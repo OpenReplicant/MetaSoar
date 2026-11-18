@@ -1,0 +1,23 @@
+# metasoar-soar: Soar 9.6.5, unchanged, from its release (BSD), with its Python SML bindings.
+#
+#   podman build -t localhost/metasoar-soar:9.6.5 -f deploy/soar/Containerfile .
+#
+# The release ships Linux binaries built for glibc 2.34+ and Python bindings on the stable ABI (its notes). The zip is
+# fetched by URL and checked against the digest GitHub reports for it (read 2026-11-18). Building from source comes
+# with the architecture lineage (docs/spec.md), not before.
+FROM docker.io/library/python:3.13.17-slim-bookworm
+
+ARG SOAR_ZIP=https://github.com/SoarGroup/Soar/releases/download/releases/9.6.5/SoarSuite_9.6.5-Multiplatform.zip
+ARG SOAR_SHA256=cf5ef7d3b143fc049e8b118fb005867c69c6aeccb9451f5eab95c8a40517ca1d
+
+COPY deploy/soar/fetch.py /tmp/fetch.py
+RUN python3 /tmp/fetch.py "$SOAR_ZIP" "$SOAR_SHA256" && rm /tmp/fetch.py
+RUN chmod +x /opt/soar/bin/linux_x86-64/soar /opt/soar/bin/linux_x86-64/UnitTests \
+ && useradd --create-home --uid 1000 soar
+
+ENV SOAR_HOME=/opt/soar/bin/linux_x86-64 \
+    SOAR_AGENTS=/opt/soar/Agents \
+    PYTHONPATH=/opt/soar/bin/linux_x86-64:/app \
+    LD_LIBRARY_PATH=/opt/soar/bin/linux_x86-64
+WORKDIR /app
+USER soar
