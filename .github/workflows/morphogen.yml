@@ -9,11 +9,11 @@ on:
 permissions: {}
 jobs:
   judge:
-    uses: OpenReplicant/Morphogen/.github/workflows/judge.yml@99c2ca10abb1cf769cdb47e34d8d7264aae4ef0a
-    permissions: {contents: read, statuses: write, id-token: write}
+    uses: OpenReplicant/Morphogen/.github/workflows/judge.yml@21b347f669b243e01fbd7aabd8c16af1b57fed6c
+    permissions: {contents: read, statuses: write, id-token: write, actions: write}
     secrets: inherit
     with:
-      judge-ref: 99c2ca10abb1cf769cdb47e34d8d7264aae4ef0a
+      judge-ref: 21b347f669b243e01fbd7aabd8c16af1b57fed6c
       cases-repo: OpenReplicant/morphogen-judge
       module: metasoar.play
       sandbox-image: ghcr.io/openreplicant/metasoar-sandbox@sha256:2b18ab782727b7fd1ce4ddbb3dc11b48957618d785d35221d31c9ba63d7f65e4
