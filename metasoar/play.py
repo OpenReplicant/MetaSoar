@@ -2,7 +2,7 @@
 
     echo '{"env": "BabyAI-GoToLocal-v0", "seed": 7}' | python3 -I -m metasoar.play
 
-Case fields: env (a Gymnasium id), seed, max_steps (default: the environment's own limit), patience (decisions
+Case fields: env (a Gymnasium id), seed, trace (also return the mission and the actions taken), max_steps (default: the environment's own limit), patience (decisions
 Soar may take per step before the step counts as stuck, default 50). The agent is `agent/main.soar` in the checkout
 (`/work` in the judge's sandbox), loaded into Soar 9.6.5 unchanged.
 
@@ -46,6 +46,8 @@ def episode(case: dict) -> dict:
     ad = Adapter(agent, env)
     patience = int(case.get("patience", 50))
     total, steps, stuck, invalid, decisions, reward, done, success = 0.0, 0, 0, 0, 0, 0.0, False, False
+    trace = [] if case.get("trace") else None
+    mission = obs.get("mission") if isinstance(obs, dict) else None
     ad.show(obs, 0, 0.0, False)
     while not done:
         action, n = ad.command(patience)
@@ -56,6 +58,8 @@ def episode(case: dict) -> dict:
         if action < 0:
             invalid += 1
             action = None
+        if trace is not None:
+            trace.append(ad.names[action] if action is not None and action >= 0 else action)
         if action is not None:
             obs, reward, terminated, truncated, _ = env.step(action)
             steps += 1
@@ -66,7 +70,8 @@ def episode(case: dict) -> dict:
     kernel.Shutdown()
     return {"env": case["env"], "seed": case["seed"], "success": success, "return": round(total, 6), "steps": steps,
             "stuck_steps": stuck, "invalid_steps": invalid, "decisions": decisions,
-            "substate_decisions": substate[0], "seconds": round(time.perf_counter() - t0, 3)}
+            "substate_decisions": substate[0], "seconds": round(time.perf_counter() - t0, 3),
+            **({"mission": mission, "actions": trace} if trace is not None else {})}
 
 
 def main():

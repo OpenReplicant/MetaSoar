@@ -5,7 +5,8 @@ Written once, for every environment, from the environment's own spaces: nothing 
 Input link, rebuilt each step under ^env:
   ^step N  ^reward R (the last step's)  ^done yes|no
   ^observation  the observation, by its space: a Dict as one attribute per key; Text and Discrete as a value;
-                an array as ^cell elements, each with its index (^i, ^j, ...) and its values (^v0, ^v1, ...)
+                an array as ^cell elements, each with its index (^i, ^j, ...) and its values (^v0, ^v1, ...);
+                text of more than one word also as ^ATTR-words, one ^word (^text, lower-cased; ^index) per word
   ^actions      one ^action per action of a Discrete action space, with ^name (the environment's own name for it,
                 where it gives one, else the number) and ^id
 Output link: the agent writes (^act.action NAME); the adapter takes it, steps the environment, and marks the
@@ -56,7 +57,15 @@ class Adapter:
         elif isinstance(value, (float, np.floating)):
             self.agent.CreateFloatWME(parent, attr, float(value))
         else:
-            self.agent.CreateStringWME(parent, attr, str(value))
+            text = str(value)
+            self.agent.CreateStringWME(parent, attr, text)
+            words = text.split()
+            if len(words) > 1:
+                node = self.agent.CreateIdWME(parent, f"{attr}-words")
+                for k, w in enumerate(words):
+                    wn = self.agent.CreateIdWME(node, "word")
+                    self.agent.CreateStringWME(wn, "text", w.lower())
+                    self.agent.CreateIntWME(wn, "index", k)
 
     def show(self, obs, step: int, reward: float, done: bool):
         if self.root is not None:
