@@ -1,0 +1,29 @@
+# The starting agent (docs/spec.md, "The base"): the least that lets it act, and nothing about any environment.
+# Every action the adapter lists is proposed, all equally (indifferent), so Soar picks one at random; the chosen
+# one is written to the output link; once the adapter marks it complete, it is cleared.
+
+sp {propose*act
+   (state <s> ^superstate nil ^io.input-link.env.actions.action.name <n> ^io.output-link <ol>)
+  -(<ol> ^act)
+-->
+   (<s> ^operator <o> + =)
+   (<o> ^name act ^action <n>)}
+
+sp {apply*act
+   (state <s> ^operator <o> ^io.output-link <ol>)
+   (<o> ^name act ^action <n>)
+-->
+   (<ol> ^act <c>)
+   (<c> ^action <n>)}
+
+sp {propose*clear-act
+   (state <s> ^superstate nil ^io.output-link.act.status complete)
+-->
+   (<s> ^operator <o> + >)
+   (<o> ^name clear-act)}
+
+sp {apply*clear-act
+   (state <s> ^operator.name clear-act ^io.output-link <ol>)
+   (<ol> ^act <c>)
+-->
+   (<ol> ^act <c> -)}

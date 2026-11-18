@@ -14,20 +14,24 @@ with vanilla Soar and a vanilla LLM agent. The design is [`docs/spec.md`](docs/s
 
 ## Status
 
-Step 1 of the spec: Soar 9.6.5 runs in a container, driven from Python, and its impasses are seen from outside the
-agent.
+Soar 9.6.5 plays BabyAI (Minigrid) through one generic adapter, starting from four rules that pick actions at
+random (success 5 to 55% by level, `trials/baseline`). Morphogen judges every change to the agent's rules on 60
+held-out episodes (M-05). Next: the hook, sending a stuck step to Substrate.
 
 ```sh
-podman build -t localhost/metasoar-soar:9.6.5 -f deploy/soar/Containerfile .
-podman run --rm -v "$PWD:/app:ro,Z" -v "$PWD/.state/run:/out:Z" --userns=keep-id \
-  localhost/metasoar-soar:9.6.5 python3 -m metasoar.run water-jug-look-ahead/water-jug-look-ahead.soar 2000 /out
+podman build -t localhost/metasoar-sandbox -f deploy/sandbox/Containerfile .
+echo '{"env": "BabyAI-GoToLocal-v0", "seed": 7}' | podman run --rm -i -v "$PWD:/work:ro,Z" localhost/metasoar-sandbox \
+  python -I -c "import sys, runpy; sys.path.append('/work'); runpy.run_module('metasoar.play', run_name='__main__')"
 ```
 
 ## Parts
 
 | Part | Where |
 | --- | --- |
-| Soar 9.6.5, from its release, digest-checked | `deploy/soar/` |
-| A run, with the goal stack read after every decision | `metasoar/run.py` |
+| Soar 9.6.5 and the environments, the image every episode runs in | `deploy/sandbox/` |
+| The adapter: any Gymnasium environment onto Soar's I/O | `metasoar/adapter.py` |
+| One episode, a case in and a result out (Morphogen's module) | `metasoar/play.py` |
+| The agent: its rules, the only thing a judged change may touch | `agent/` |
+| Morphogen: the policy, the scorer, the case generator | `.morphogen/`, `.github/workflows/` |
 
 Soar is under the BSD licence (its `LICENSE.md`); MetaSoar's own licence is not chosen yet.

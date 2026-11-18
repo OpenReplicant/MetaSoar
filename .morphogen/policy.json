@@ -1,0 +1,10 @@
+{"policy": "morphogen.policy/v1",
+ "scope": ["agent/**"],
+ "protected": [".github/**", ".morphogen/**", "metasoar/**", "deploy/**", "trials/**", "docs/**", "README.md", "DECISIONS.md"],
+ "case_sets": {"babyai-heldout": {
+   "required_kpis": [
+     {"name": "success", "source": "scorer", "direction": "higher", "floor": 0.0, "role": "decide"},
+     {"name": "wall_seconds", "source": "runner", "direction": "lower", "floor": 1.0, "role": "bound"}],
+   "stale_after": 200}},
+ "network": [],
+ "alpha": 0.05}

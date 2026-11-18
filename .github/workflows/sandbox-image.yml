@@ -1,0 +1,28 @@
+# Build the sandbox image every episode runs in (deploy/sandbox) and publish it to GitHub's registry, so Morphogen's
+# judge can pull it by digest (its `sandbox-image`). The digest is printed in the run's summary; morphogen.yml pins it.
+name: sandbox-image
+on:
+  push:
+    branches: [main]
+    paths: ["deploy/sandbox/**", ".github/workflows/sandbox-image.yml"]
+  workflow_dispatch:
+permissions: {}
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    permissions: {contents: read, packages: write}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with: {persist-credentials: false}
+      - name: Build and push
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE: ghcr.io/openreplicant/metasoar-sandbox
+        run: |
+          set -eu
+          echo "$TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          docker build -t "$IMAGE:$GITHUB_SHA" -f deploy/sandbox/Containerfile .
+          docker push "$IMAGE:$GITHUB_SHA"
+          digest="$(docker inspect --format '{{index .RepoDigests 0}}' "$IMAGE:$GITHUB_SHA")"
+          echo "sandbox image: \`$digest\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "$digest"

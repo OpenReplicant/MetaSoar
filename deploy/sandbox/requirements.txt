@@ -1,0 +1,2 @@
+gymnasium==1.4.0
+minigrid==3.2.0

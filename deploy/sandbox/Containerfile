@@ -1,0 +1,15 @@
+# metasoar-sandbox: what every episode runs in, here and in Morphogen's judge (its `sandbox-image`, pinned by
+# digest). Soar 9.6.5, unchanged, from its release (BSD), and the environments (M-04). Nothing of MetaSoar's own:
+# the judge copies the checkout being judged to /work and runs `python -I -m metasoar.play` there.
+#
+#   podman build -t localhost/metasoar-sandbox -f deploy/sandbox/Containerfile .
+FROM docker.io/library/python:3.13.17-slim-bookworm
+
+ARG SOAR_ZIP=https://github.com/SoarGroup/Soar/releases/download/releases/9.6.5/SoarSuite_9.6.5-Multiplatform.zip
+ARG SOAR_SHA256=cf5ef7d3b143fc049e8b118fb005867c69c6aeccb9451f5eab95c8a40517ca1d
+
+COPY deploy/sandbox/fetch.py deploy/sandbox/requirements.txt /tmp/
+RUN python3 /tmp/fetch.py "$SOAR_ZIP" "$SOAR_SHA256" && ldconfig \
+ && pip install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/fetch.py /tmp/requirements.txt
+ENV SOAR_AGENTS=/opt/soar/Agents
+WORKDIR /work
