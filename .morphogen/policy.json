@@ -1,5 +1,5 @@
 {"policy": "morphogen.policy/v1",
- "scope": ["agent/**"],
+ "scope": ["agent/**/*.soar"],
  "protected": [".github/**", ".morphogen/**", "metasoar/**", "deploy/**", "trials/**", "docs/**", "README.md", "DECISIONS.md"],
  "case_sets": {"babyai-heldout": {
    "required_kpis": [

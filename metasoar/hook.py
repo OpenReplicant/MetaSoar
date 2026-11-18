@@ -49,8 +49,8 @@ REQUEST = """# A request to Substrate, from MetaSoar's hook
 **Intent:** the agent in OpenReplicant/MetaSoar plays BabyAI better: it {why}.
 **How it will be judged (from MetaSoar's base, not this request):** Morphogen, on the held-out case set
 `babyai-heldout`; KPIs `success` (decides, higher) and `wall_seconds` (bounds). See `.morphogen/policy.json`.
-**What may change:** `agent/**` only (Soar rules, sourced from `agent/main.soar`); everything else is the judge's.
-**The pull request** must carry exactly one `morphogen-card` block naming `agent/**` as scope and the case set and
+**What may change:** `agent/**/*.soar` only (Soar rule files, sourced from `agent/main.soar`); everything else is the judge's.
+**The pull request** must carry exactly one `morphogen-card` block naming `agent/**/*.soar` as scope and the case set and
 KPIs above (docs: Morphogen's `docs/cards.md`).
 
 ## What the hook saw ({at})
