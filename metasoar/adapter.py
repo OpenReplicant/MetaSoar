@@ -5,7 +5,7 @@ Written once, for every environment, from the environment's own spaces: nothing 
 Input link, rebuilt each step under ^env:
   ^step N  ^reward R (the last step's)  ^done yes|no
   ^observation  the observation, by its space: a Dict as one attribute per key; Text and Discrete as a value;
-                an array as ^cell elements, each with its index (^i, ^j, ...) and its values (^v0, ^v1, ...);
+                an array as ^cell elements, each with its index (^i, ^j, ...) and its values (^value0, ^value1, ...: not ^v0, which Soar would read as an identifier);
                 text of more than one word also as ^ATTR-words, one ^word (^text, lower-cased; ^index) per word
   ^actions      one ^action per action of a Discrete action space, with ^name (the environment's own name for it,
                 where it gives one, else the number) and ^id
@@ -49,7 +49,7 @@ class Adapter:
                 for axis, idx in enumerate(np.unravel_index(flat, shape)):
                     self.agent.CreateIntWME(cell, "ijklmn"[axis], int(idx))
                 for c, v in enumerate(vals):
-                    self.agent.CreateIntWME(cell, f"v{c}", int(v))
+                    self.agent.CreateIntWME(cell, f"value{c}", int(v))
         elif isinstance(value, (bool, np.bool_)):
             self.agent.CreateStringWME(parent, attr, "yes" if value else "no")
         elif isinstance(value, (int, np.integer)):
