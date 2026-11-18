@@ -44,6 +44,46 @@ sp {mission*target*color
 -->
    (<t> ^color <c>)}
 
+# The second object of a "put X next to Y" mission, with its colour.
+sp {mission*goal
+   (state <s> ^target <t> ^io.input-link.env.observation.mission-words.word <w> ^lex <x>)
+   (<t> ^index <k>)
+   (<w> ^text <name> ^index { <j> > <k> })
+   (<x> ^word <name> ^kind object ^idx <o>)
+  -{(<s> ^io.input-link.env.observation.mission-words.word <w2> ^lex <x2>)
+    (<w2> ^text <n2> ^index { > <k> < <j> })
+    (<x2> ^word <n2> ^kind object)}
+-->
+   (<s> ^goal <g>)
+   (<g> ^object <o> ^before (- <j> 1))}
+
+sp {mission*goal*color
+   (state <s> ^goal <g> ^io.input-link.env.observation.mission-words.word <w> ^lex <x>)
+   (<g> ^before <b>)
+   (<w> ^index <b> ^text <name>)
+   (<x> ^word <name> ^kind color ^idx <c>)
+-->
+   (<g> ^color <c>)}
+
+# --- what is sought: the target, or once it is carried, the goal ---
+# (Minigrid shows a carried object in the agent's own cell, i 3, j 6.)
+sp {view*carrying
+   (state <s> ^target <t> ^io.input-link.env.observation.image.cell <c>)
+   (<t> ^object <o>)
+   (<c> ^i 3 ^j 6 ^value0 <o>)
+-->
+   (<s> ^carrying yes)}
+
+sp {seek*target
+   (state <s> ^target <t> -^carrying yes)
+-->
+   (<s> ^seek <t>)}
+
+sp {seek*goal
+   (state <s> ^goal <g> ^carrying yes)
+-->
+   (<s> ^seek <g>)}
+
 # --- what is in view ---
 sp {view*front
    (state <s> ^superstate nil ^io.input-link.env.observation.image.cell <c>)
@@ -64,18 +104,32 @@ sp {view*front-free*open-door
    (<s> ^front-free yes)}
 
 sp {view*seen*with-color
-   (state <s> ^target <t> ^io.input-link.env.observation.image.cell <c>)
+   (state <s> ^seek <t> ^io.input-link.env.observation.image.cell <c>)
    (<t> ^object <o> ^color <col>)
    (<c> ^value0 <o> ^value1 <col>)
 -->
    (<s> ^seen <c>)}
 
 sp {view*seen*any-color
-   (state <s> ^target <t> ^io.input-link.env.observation.image.cell <c>)
+   (state <s> ^seek <t> ^io.input-link.env.observation.image.cell <c>)
    (<t> ^object <o> -^color)
    (<c> ^value0 <o>)
 -->
    (<s> ^seen <c>)}
+
+# Carrying the target with the goal two ahead or just beside the cell in front: dropping it there puts it next
+# to the goal.
+sp {view*near-goal
+   (state <s> ^task put ^carrying yes ^front-free yes ^seen <c>)
+   (<c> ^i 3 ^j 4)
+-->
+   (<s> ^near-goal yes)}
+
+sp {view*near-goal*side
+   (state <s> ^task put ^carrying yes ^front-free yes ^seen <c>)
+   (<c> ^i << 2 4 >> ^j 5)
+-->
+   (<s> ^near-goal yes)}
 
 sp {view*facing-target
    (state <s> ^seen <c>)
@@ -85,7 +139,7 @@ sp {view*facing-target
 
 # --- never: actions that cannot help here ---
 sp {act*reject*drop
-   (state <s> ^operator <o> +)
+   (state <s> ^operator <o> + -^near-goal yes)
    (<o> ^name act ^action drop)
 -->
    (<s> ^operator <o> -)}
@@ -114,6 +168,30 @@ sp {act*reject*forward-blocked
    (<o> ^name act ^action forward)
 -->
    (<s> ^operator <o> -)}
+
+sp {act*reject*pickup*carrying
+   (state <s> ^operator <o> + ^carrying yes)
+   (<o> ^name act ^action pickup)
+-->
+   (<s> ^operator <o> -)}
+
+sp {act*reject*forward*near-goal
+   (state <s> ^operator <o> + ^near-goal yes)
+   (<o> ^name act ^action forward)
+-->
+   (<s> ^operator <o> -)}
+
+sp {act*best*put-down
+   (state <s> ^operator <o> + ^near-goal yes)
+   (<o> ^name act ^action drop)
+-->
+   (<s> ^operator <o> >)}
+
+sp {act*best*put-pickup
+   (state <s> ^operator <o> + ^facing-target yes ^task put -^carrying yes)
+   (<o> ^name act ^action pickup)
+-->
+   (<s> ^operator <o> >)}
 
 # --- facing the target: finish the task ---
 sp {act*best*finish-go
