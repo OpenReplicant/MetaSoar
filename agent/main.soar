@@ -27,3 +27,5 @@ sp {apply*clear-act
    (<ol> ^act <c>)
 -->
    (<ol> ^act <c> -)}
+
+source navigate.soar

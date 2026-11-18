@@ -1,0 +1,187 @@
+# Reading the mission and moving toward what it names (answering the hook's first request, M-06).
+#
+# Knowledge taken from the environment's documentation, not built into Soar or the adapter: Minigrid's encoding
+# (minigrid.core.constants, 3.2.0): objects door 4, key 5, ball 6, box 7, empty 1, floor 3; colours red 0, green 1,
+# blue 2, purple 3, yellow 4, grey 5; door state open 0. The view is 7x7 cells (^i column, ^j row) with the agent at
+# i 3, j 6, facing j 0; the cell in front is i 3, j 5. Seen from the agent, i below 3 is to its left. These rules only add preferences to the starting agent's act
+# operators (main.soar): they never act on their own.
+
+# --- the words ---
+sp {lex*key    (state <s> ^superstate nil) --> (<s> ^lex <x>) (<x> ^word key    ^kind object ^idx 5)}
+sp {lex*ball   (state <s> ^superstate nil) --> (<s> ^lex <x>) (<x> ^word ball   ^kind object ^idx 6)}
+sp {lex*box    (state <s> ^superstate nil) --> (<s> ^lex <x>) (<x> ^word box    ^kind object ^idx 7)}
+sp {lex*door   (state <s> ^superstate nil) --> (<s> ^lex <x>) (<x> ^word door   ^kind object ^idx 4)}
+sp {lex*red    (state <s> ^superstate nil) --> (<s> ^lex <x>) (<x> ^word red    ^kind color ^idx 0)}
+sp {lex*green  (state <s> ^superstate nil) --> (<s> ^lex <x>) (<x> ^word green  ^kind color ^idx 1)}
+sp {lex*blue   (state <s> ^superstate nil) --> (<s> ^lex <x>) (<x> ^word blue   ^kind color ^idx 2)}
+sp {lex*purple (state <s> ^superstate nil) --> (<s> ^lex <x>) (<x> ^word purple ^kind color ^idx 3)}
+sp {lex*yellow (state <s> ^superstate nil) --> (<s> ^lex <x>) (<x> ^word yellow ^kind color ^idx 4)}
+sp {lex*grey   (state <s> ^superstate nil) --> (<s> ^lex <x>) (<x> ^word grey   ^kind color ^idx 5)}
+
+# --- the mission: its first verb, and its first object with the colour just before it ---
+sp {mission*task
+   (state <s> ^superstate nil ^io.input-link.env.observation.mission-words.word <w>)
+   (<w> ^index 0 ^text <v>)
+-->
+   (<s> ^task <v>)}
+
+sp {mission*target
+   (state <s> ^superstate nil ^io.input-link.env.observation.mission-words.word <w> ^lex <x>)
+   (<w> ^text <name> ^index <k>)
+   (<x> ^word <name> ^kind object ^idx <o>)
+  -{(<s> ^io.input-link.env.observation.mission-words.word <w2> ^lex <x2>)
+    (<w2> ^text <n2> ^index < <k>)
+    (<x2> ^word <n2> ^kind object)}
+-->
+   (<s> ^target <t>)
+   (<t> ^object <o> ^index <k> ^before (- <k> 1))}
+
+sp {mission*target*color
+   (state <s> ^target <t> ^io.input-link.env.observation.mission-words.word <w> ^lex <x>)
+   (<t> ^before <b>)
+   (<w> ^index <b> ^text <name>)
+   (<x> ^word <name> ^kind color ^idx <c>)
+-->
+   (<t> ^color <c>)}
+
+# --- what is in view ---
+sp {view*front
+   (state <s> ^superstate nil ^io.input-link.env.observation.image.cell <c>)
+   (<c> ^i 3 ^j 5)
+-->
+   (<s> ^front <c>)}
+
+sp {view*front-free*empty
+   (state <s> ^front <c>)
+   (<c> ^value0 << 1 3 >>)
+-->
+   (<s> ^front-free yes)}
+
+sp {view*front-free*open-door
+   (state <s> ^front <c>)
+   (<c> ^value0 4 ^value2 0)
+-->
+   (<s> ^front-free yes)}
+
+sp {view*seen*with-color
+   (state <s> ^target <t> ^io.input-link.env.observation.image.cell <c>)
+   (<t> ^object <o> ^color <col>)
+   (<c> ^value0 <o> ^value1 <col>)
+-->
+   (<s> ^seen <c>)}
+
+sp {view*seen*any-color
+   (state <s> ^target <t> ^io.input-link.env.observation.image.cell <c>)
+   (<t> ^object <o> -^color)
+   (<c> ^value0 <o>)
+-->
+   (<s> ^seen <c>)}
+
+sp {view*facing-target
+   (state <s> ^seen <c>)
+   (<c> ^i 3 ^j 5)
+-->
+   (<s> ^facing-target yes)}
+
+# --- never: actions that cannot help here ---
+sp {act*reject*drop
+   (state <s> ^operator <o> +)
+   (<o> ^name act ^action drop)
+-->
+   (<s> ^operator <o> -)}
+
+sp {act*reject*done
+   (state <s> ^operator <o> + -^facing-target yes)
+   (<o> ^name act ^action done)
+-->
+   (<s> ^operator <o> -)}
+
+sp {act*reject*pickup
+   (state <s> ^operator <o> + -^facing-target yes)
+   (<o> ^name act ^action pickup)
+-->
+   (<s> ^operator <o> -)}
+
+sp {act*reject*toggle
+   (state <s> ^operator <o> + ^front <f>)
+   (<o> ^name act ^action toggle)
+   (<f> -^value0 4)
+-->
+   (<s> ^operator <o> -)}
+
+sp {act*reject*forward-blocked
+   (state <s> ^operator <o> + -^front-free yes)
+   (<o> ^name act ^action forward)
+-->
+   (<s> ^operator <o> -)}
+
+# --- facing the target: finish the task ---
+sp {act*best*finish-go
+   (state <s> ^operator <o> + ^facing-target yes ^task go)
+   (<o> ^name act ^action done)
+-->
+   (<s> ^operator <o> >)}
+
+sp {act*best*finish-pick
+   (state <s> ^operator <o> + ^facing-target yes ^task pick)
+   (<o> ^name act ^action pickup)
+-->
+   (<s> ^operator <o> >)}
+
+sp {act*best*finish-open
+   (state <s> ^operator <o> + ^facing-target yes ^task open)
+   (<o> ^name act ^action toggle)
+-->
+   (<s> ^operator <o> >)}
+
+# --- the target in view: walk until it is level, turn toward it, walk up to it ---
+# (Turning moves anything off to the side out of the 7-wide view, so the agent first closes the distance.)
+sp {act*best*approach-in-line
+   (state <s> ^operator <o> + ^seen <c> -^facing-target yes ^front-free yes)
+   (<c> ^i 3)
+   (<o> ^name act ^action forward)
+-->
+   (<s> ^operator <o> >)}
+
+sp {act*best*approach-ahead
+   (state <s> ^operator <o> + ^seen <c> -^facing-target yes ^front-free yes)
+   (<c> ^j < 6)
+   (<o> ^name act ^action forward)
+-->
+   (<s> ^operator <o> >)}
+
+sp {act*best*turn-left*level
+   (state <s> ^operator <o> + ^seen <c> -^facing-target yes)
+   (<c> ^i < 3 ^j 6)
+   (<o> ^name act ^action left)
+-->
+   (<s> ^operator <o> >)}
+
+sp {act*best*turn-right*level
+   (state <s> ^operator <o> + ^seen <c> -^facing-target yes)
+   (<c> ^i > 3 ^j 6)
+   (<o> ^name act ^action right)
+-->
+   (<s> ^operator <o> >)}
+
+sp {act*best*turn-left*blocked
+   (state <s> ^operator <o> + ^seen <c> -^facing-target yes -^front-free yes)
+   (<c> ^i < 3)
+   (<o> ^name act ^action left)
+-->
+   (<s> ^operator <o> >)}
+
+sp {act*best*turn-right*blocked
+   (state <s> ^operator <o> + ^seen <c> -^facing-target yes -^front-free yes)
+   (<c> ^i > 3)
+   (<o> ^name act ^action right)
+-->
+   (<s> ^operator <o> >)}
+
+# --- nothing in view: keep moving while the way is clear ---
+sp {act*better*explore-forward
+   (state <s> ^operator <o1> + ^operator <o2> + -^seen ^front-free yes)
+   (<o1> ^name act ^action forward)
+   (<o2> ^name act ^action << left right >>)
+-->
+   (<s> ^operator <o1> > <o2>)}
