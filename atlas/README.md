@@ -33,9 +33,29 @@ echo '{"env": "arc3:LS20", "seed": 0, "max_steps": 500}' | podman run --rm -i -v
 On LS20 the first level falls out of the claims: it touches the untested rotator, the scene changes, it touches the
 door. BP35 completes a level for the first time with any agent here.
 
+## Hidden state (in `agent.py`; LS20 level 2 not solved yet)
+
+Two latent variables, after AutumnSynth's invented automata, each learned from play:
+- **a budget**: steps since the budget last filled. Its size comes from harm that arrived with nothing touched
+  (the player sent back to its start); a kind whose taking makes the ticking region jump is a refill. Routes to a
+  target too far for what is left go through a refill first, choosing the spot that leaves the shortest way on.
+- **a press count**: how many times this attempt the agent changed the scene by touching something, and at which
+  counts something blocked it. If what blocks did so at the current count, it presses again before going back.
+
+Also fixed on the way: an object counts as taken only if its cells lose its colour (floor fragments that the body
+covers are not taken); a contact that changes the scene beyond what was touched is an event (the rotator), not a
+take; passability goes by the majority of evidence; colours walked on often are floor, not things to test; a new
+scene only when the agent caused a change, a level ended or the attempt started over (not when a life was lost).
+
+On LS20 level 2 the agent now learns the budget (22 steps), the refill (the rings), that the door stays shut after
+0 and 1 presses, and presses the rotator twice. It still runs out of budget on the way to the door: from the
+rotator's corner the door is about 22 steps by the only way out, against a budget of 22. Whether the key's state
+survives a lost life (so that pressing twice in one life and walking to the door in the next works) is untested.
+The rest of the training games are unchanged (51 levels, seeds 0 to 19).
+
 ## Next
 
-- Latent state: count what a kind's repeated contact does (the second rotator press LS20's level 2 needs), after
-  AutumnSynth's invented automata.
-- Claims carried between levels are kept now; between games, the library (the slow loop).
+- LS20 level 2: test whether the key survives a lost life; plan presses and refills as one sequence under the
+  budget rather than one target at a time.
+- Claims carried between games: the library (the slow loop).
 - An LLM proposing rules where the enumerated outcomes do not explain an observation (the WorldCoder tier).

@@ -74,6 +74,14 @@ class Atlas:
         self.fatal = collections.defaultdict(set)
         self.edges = collections.defaultdict(dict)
         self.home = None
+        # a latent counter (after AutumnSynth): steps since the budget last filled; its size, learned from harm that
+        # came with nothing touched; the kinds whose taking refills it (the ticking region jumps)
+        self.since, self.budget = 0, None
+        self.refill = collections.Counter()
+        # a second latent variable: how many times, this attempt, the agent has changed the scene by touching
+        # something; and at which counts something blocked it. If what blocks did so at this count, press again.
+        self.presses = 0
+        self.blocked_at = set()
         self.target = None  # the object it is heading for, kept while untested and reachable
         self.dead_pts = set()  # (level, x, y): points whose click did nothing
         self.why = ""
@@ -168,34 +176,69 @@ class Atlas:
                         self.passable[c][0] += 1
                 elif pm is None and not lost and not level and inside:
                     self.stuck.add((self.epoch, x0, y0, v[0], v[1]))
-                    blame = [c for c in set(dest.ravel().tolist()) - own if self.passable[c][0] == 0]
+                    blame = [c for c in set(dest.ravel().tolist()) - own
+                             if self.passable[c][0] <= self.passable[c][1]]
                     for c in blame:
                         self.passable[c][1] += 1
                 # what the body touched: objects whose box meets the destination, grown by one cell
                 ex0, ey0, ex1, ey1 = dx0 - 1, dy0 - 1, dx1 + 1, dy1 + 1
-                gone = {key(o) for o in pobjs} - {key(o) for o in objs}
+                now_box = self.body(objs, mk)[1]
+
+                def vanished(o):  # its cells lost its colour (beyond what the body now covers): taken, not reshaped
+                    sub = pg[o["y"]:o["y"] + o["h"], o["x"]:o["x"] + o["w"]] == o["color"]
+                    aft = g[o["y"]:o["y"] + o["h"], o["x"]:o["x"] + o["w"]] == o["color"]
+                    if now_box:
+                        bx0, by0, bx1, by1 = now_box
+                        ys, xs = np.ogrid[o["y"]:o["y"] + o["h"], o["x"]:o["x"] + o["w"]]
+                        under = (ys >= by0) & (ys <= by1) & (xs >= bx0) & (xs <= bx1)
+                        sub, aft = sub & ~under, aft & ~under
+                    if sub.sum() == 0:  # all under the body: gone if nothing of its colour overlaps where it was
+                        return not any(n["color"] == o["color"] and n["x"] <= o["x"] + o["w"] - 1
+                                       and n["x"] + n["w"] - 1 >= o["x"] and n["y"] <= o["y"] + o["h"] - 1
+                                       and n["y"] + n["h"] - 1 >= o["y"] for n in objs)
+                    return (sub & aft).sum() <= 0.2 * sub.sum()
+                gone = {key(o) for o in pobjs if key(o) not in {key(n) for n in objs} and vanished(o)}
                 for o in pobjs:
                     k = kind(o)
                     if k == mk or self.along[k] >= 2 or o["size"] > GOAL_MAX:
                         continue
                     if o["x"] <= ex1 and o["x"] + o["w"] - 1 >= ex0 and o["y"] <= ey1 and o["y"] + o["h"] - 1 >= ey0:
                         contacts.append(o)
+                # a change beyond what it touched (a door's key turning) is an event; one only where it touched,
+                # with the thing gone, is a take
+                beyond = rest & ~self.masked
+                for o in contacts:
+                    beyond[o["y"]:o["y"] + o["h"], o["x"]:o["x"] + o["w"]] = False
                 if level:
                     outcome = "level"
                 elif lost or sent_home:
                     outcome = "harm"
+                elif int(beyond.sum()) > 2:
+                    outcome = "event"
                 elif any(key(o) in gone for o in contacts):
                     outcome = "take"
-                elif event:
-                    outcome = "event"
                 elif pm is None:
                     outcome = "block"
                 else:
                     outcome = "none"
+                spent = outcome == "harm" and (not contacts or (self.budget is not None and self.since >= self.budget - 1))
+                if spent:  # the budget ran out: not the contact's doing
+                    self.budget = self.since if self.budget is None else min(self.budget, self.since)
+                refilled = outcome == "take" and int((changed & self.masked).sum()) > 4
                 for o in contacts:
                     out = outcome if outcome != "take" or key(o) in gone else "none"
+                    if spent:
+                        out = "none"
+                    if refilled and key(o) in gone:
+                        self.refill[kind(o)] += 1
                     self.contact[kind(o)][out] += 1
                     self.tested.add((self.epoch, key(o)))
+                if refilled or sent_home:
+                    self.since = 0
+                if outcome == "block" and contacts:
+                    self.blocked_at.add(self.presses)
+                if outcome == "event" and contacts:
+                    self.presses += 1
         hit = None
         if params is not None:
             x, y = params["x"], params["y"]
@@ -216,12 +259,19 @@ class Atlas:
         else:
             self.edges[f][akey] = state
 
+        self.since += 1
+        if level or lost:
+            self.since = 0
+            self.presses = 0
+        if level:
+            self.blocked_at = set()
         if level:
             self.stuck.clear()
             self.home = None
-        if event or level or lost:
+        caused = event and (contacts or hit is not None) and outcome != "harm"
+        if caused or level or lost:  # a new scene: the agent changed it, or the game started over
             self.epoch += 1
-            if event and not (level or lost):
+            if caused and not (level or lost):
                 # what it touched or clicked made the change: that stays tested in the new scene
                 for o in contacts + ([hit] if params is not None and hit is not None else []):
                     self.tested.add((self.epoch, key(o)))
@@ -250,7 +300,9 @@ class Atlas:
     def testable(self, objs, g):
         H, W = g.shape
         mk = self.mover()
+        floor = {c for c, (passed, blocked) in self.passable.items() if passed >= 10 and blocked == 0}
         return [o for o in objs if o["size"] <= GOAL_MAX and kind(o) != mk and self.along[kind(o)] < 2
+                and o["color"] not in floor
                 and o["x"] > 0 and o["y"] > 0 and o["x"] + o["w"] < W and o["y"] + o["h"] < H]
 
     def route(self, g, objs, box, mk, targets):
@@ -266,7 +318,7 @@ class Atlas:
         H, W = g.shape
         free = np.ones(g.shape, dtype=bool)
         for c, (passed, blocked) in self.passable.items():
-            if passed == 0 and blocked > 0:
+            if blocked > passed:  # untried colours stay passable (optimism); tried ones go by the evidence
                 free[g == c] = False
         for o in objs:
             if self.harmful(self.contact[kind(o)]):
@@ -311,6 +363,64 @@ class Atlas:
             frontier = nxt
         return None if best is None else (best[2], best[1], best[3])
 
+    def via(self, g, objs, box, mk, fills, target, left):
+        """The first move toward a spot touching a refill, reachable within `left` steps, from which the target is
+        nearest (the refill picked up on the way, not off it). None if no such spot."""
+        vecs = {}
+        for a in self.plain:
+            v = self.vec(a, mk)
+            if v and v not in vecs.values():
+                vecs[a] = v
+        H, W = g.shape
+        free = np.ones(g.shape, dtype=bool)
+        for c, (passed, blocked) in self.passable.items():
+            if blocked > passed:
+                free[g == c] = False
+        for o in objs:
+            if self.harmful(self.contact[kind(o)]):
+                free[o["y"]:o["y"] + o["h"], o["x"]:o["x"] + o["w"]] = False
+        x0, y0, x1, y1 = box
+        free[y0:y1 + 1, x0:x1 + 1] = True
+        for o in fills + [target]:
+            free[o["y"]:o["y"] + o["h"], o["x"]:o["x"] + o["w"]] = True
+        bw, bh = x1 - x0 + 1, y1 - y0 + 1
+        ii = np.zeros((H + 1, W + 1), dtype=np.int64)
+        ii[1:, 1:] = (~free).cumsum(0).cumsum(1)
+
+        def ok(x, y):
+            return 0 <= x and 0 <= y and x + bw <= W and y + bh <= H and \
+                ii[y + bh, x + bw] - ii[y, x + bw] - ii[y + bh, x] + ii[y, x] == 0
+
+        def touches(x, y, o):
+            return o["x"] <= x + bw and o["x"] + o["w"] - 1 >= x - 1 and o["y"] <= y + bh and o["y"] + o["h"] - 1 >= y - 1
+
+        def bfs(start, limit):
+            first, dist, frontier = {start: None}, {start: 0}, [start]
+            while frontier:
+                nxt = []
+                for x, y in frontier:
+                    if dist[(x, y)] >= limit:
+                        continue
+                    for a, v in vecs.items():
+                        n = (x + v[0], y + v[1])
+                        if n in first or (self.epoch, x, y, v[0], v[1]) in self.stuck or not ok(*n):
+                            continue
+                        first[n], dist[n] = first[(x, y)] or a, dist[(x, y)] + 1
+                        nxt.append(n)
+                frontier = nxt
+            return first, dist
+
+        first, dist = bfs((x0, y0), left)
+        best = None
+        for p_, d in dist.items():
+            if d == 0 or not any(touches(*p_, f) for f in fills):
+                continue
+            _, d2 = bfs(p_, self.budget)
+            on = [dd for q, dd in d2.items() if touches(*q, target)]
+            if on and (best is None or (min(on), d) < best[:2]):
+                best = (min(on), d, first[p_])
+        return None if best is None else best[2]
+
     def choose(self, g, objs, state):
         mk = self.mover()
         acts = self.actions(objs)
@@ -321,19 +431,33 @@ class Atlas:
             if me is not None:
                 if self.home is None:
                     self.home = (me["cx"], me["cy"])
+                presses = [o for o in self.testable(objs, g) if self.contact[kind(o)]["event"]
+                           and not self.harmful(self.contact[kind(o)])]
+                if presses and self.presses in self.blocked_at:  # shut at this count: press again first
+                    r = self.route(g, objs, box, mk, presses)
+                    if r is not None and r[0] not in fatal:
+                        self.why = f"press again ({self.presses} pressed) in {r[1]}"
+                        return r[0], None, r[0]
                 for again in (False, True):
-                    targets = [o for o in self.testable(objs, g) if (self.epoch, key(o)) not in self.tested
-                               and not self.harmful(self.contact[kind(o)])]
+                    if not again:
+                        targets = [o for o in self.testable(objs, g) if (self.epoch, key(o)) not in self.tested
+                                   and not self.harmful(self.contact[kind(o)]) and not self.refill[kind(o)]]
+                    else:  # all tested here and nothing won: press again what changed the scene before
+                        targets = [o for o in self.testable(objs, g) if self.contact[kind(o)]["event"]
+                                   and not self.harmful(self.contact[kind(o)])]
                     if targets:
                         r = self.route(g, objs, box, mk, targets)
+                        fills = [o for o in objs if self.refill[kind(o)]]
+                        if r is not None and self.budget is not None and fills \
+                                and r[1] + 2 > self.budget - self.since:
+                            a = self.via(g, objs, box, mk, fills, r[2], self.budget - self.since)
+                            if a is not None and a not in fatal:
+                                self.why = f"refill on the way, {self.budget - self.since} left"
+                                return a, None, a
                         if r is not None and r[0] not in fatal:
                             self.target = key(r[2])
                             self.why = f"touch {kind(r[2])} t{self.tier(self.contact[kind(r[2])])} in {r[1]}"
                             return r[0], None, r[0]
-                        break
-                    if again or not self.testable(objs, g):
-                        break
-                    self.epoch += 1  # everything tested here and nothing won: touching again may differ
         # 1'. a click not yet tried in this scene, never one that did nothing on this level (in any scene): a kind
         # never clicked first, then any at random
         if self.point:
