@@ -89,6 +89,27 @@ alone points the wrong way about as often as the right way. What would have to c
 look (a thing that changes the scene beyond itself is worth touching again; a ticking bar is a budget), which the
 agent already brings to every game as code.
 
+## The model tier (`propose.py`), first run
+
+When a level goes 40 steps without completing, the agent asks a model for a hypothesis and a `plan(w)` that names
+what to touch; a plan with no level in 60 steps is refuted and the next call is told so; at most 4 calls a level.
+The prompt holds only what the agent has seen and learned (claims, objects, notable events with the cells they
+changed, the frame as hex), about 3,000 tokens. Answers go through the cache as a mailbox: the episode stops at an
+unanswered prompt and replays once it is answered, so the sandbox needs no network.
+
+First run, Claude Haiku 5.5 (a small model, standing in for one run locally), on LS20 with the hand-written dial and
+lock turned off, seeds 0 to 4: **1 level on each seed, the same as with no model** (4 seeds finished; seed 3 stopped
+with 1 level and a fifth prompt unanswered). Over 22 answers the hypotheses went from "touch what completed a level
+before" to "the switch changes the pattern in the bottom-left block", and by the third and fourth calls two seeds
+named that change. None compared that pattern with the door's, and the plans then sent the player to touch the
+bottom-left block itself (part of the HUD, out of reach) instead of pressing the switch until it matched the door.
+
+Reading: the evidence was there (events with before and after patches; the frame), but a small model did not join
+"the switch changes a pattern" to "the door shows a pattern" in four tries. Open: whether a stronger model does
+with the same prompt (which separates the model from the representation), and whether reporting relations between
+objects (equal shapes up to scale, as core knowledge of objects rather than a rule for this game) would let a
+small one.
+
 ## Next
 
 - LS20 level 3 and beyond; plan presses and refills as one sequence under the budget rather than one target at a
