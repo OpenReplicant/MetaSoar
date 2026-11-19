@@ -18,6 +18,11 @@ rules read):
   player most likely controls; `at`: where it is, one symbol of colour, size and centre (the first such object);
   `was-at`: the same for the last frame; `reset`: the last plain action sent the mover back to where it was when the
   attempt began, by a jump that is not that action's usual step (progress thrown away)
+- `goal-dx`, `goal-dy` (-1, 0 or 1): which way the nearest object the mover has not touched lies. Touching is the
+  object's point coming within the mover's box (2 cells around it). Not counted: the mover's kind and kinds that move
+  along with it, objects larger than GOAL_MAX cells (floors, walls) or touching the frame's edge (borders, panels), and goals given up (no closer in GOAL_PATIENCE
+  steps; given up for the attempt). When the scene changes other than by what moved (something picked up, a switch),
+  everything counts as untouched again, except what it touched on that step or the one before (the likely cause).
 - `from`: the last step's `state`; `did`: the last step as one symbol, `from`-action, or `from`-action-x-y for a
   point, the same symbol the rules build for an action they propose; `act`, the same without the state; `lost`: the
   last action ended the attempt (the attempt count went up)
@@ -31,6 +36,8 @@ import sys
 import numpy as np
 
 MAX_OBJECTS = 24
+GOAL_MAX = 256
+GOAL_PATIENCE = 15
 SHOWN = ("id", "color", "size", "cx", "cy")  # of an object's fields, those the rules read
 
 
@@ -150,6 +157,9 @@ def main():
     moves = {}  # (colour, size) -> plain-action steps it moved on
     steps = {}  # (action, colour, size) -> {(dx, dy): count}
     first = None  # the objects of the attempt's first frame
+    touched, given_up, along = set(), set(), set()  # objects by (colour, size, cx, cy); kinds that move with the mover
+    goal, best, stale = None, None, 0
+    prev_obs, recent, last_touch = None, set(), set()
     for line in sys.stdin:
         msg = json.loads(line)
         g = grid_of(msg.get("observation"))
@@ -175,6 +185,7 @@ def main():
                 o = objs[m["id"]]
                 for bx, by in ((o["x"], o["y"]), (o["x"] - m["dx"], o["y"] - m["dy"])):
                     rest[max(by, 0):max(by + o["h"], 0), max(bx, 0):max(bx + o["w"], 0)] = False
+            event = int((rest & ~masked).sum()) > 2
             ry, rx = np.nonzero(rest)
             if 0 < len(ry) <= 2 and not masked[ry, rx].all():
                 # a tick: leave out the region it belonged to, at its size before the tick, and say again what the
@@ -184,6 +195,8 @@ def main():
                         y0, x0, y1, x1 = region_box(prev_grid, y, x)
                         masked[y0:y1 + 1, x0:x1 + 1] = True
                 prev_state = signature(prev_grid, masked)
+        else:
+            event = False
         state = signature(g, masked)
         res["state"] = state
         obs = msg.get("observation") or {}
@@ -223,10 +236,44 @@ def main():
                 if (where["at"]["cx"], where["at"]["cy"]) == (where["home"]["cx"], where["home"]["cy"]) and usual \
                         and (m["dx"], m["dy"]) != max(usual, key=usual.get):
                     res["reset"] = "yes"
+            if m:
+                along.update((o["color"], o["size"]) for o in res.get("moved", [])
+                             if (o["dx"], o["dy"]) == (m["dx"], m["dy"]) and (o["color"], o["size"]) != (c, z))
+            new_level = obs.get("levels_completed") != (prev_obs or {}).get("levels_completed")
+            if "lost" in res or new_level:
+                touched.clear(); given_up.clear(); goal = None
+            elif event or "reset" in res:
+                touched = set(recent)  # what it was touching made the change: that stays touched
+            if "at" in where:
+                me = where["at"]
+                x0, y0, x1, y1 = me["x"] - 2, me["y"] - 2, me["x"] + me["w"] + 1, me["y"] + me["h"] + 1
+                key = lambda o: (o["color"], o["size"], o["cx"], o["cy"])
+                # touching: an object's point within the mover's box, or an object that vanished under it
+                now = {key(o) for o in objs + prev_objs if x0 <= o["cx"] <= x1 and y0 <= o["cy"] <= y1}
+                touched |= now
+                recent = now | last_touch
+                last_touch = now
+                H, W = g.shape
+                cands = [o for o in objs if o["size"] <= GOAL_MAX and (o["color"], o["size"]) != (c, z)
+                         and o["x"] > 0 and o["y"] > 0 and o["x"] + o["w"] < W and o["y"] + o["h"] < H
+                         and (o["color"], o["size"]) not in along and key(o) not in touched and key(o) not in given_up]
+                if cands:
+                    t = min(cands, key=lambda o: abs(o["cx"] - me["cx"]) + abs(o["cy"] - me["cy"]))
+                    dist = abs(t["cx"] - me["cx"]) + abs(t["cy"] - me["cy"])
+                    if key(t) != goal:
+                        goal, best, stale = key(t), dist, 0
+                    elif dist < best:
+                        best, stale = dist, 0
+                    else:
+                        stale += 1
+                        if stale > GOAL_PATIENCE:
+                            given_up.add(goal)
+                    res["goal-dx"] = (t["cx"] > me["cx"]) - (t["cx"] < me["cx"])
+                    res["goal-dy"] = (t["cy"] > me["cy"]) - (t["cy"] < me["cy"])
         if first is None or "lost" in res or obs.get("attempt", attempt) != attempt:
             first = objs
         attempt = obs.get("attempt", attempt)
-        prev_grid, prev_objs, prev_state = g, objs, state
+        prev_grid, prev_objs, prev_state, prev_obs = g, objs, state, obs
         print(json.dumps(res), flush=True)
 
 

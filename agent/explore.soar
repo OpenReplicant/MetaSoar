@@ -7,16 +7,16 @@
 # action taken there:
 #   tried  - it has been taken there;
 #   dead   - it changed nothing (the state stayed the same); and for moves, where the mover was when a move did
-#            nothing or sent it back home, on this level (blocked: a wall or a trap there, whatever else the
-#            scene shows);
-#   fatal  - it ended the attempt;
+#            nothing, on this level (blocked: a wall there, whatever else the scene shows);
+#   fatal  - it ended the attempt, or sent the mover back to where the attempt began;
 #   edge   - where it led.
 # and for points, whatever the state, on this level: which were clicked (tried-act) and which changed nothing
 # (dead-act), since a point that did nothing in one scene usually does nothing in another. Moves are not judged
 # across states: a move that hits a wall here may not elsewhere.
 #
-# It prefers a fresh action (not tried here; a point, not clicked on this level), and among those, one whose known
-# effect does not take what it moves back to a place already visited, takes what was dead or fatal here
+# It prefers a fresh action (not tried here; a point, not clicked on this level); among those, a move toward the
+# nearest thing the mover has not touched (perception's goal), then one whose known effect does not take what it
+# moves back to a place already visited; takes what was dead or fatal here
 # only when nothing else is left (an attempt can end because its budget ran out, not because of the action), never
 # clicks a point that did nothing on this level, and where nothing is fresh, takes the known step toward the nearest state that still has something fresh.
 # Everything it keeps hangs off a node, so each test looks under one identifier, not across the whole map.
@@ -132,12 +132,13 @@ sp {apply*record*blocked
 -->
    (<s> ^blocked (concat <w> |-| <a>))}
 
-# A move that sent the mover home from where it was: as bad as a wall there, whatever else the scene shows.
+# A move that sent the mover home: as bad as ending the attempt, in that scene (in another, say with something else
+# carried, the same move from the same place may be what the level asks).
 sp {apply*record*reset
-   (state <s> ^operator.name record ^io.input-link.env.percept <p>)
-   (<p> ^last-action <a> ^was-at <w> ^reset yes)
+   (state <s> ^operator.name record ^io.input-link.env.percept <p> ^was <n>)
+   (<p> ^did <d> ^reset yes)
 -->
-   (<s> ^blocked (concat <w> |-| <a>))}
+   (<n> ^fatal <d>)}
 
 sp {apply*record*new-level*blocked
    (state <s> ^operator.name record ^io.input-link.env.reward > 0 ^blocked <b>)
@@ -244,6 +245,49 @@ sp {explore*bump
 -->
    (<o> ^bump (concat <w> |-| <a>))}
 
+# A move whose known effect takes the mover toward the nearest thing it has not touched (perception's goal).
+sp {explore*toward*dx-plus
+   (state <s> ^operator <o> + ^knows <k> ^io.input-link.env.percept <p>)
+   (<o> ^name act ^action <a> -^x)
+   (<p> ^mover <mv> ^goal-dx 1)
+   (<mv> ^color <c> ^size <z>)
+   (<k> ^action <a> ^color <c> ^size <z> ^dx > 0)
+-->
+   (<o> ^toward yes)}
+
+sp {explore*toward*dx-minus
+   (state <s> ^operator <o> + ^knows <k> ^io.input-link.env.percept <p>)
+   (<o> ^name act ^action <a> -^x)
+   (<p> ^mover <mv> ^goal-dx -1)
+   (<mv> ^color <c> ^size <z>)
+   (<k> ^action <a> ^color <c> ^size <z> ^dx < 0)
+-->
+   (<o> ^toward yes)}
+
+sp {explore*toward*dy-plus
+   (state <s> ^operator <o> + ^knows <k> ^io.input-link.env.percept <p>)
+   (<o> ^name act ^action <a> -^x)
+   (<p> ^mover <mv> ^goal-dy 1)
+   (<mv> ^color <c> ^size <z>)
+   (<k> ^action <a> ^color <c> ^size <z> ^dy > 0)
+-->
+   (<o> ^toward yes)}
+
+sp {explore*toward*dy-minus
+   (state <s> ^operator <o> + ^knows <k> ^io.input-link.env.percept <p>)
+   (<o> ^name act ^action <a> -^x)
+   (<p> ^mover <mv> ^goal-dy -1)
+   (<mv> ^color <c> ^size <z>)
+   (<k> ^action <a> ^color <c> ^size <z> ^dy < 0)
+-->
+   (<o> ^toward yes)}
+
+sp {explore*blocked
+   (state <s> ^operator <o> + ^blocked <b>)
+   (<o> ^name act ^bump <b>)
+-->
+   (<o> ^blocked yes)}
+
 sp {explore*worst*blocked
    (state <s> ^operator <o> + ^blocked <b>)
    (<o> ^name act ^bump <b>)
@@ -271,9 +315,18 @@ sp {explore*reject*dead-act
 -->
    (<s> ^operator <o> -)}
 
+# Among fresh actions: toward something untouched first, then to a place not yet visited, then any.
+sp {explore*best*fresh-toward
+   (state <s> ^operator <o> +)
+   (<o> ^name act ^fresh yes ^toward yes -^blocked yes)
+-->
+   (<s> ^operator <o> >)}
+
 sp {explore*best*fresh-new
    (state <s> ^operator <o> +)
    (<o> ^name act ^fresh yes -^seen yes)
+  -{(<s> ^operator <t> +)
+    (<t> ^name act ^fresh yes ^toward yes -^blocked yes)}
 -->
    (<s> ^operator <o> >)}
 
@@ -282,6 +335,8 @@ sp {explore*best*fresh
    (<o> ^name act ^fresh yes ^seen yes)
   -{(<s> ^operator <a> +)
     (<a> ^name act ^fresh yes -^seen yes)}
+  -{(<s> ^operator <t> +)
+    (<t> ^name act ^fresh yes ^toward yes -^blocked yes)}
 -->
    (<s> ^operator <o> >)}
 
