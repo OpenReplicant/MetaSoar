@@ -17,23 +17,23 @@ echo '{"env": "arc3:LS20", "seed": 0, "max_steps": 500}' | podman run --rm -i -v
 
 ## Measured (training games only, seeds 0 to 19, 500 steps)
 
-| game | Soar, PR #6 | atlas, first tier |
-|---|---|---|
-| LS20 | 20 | 20 |
-| VC33 | 31 | 23 |
-| S5I5 | 9 | 5 |
-| BP35 | 0 | 3 |
-| RE86 | 2 | 0 |
-| SK48 | 2 | 0 |
-| DC22, SB26, TR87 | 0 | 0 |
-| total | 64 | 51 |
-| games with a level | 5 | 4 |
-| slowest episode | about 8 s | 3.9 s |
+| game | Soar, PR #6 | atlas, first tier | atlas, with the lock |
+|---|---|---|---|
+| LS20 | 20 | 20 | 40 |
+| VC33 | 31 | 23 | 23 |
+| S5I5 | 9 | 5 | 5 |
+| BP35 | 0 | 3 | 2 |
+| RE86 | 2 | 0 | 0 |
+| SK48 | 2 | 0 | 0 |
+| DC22, SB26, TR87 | 0 | 0 | 0 |
+| total | 64 | 51 | 70 |
+| games with a level | 5 | 4 | 4 |
+| slowest episode | about 8 s | 3.9 s | 5.0 s |
 
 On LS20 the first level falls out of the claims: it touches the untested rotator, the scene changes, it touches the
 door. BP35 completes a level for the first time with any agent here.
 
-## Hidden state (in `agent.py`; LS20 level 2 not solved yet)
+## Hidden state (in `agent.py`)
 
 Two latent variables, after AutumnSynth's invented automata, each learned from play:
 - **a budget**: steps since the budget last filled. Its size comes from harm that arrived with nothing touched
@@ -52,6 +52,20 @@ On LS20 level 2 the agent now learns the budget (22 steps), the refill (the ring
 rotator's corner the door is about 22 steps by the only way out, against a budget of 22. Whether the key's state
 survives a lost life (so that pressing twice in one life and walking to the door in the next works) is untested.
 The rest of the training games are unchanged (51 levels, seeds 0 to 19).
+
+Then it was tested by reading the frame directly: the key's state does **not** survive a lost life (it is put back
+with the player), and the key has four turns, of which the door wants the third, not the second. So a third latent
+claim, and one fix:
+- **a dial and a lock**: the region a press changes beyond what was touched is the dial; what blocked a touch is a
+  lock (each contacted object, its own box). Each is read as a pattern per colour, cropped and reduced to its
+  smallest scale, so the HUD's key drawn at twice the size of the door's matches it. While the dial does not fit any
+  lock, press again; when it fits, go to the lock (through a refill if the budget would not last). The press count
+  is now put back when a life is lost, as the game does.
+- **floor is not a culprit**: a region of a floor colour under the size limit for walls had been blamed for a lost
+  life and so walled off from every route; things of a floor colour are no longer contacts or harmful.
+
+LS20 level 2 now falls on all 20 seeds, at about step 106 (three turns, a refill on the way, the door). Nothing in
+the rule names the game: it is the claim "a thing that changes when pressed and matches what blocks is a key".
 
 ## Claims carried between games (the library)
 
@@ -77,8 +91,8 @@ agent already brings to every game as code.
 
 ## Next
 
-- LS20 level 2: test whether the key survives a lost life; plan presses and refills as one sequence under the
-  budget rather than one target at a time.
+- LS20 level 3 and beyond; plan presses and refills as one sequence under the budget rather than one target at a
+  time.
 - Transfer by rule, not by look: carry roles (refill, rotator, door) matched by what an object does in its first
   contacts, not by its appearance.
 - An LLM proposing rules where the enumerated outcomes do not explain an observation (the WorldCoder tier).

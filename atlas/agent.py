@@ -49,6 +49,57 @@ def kind(o):
     return (o["color"], o["size"])
 
 
+def union(boxes):
+    return (min(b[0] for b in boxes), min(b[1] for b in boxes), max(b[2] for b in boxes), max(b[3] for b in boxes))
+
+
+def grow(g, b):
+    """The box grown while the cells around it hold one of its minority colours (the whole of a pattern)."""
+    h, w = g.shape
+    x0, y0, x1, y1 = b
+    for _ in range(64):
+        sub = g[y0:y1 + 1, x0:x1 + 1]
+        cols, n = np.unique(sub, return_counts=True)
+        minor = set(cols[n < n.max()].tolist())
+        if not minor:
+            break
+        X0, Y0, X1, Y1 = max(x0 - 1, 0), max(y0 - 1, 0), min(x1 + 1, w - 1), min(y1 + 1, h - 1)
+        ring = g[Y0:Y1 + 1, X0:X1 + 1].copy()
+        ring[y0 - Y0:y1 - Y0 + 1, x0 - X0:x1 - X0 + 1] = -1
+        ys, xs = np.nonzero(np.isin(ring, list(minor)))
+        if not len(ys):
+            break
+        nx0, ny0, nx1, ny1 = X0 + xs.min(), Y0 + ys.min(), X0 + xs.max(), Y0 + ys.max()
+        x0, y0, x1, y1 = min(x0, nx0), min(y0, ny0), max(x1, nx1), max(y1, ny1)
+    return (int(x0), int(y0), int(x1), int(y1))
+
+
+def shapes(g, b):
+    """Colour -> the pattern of that colour in the box, cropped and reduced to its smallest scale; the box's
+    commonest colour left out."""
+    x0, y0, x1, y1 = b
+    sub = g[y0:y1 + 1, x0:x1 + 1]
+    cols, n = np.unique(sub, return_counts=True)
+    out = {}
+    for c in cols[n < sub.size].tolist():
+        m = sub == c
+        ys, xs = np.nonzero(m)
+        m = m[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
+        for k in range(min(m.shape), 1, -1):  # the largest scale the pattern is drawn at
+            if m.shape[0] % k == 0 and m.shape[1] % k == 0:
+                r = m[::k, ::k]
+                if (np.kron(r, np.ones((k, k), dtype=bool)) == m).all():
+                    m = r
+                    break
+        if m.size > 1:
+            out[c] = m.tobytes() + bytes(m.shape)
+    return out
+
+
+def fits(a, b):
+    return any(c in b and b[c] == v for c, v in a.items())
+
+
 class Atlas:
     def __init__(self, names, takes_point, seed=0, library=None):
         self.names = names
@@ -83,6 +134,10 @@ class Atlas:
         # something; and at which counts something blocked it. If what blocks did so at this count, press again.
         self.presses = 0
         self.blocked_at = set()
+        # a third: what a press changes (the dial, a box) and what blocked (the lock, a box); when their shapes
+        # agree, go to the lock, else press again (a key turned until it fits)
+        self.dial = None
+        self.lock = None
         self.target = None  # the object it is heading for, kept while untested and reachable
         self.dead_pts = set()  # (level, x, y): points whose click did nothing
         # claims carried from other games, by appearance (shape and colour): priors on what to test first, never
@@ -204,10 +259,11 @@ class Atlas:
                                        and n["x"] + n["w"] - 1 >= o["x"] and n["y"] <= o["y"] + o["h"] - 1
                                        and n["y"] + n["h"] - 1 >= o["y"] for n in objs)
                     return (sub & aft).sum() <= 0.2 * sub.sum()
+                floor = self.floor()
                 gone = {key(o) for o in pobjs if key(o) not in {key(n) for n in objs} and vanished(o)}
                 for o in pobjs:
                     k = kind(o)
-                    if k == mk or self.along[k] >= 2 or o["size"] > GOAL_MAX:
+                    if k == mk or self.along[k] >= 2 or o["size"] > GOAL_MAX or o["color"] in floor:
                         continue
                     if o["x"] <= ex1 and o["x"] + o["w"] - 1 >= ex0 and o["y"] <= ey1 and o["y"] + o["h"] - 1 >= ey0:
                         contacts.append(o)
@@ -244,8 +300,18 @@ class Atlas:
                     self.since = 0
                 if outcome == "block" and contacts:
                     self.blocked_at.add(self.presses)
+                    locks = [((o["x"], o["y"], o["x"] + o["w"] - 1, o["y"] + o["h"] - 1), kind(o)) for o in contacts
+                             if o["color"] not in floor]
+                    locks = [(b, k) for b, k in locks if shapes(pg, b)]
+                    if locks:
+                        self.lock = locks
                 if outcome == "event" and contacts:
                     self.presses += 1
+                    ys, xs = np.nonzero(beyond)
+                    b = union([(int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max()))] + ([self.dial] if self.dial else []))
+                    self.dial = grow(g, b)
+                if sent_home:  # a life lost: what the presses changed is put back
+                    self.presses = 0
         hit = None
         if params is not None:
             x, y = params["x"], params["y"]
@@ -272,6 +338,7 @@ class Atlas:
             self.presses = 0
         if level:
             self.blocked_at = set()
+            self.dial = self.lock = None
         if level:
             self.stuck.clear()
             self.home = None
@@ -338,10 +405,13 @@ class Atlas:
             return 1  # did something
         return 2
 
+    def floor(self):
+        return {c for c, (passed, blocked) in self.passable.items() if passed >= 10 and blocked == 0}
+
     def testable(self, objs, g):
         H, W = g.shape
         mk = self.mover()
-        floor = {c for c, (passed, blocked) in self.passable.items() if passed >= 10 and blocked == 0}
+        floor = self.floor()
         return [o for o in objs if o["size"] <= GOAL_MAX and kind(o) != mk and self.along[kind(o)] < 2
                 and o["color"] not in floor
                 and o["x"] > 0 and o["y"] > 0 and o["x"] + o["w"] < W and o["y"] + o["h"] < H]
@@ -361,8 +431,9 @@ class Atlas:
         for c, (passed, blocked) in self.passable.items():
             if blocked > passed:  # untried colours stay passable (optimism); tried ones go by the evidence
                 free[g == c] = False
+        floor = self.floor()
         for o in objs:
-            if self.harmful(self.contact[kind(o)]):
+            if self.harmful(self.contact[kind(o)]) and o["color"] not in floor:
                 free[o["y"]:o["y"] + o["h"], o["x"]:o["x"] + o["w"]] = False
         x0, y0, x1, y1 = box
         free[y0:y1 + 1, x0:x1 + 1] = True
@@ -417,8 +488,9 @@ class Atlas:
         for c, (passed, blocked) in self.passable.items():
             if blocked > passed:
                 free[g == c] = False
+        floor = self.floor()
         for o in objs:
-            if self.harmful(self.contact[kind(o)]):
+            if self.harmful(self.contact[kind(o)]) and o["color"] not in floor:
                 free[o["y"]:o["y"] + o["h"], o["x"]:o["x"] + o["w"]] = False
         x0, y0, x1, y1 = box
         free[y0:y1 + 1, x0:x1 + 1] = True
@@ -462,6 +534,22 @@ class Atlas:
                 best = (min(on), d, first[p_])
         return None if best is None else best[2]
 
+    def go(self, g, objs, box, mk, targets, fatal):
+        """The first action towards the nearest target, through a refill when the budget would not last."""
+        r = self.route(g, objs, box, mk, targets)
+        if r is None:
+            return None
+        fills = [o for o in objs if self.refill[kind(o)]]
+        if self.budget is not None and fills and r[1] + 2 > self.budget - self.since:
+            a = self.via(g, objs, box, mk, fills, r[2], self.budget - self.since)
+            if a is not None and a not in fatal:
+                self.why = f"refill on the way, {self.budget - self.since} left"
+                return a, None, a
+        if r[0] in fatal:
+            return None
+        self.why = f"in {r[1]}"
+        return r[0], None, r[0]
+
     def choose(self, g, objs, state):
         mk = self.mover()
         acts = self.actions(objs)
@@ -474,6 +562,18 @@ class Atlas:
                     self.home = (me["cx"], me["cy"])
                 presses = [o for o in self.testable(objs, g) if self.contact[kind(o)]["event"]
                            and not self.harmful(self.contact[kind(o)])]
+                if presses and self.lock and self.dial:  # turn the key until it fits the lock, then go to the lock
+                    dial = shapes(g, self.dial)
+                    lk = {k for b, k in self.lock if fits(shapes(g, b), dial)}
+                    if lk:
+                        targets = [o for o in objs if kind(o) in lk]
+                        why = "to the lock: it fits"
+                    else:
+                        targets, why = presses, "turn: does not fit"
+                    r = self.go(g, objs, box, mk, targets, fatal)
+                    if r is not None:
+                        self.why = why + " " + self.why
+                        return r
                 if presses and self.presses in self.blocked_at:  # shut at this count: press again first
                     r = self.route(g, objs, box, mk, presses)
                     if r is not None and r[0] not in fatal:

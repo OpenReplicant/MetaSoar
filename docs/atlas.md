@@ -241,6 +241,15 @@ structure and logic; components with scopes and verdicts) is worth having for Su
 outside user would be the atlas's library across games. Before calling it a product: a real market survey (the
 research skill), and the cost of shipping a Postgres extension (packaging, upgrades, support).
 
+**Blueprints as interfaces with roles; catalogs searched by role.** The owner: the premise that a narrow interface
+keeps a module clean suits how Substrate maps blueprints. A blueprint is a set of interfaces, each slot named by
+the role it plays and the intent behind it, and the component catalog is searched by what fills a slot (its role,
+its contract, its judged record for that scope) rather than by description. The atlas's measurements point the same
+way: claims carried between games by appearance did nothing (8 episodes better, 8 worse), because a look predicts
+poorly what a thing does; what an agent can carry is a role (a refill, a dial, a lock) recognised by its behaviour
+in the first contacts. Matching a part to a slot by role and evidence is one operation at both levels: an object to
+a role in a game, a component to a role in a blueprint.
+
 ## Read for it
 
 Read in full (2026-11-19): EMPA (arXiv 2107.12544); WorldCoder (arXiv 2402.12275); AutumnSynth (POPL 2023,
