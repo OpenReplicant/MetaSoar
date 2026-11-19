@@ -1,11 +1,11 @@
-# Morphogen judges every pull request that changes the agent's rules (agent/**), from this definition on main
+# Morphogen judges every pull request that changes the agent's rules (agent/**) or the atlas arm (atlas/**), from this definition on main
 # (pull_request_target), so a pull request cannot change what judges it. The judge commit and the sandbox image
 # are pinned; the verdict is posted by the judge's GitHub App (M-05).
 name: morphogen
 on:
   pull_request_target:
     types: [opened, synchronize, reopened, edited]
-    paths: ["agent/**"]
+    paths: ["agent/**", "atlas/**"]
 permissions: {}
 jobs:
   judge:
@@ -15,7 +15,7 @@ jobs:
     with:
       judge-ref: 21b347f669b243e01fbd7aabd8c16af1b57fed6c
       cases-repo: OpenReplicant/morphogen-judge
-      module: metasoar.play
+      module: metasoar.arm
       sandbox-image: ghcr.io/openreplicant/metasoar-sandbox@sha256:846875ecea32834ee9d44635128d382502086362341cf91c559a1b195ab1033d
       case-timeout: 60
       verdict-poster: app

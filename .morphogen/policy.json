@@ -2,7 +2,8 @@
  "policy": "morphogen.policy/v1",
  "scope": [
   "agent/**/*.soar",
-  "agent/perception/**/*.py"
+  "agent/perception/**/*.py",
+  "atlas/**"
  ],
  "protected": [
   ".github/**",
