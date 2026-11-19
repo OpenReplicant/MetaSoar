@@ -1,33 +1,43 @@
-# Where the work stands, and what is next (2026-11-19)
+# Where the work stands, and what is next (2026-11-19, evening)
 
 A handoff for the next session, local or in the cloud. Read `README.md`, `docs/spec.md` and `DECISIONS.md` first.
 
 ## State
 
 - `main`: Soar 9.6.5 unchanged, the adapter (`metasoar/`), the hook, and Morphogen as the judge
-  (`.github/workflows/morphogen.yml`, pinned to `judge.yml@21b347f`). BabyAI rules merged in PRs #1 and #2. The
-  policy's scope includes the agent's perception (`agent/perception/**/*.py`, PR #3).
-- PR #4 (branch `claude/exciting-wozniak-0sof8t`, `ce9ca28`): ARC-AGI-3 perception and a map of states learned by
-  playing (M-12). **Passed** by the judge on `arc3-heldout`: levels 0.083 to 0.25 a case (9 better, 1 worse, 38 tied,
-  p = 0.011); `wall_seconds` 1.08 to 3.09 s. Waiting for the owner to merge. It has used 2 of the case set's 200 verdicts.
-- Training games, seeds 0 to 19, 500 steps: VC33 31 levels, S5I5 9, the other 7 games 0 or 1 between them.
+  (`.github/workflows/morphogen.yml`, pinned to `judge.yml@21b347f`).
+  - BabyAI rules: PRs #1 and #2.
+  - ARC-AGI-3: perception and a map of states learned by playing, #4 (M-12), passed on `arc3-heldout`.
+  - The judge runs `metasoar.arm` (#7): ARC-AGI-3 cases go to `atlas.play` if the tree has `atlas/`, everything else
+    to `metasoar.play`. `main` has no `atlas/`, so the Soar agent plays everything.
+  - The policy's scope: `agent/**/*.soar`, `agent/perception/**/*.py`, `atlas/**`.
+- Refused and closed: #6, curiosity rules (M-13; 2 better, 0 worse); #8, the atlas arm (M-14; 0 better, 12 worse).
+  Both gained on the training games through rules read off them, and neither carried to the held-out games.
+- The atlas prototype: branch `claude/atlas-prototype` (`atlas/`, `docs/atlas.md`). 70 levels on the training games.
+- 4 of `arc3-heldout`'s 200 verdicts used.
+
+## What the verdicts say
+
+Rules written by the author after watching training games fail do not generalise, however general they are
+written: of four ARC-AGI-3 verdicts, one passed. The pass (#4) was broad exploration with a map; the
+two refusals added targeted behaviour on top or in its place. A rule the agent did not find for itself is one
+more thing for the held-out games to break.
 
 ## Next
 
-1. **Learn what a level asks, not only where it has not been.** The agent covers LS20's maze in about 100 steps but never
-   learns that the key it carries must match the door. Candidates, all game-agnostic:
-   - progress signals other than a level: a change that persists across steps, or that matches part of the scene
-     elsewhere (the key's shape against the door's);
-   - remembering, across attempts and levels, the kinds of steps that came before a level was completed.
-2. **VC33 stops at 2 levels.** Attempts there last 50 steps. Find out whether level 3 needs a longer sequence than
-   one attempt explores, or something the rules forbid (points are ruled out for a level after doing nothing once).
-3. **Keep the time bound in view.** The bound is 5 s worse a case than `main`; PR #4 is about 2 s worse on held-out
-   games, BP35 about 4 s on training. Soar's joins hash on the identifier: put new memory under a node or as a single
-   symbol, never as a flat set that a negated conjunction scans.
+1. **The model tier of the atlas** (`docs/atlas.md`, "The first experiment"): where the enumerated outcomes do not
+   explain an observation (a surprise), a model proposes a claim (a transition rule, a latent variable, a goal), and
+   the agent tests it by playing. First test: with the dial and lock deleted from `atlas/agent.py`, does it recover
+   that rule on LS20? Then the five training games where nothing has scored (SK48, RE86, DC22, SB26, TR87).
+2. **Exploration as the floor.** Whatever is built on claims keeps the Soar agent's coverage of actions and points
+   underneath: claims may order what to try, not cut what gets tried.
+3. **Spend verdicts only on mechanisms.** Open a judged PR when a training gain comes from claims the agent made, not
+   from rules written against the training games.
 
 Later:
-- the three-way comparison: plain Soar, Soar with the hook, and Haiku 5.5 as the plain LLM player, on the
-  owner's subscription;
+- the store: claims with evidence and status in Substrate's Postgres once a model proposes them (provenance,
+  retraction), not before;
+- the three-way comparison: plain Soar, Soar with the hook, and Haiku 5.5 as the plain LLM player;
 - ARC-AGI-1 as the next suite.
 
 ## How to measure
@@ -35,6 +45,9 @@ Later:
 In the sandbox image (`docker run --rm -v $PWD:/work:ro <image> sh -c '...'`), one episode:
 
     echo '{"env": "arc3:VC33", "seed": 0, "max_steps": 500}' | python3 -m metasoar.play
+
+`python3 -m metasoar.arm` is what the judge runs (the atlas for ARC-AGI-3 when `atlas/` is present);
+`python3 -m atlas.play` runs the atlas alone.
 
 The judge plays 500 steps a held-out case; measure training games at 500 too, on at least 10 seeds a game: with 3
 seeds, the noise is as large as most changes. `trials/baseline/run.py` covers BabyAI only.
