@@ -46,22 +46,26 @@ sp {apply*record*move
    (<s> ^knows <k2>)
    (<k2> ^action <a> ^color <c> ^size <z> ^dx <dx> ^dy <dy>)}
 
+# Where things have been: the place each moved object reached, one symbol per colour, size and place, so asking
+# whether a place is new is a single test however many places it has seen (a WME already there is not added twice).
 sp {apply*record*visited
-   (state <s> ^operator.name record ^io.input-link.env.percept.objects <ob> ^knows <k>)
-   (<k> ^color <c> ^size <z>)
-   (<ob> ^color <c> ^size <z> ^cx <x> ^cy <y>)
-  -{(<s> ^visited <v>) (<v> ^color <c> ^size <z> ^x <x> ^y <y>)}
+   (state <s> ^operator.name record ^io.input-link.env.percept <p>)
+   (<p> ^moved.id <i> ^objects <ob>)
+   (<ob> ^id <i> ^color <c> ^size <z> ^cx <x> ^cy <y>)
 -->
-   (<s> ^visited <v2>)
-   (<v2> ^color <c> ^size <z> ^x <x> ^y <y>)}
+   (<s> ^visited (concat |c| <c> |s| <z> |x| <x> |y| <y>))}
 
 sp {apply*record*clicked
    (state <s> ^operator.name record ^io.input-link.env.percept <p>)
-   (<p> ^last-x <x> ^last-y <y> ^effect <ef>)
-  -{(<s> ^clicked <c>) (<c> ^x <x> ^y <y>)}
+   (<p> ^last-x <x> ^last-y <y>)
 -->
-   (<s> ^clicked <c2>)
-   (<c2> ^x <x> ^y <y> ^effect <ef>)}
+   (<s> ^clicked (concat <x> |_| <y>))}
+
+sp {apply*record*dead-click
+   (state <s> ^operator.name record ^io.input-link.env.percept <p>)
+   (<p> ^last-x <x> ^last-y <y> ^effect none)
+-->
+   (<s> ^dead-click (concat <x> |_| <y>))}
 
 # A level completed: the scene is new, so where it has been and what it clicked no longer hold.
 sp {apply*record*new-level*visited
@@ -74,6 +78,11 @@ sp {apply*record*new-level*clicked
 -->
    (<s> ^clicked <c> -)}
 
+sp {apply*record*new-level*dead-click
+   (state <s> ^operator.name record ^io.input-link.env.reward > 0 ^dead-click <c>)
+-->
+   (<s> ^dead-click <c> -)}
+
 # --- clicking: on each object it sees, not only at random points ---
 sp {propose*act*click-object
    (state <s> ^superstate nil ^io.input-link.env <e> ^io.output-link <ol>)
@@ -83,7 +92,7 @@ sp {propose*act*click-object
   -(<ol> ^act)
 -->
    (<s> ^operator <op> + =)
-   (<op> ^name act ^action <n> ^x <x> ^y <y> ^object yes)}
+   (<op> ^name act ^action <n> ^x <x> ^y <y> ^object yes ^key (concat <x> |_| <y>))}
 
 # --- where each known move would take what it moves ---
 sp {explore*next
@@ -92,7 +101,7 @@ sp {explore*next
    (<ob> ^color <c> ^size <z> ^cx <x> ^cy <y>)
 -->
    (<s> ^next <n>)
-   (<n> ^action <a> ^color <c> ^size <z> ^x (+ <x> <dx>) ^y (+ <y> <dy>))}
+   (<n> ^action <a> ^key (concat |c| <c> |s| <z> |x| (+ <x> <dx>) |y| (+ <y> <dy>)))}
 
 # --- preferences on act ---
 sp {explore*best*untried
@@ -105,15 +114,15 @@ sp {explore*best*untried
 sp {explore*best*unvisited
    (state <s> ^operator <o> + ^next <n>)
    (<o> ^name act ^action <a> -^x)
-   (<n> ^action <a> ^color <c> ^size <z> ^x <x> ^y <y>)
-  -{(<s> ^visited <v>) (<v> ^color <c> ^size <z> ^x <x> ^y <y>)}
+   (<n> ^action <a> ^key <k>)
+  -(<s> ^visited <k>)
 -->
    (<s> ^operator <o> >)}
 
 sp {explore*best*unclicked
    (state <s> ^operator <o> + ^io.input-link.env.percept.objects)
-   (<o> ^name act ^object yes ^x <x> ^y <y>)
-  -{(<s> ^clicked <c>) (<c> ^x <x> ^y <y>)}
+   (<o> ^name act ^object yes ^key <k>)
+  -(<s> ^clicked <k>)
 -->
    (<s> ^operator <o> >)}
 
@@ -125,8 +134,7 @@ sp {explore*reject*no-effect
    (<s> ^operator <o> -)}
 
 sp {explore*reject*dead-click
-   (state <s> ^operator <o> + ^clicked <c>)
-   (<o> ^name act ^x <x> ^y <y>)
-   (<c> ^x <x> ^y <y> ^effect none)
+   (state <s> ^operator <o> + ^dead-click <k>)
+   (<o> ^name act ^key <k>)
 -->
    (<s> ^operator <o> -)}
