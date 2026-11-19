@@ -16,7 +16,17 @@ def episode(case: dict) -> dict:
     obs, _ = env.reset(seed=int(case["seed"]))
     u = env.unwrapped
     names = u.action_names()
-    agent = Atlas(names, u.takes_point, seed=int(case["seed"]))
+    library = {}
+    for path in case.get("library_in") or []:  # libraries from other games, merged
+        try:
+            for look, whats in json.load(open(path)).items():
+                for what, c in whats.items():
+                    for o, n in c.items():
+                        library.setdefault(look, {}).setdefault(what, {})
+                        library[look][what][o] = library[look][what].get(o, 0) + n
+        except (OSError, ValueError):
+            pass
+    agent = Atlas(names, u.takes_point, seed=int(case["seed"]), library=library)
     total, steps, done, success, trace = 0.0, 0, False, False, []
     while not done:
         name, params = agent.step(obs)
@@ -26,10 +36,13 @@ def episode(case: dict) -> dict:
         total += float(reward)
         done = terminated or truncated
         success = obs.get("state") == "WIN"
-        if case.get("trace"):
-            trace.append([name, params, agent.why, int(reward)])
+        trace.append([name, params, agent.why, int(reward)])
+    if case.get("library_out"):
+        json.dump(agent.export(), open(case["library_out"], "w"))
     out = {"env": case["env"], "seed": case["seed"], "success": success, "return": round(total, 6), "steps": steps,
            "stuck_steps": 0, "invalid_steps": 0, "percept_failures": 0, "seconds": round(time.perf_counter() - t0, 3)}
+    out["first_level"] = next((i + 1 for i, t in enumerate(trace) if t[3]), None)
+    out["library_size"] = len(library)
     if case.get("trace"):
         out["trace"] = trace
     return out

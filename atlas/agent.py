@@ -25,6 +25,7 @@ It chooses, in order:
 from __future__ import annotations
 
 import collections
+import hashlib
 import importlib.util
 import random
 from pathlib import Path
@@ -49,7 +50,7 @@ def kind(o):
 
 
 class Atlas:
-    def __init__(self, names, takes_point, seed=0):
+    def __init__(self, names, takes_point, seed=0, library=None):
         self.names = names
         self.point = {n for i, n in enumerate(names) if takes_point(i)}
         self.plain = [n for n in names if n not in self.point]
@@ -84,6 +85,10 @@ class Atlas:
         self.blocked_at = set()
         self.target = None  # the object it is heading for, kept while untested and reachable
         self.dead_pts = set()  # (level, x, y): points whose click did nothing
+        # claims carried from other games, by appearance (shape and colour): priors on what to test first, never
+        # facts; the agent's own evidence in this game overrides them
+        self.library = library or {}
+        self.look = {}  # kind -> appearance
         self.why = ""
 
     # --- perception ---
@@ -95,6 +100,8 @@ class Atlas:
         objs = [o for o in objs if not self.masked[o["y"]:o["y"] + o["h"], o["x"]:o["x"] + o["w"]].all()]
         for i, o in enumerate(objs):
             o["id"] = i
+            if o["size"] <= GOAL_MAX:
+                self.appearance(g, o)
         return g, objs
 
     def mover(self):
@@ -287,6 +294,40 @@ class Atlas:
                 acts.append((n, {"x": o["cx"], "y": o["cy"]}, f"{n}@{o['cx']},{o['cy']}"))
         return acts
 
+    def appearance(self, g, o):
+        k = kind(o)
+        if k not in self.look:
+            m = (g[o["y"]:o["y"] + o["h"], o["x"]:o["x"] + o["w"]] == o["color"]).astype(np.uint8)
+            self.look[k] = f"{hashlib.blake2b(m.tobytes() + bytes([o['w'], o['h']]), digest_size=4).hexdigest()}-{o['color']}"
+        return self.look[k]
+
+    def prior(self, k, what):
+        a = self.look.get(k)
+        return collections.Counter(self.library.get(a, {}).get(what, {})) if a else collections.Counter()
+
+    def ctier(self, k):
+        """The order to test a kind by contact: its own evidence, else what its look did elsewhere (lower first)."""
+        own = self.contact[k]
+        if own:
+            return self.tier(own)
+        pr = self.prior(k, "contact")
+        if pr["level"]:
+            return -1
+        if self.harmful(pr):
+            return 2
+        return 0 if not pr or pr["take"] or pr["event"] else 1
+
+    def export(self):
+        """What each look did in this game, for the library."""
+        out = {}
+        for what, table in (("contact", self.contact), ("click", self.clicked)):
+            for k, c in table.items():
+                if c and k in self.look:
+                    out.setdefault(self.look[k], {}).setdefault(what, {})
+                    for o, n in c.items():
+                        out[self.look[k]][what][o] = out[self.look[k]][what].get(o, 0) + n
+        return out
+
     def harmful(self, outcomes):
         return outcomes["harm"] > 0 and outcomes["harm"] >= outcomes["take"] + outcomes["event"] + outcomes["level"]
 
@@ -355,7 +396,7 @@ class Atlas:
                     first[n] = first[(x, y)] or a
                     nxt.append(n)
                     for o in touching(*n):
-                        cand = (self.tier(self.contact[kind(o)]) - (key(o) == self.target) * 3, d, first[n], o)
+                        cand = (self.ctier(kind(o)) - (key(o) == self.target) * 3, d, first[n], o)
                         if best is None or cand[:2] < best[:2]:
                             best = cand
             if best is not None and best[0] <= 0:
@@ -456,7 +497,7 @@ class Atlas:
                                 return a, None, a
                         if r is not None and r[0] not in fatal:
                             self.target = key(r[2])
-                            self.why = f"touch {kind(r[2])} t{self.tier(self.contact[kind(r[2])])} in {r[1]}"
+                            self.why = f"touch {kind(r[2])} t{self.ctier(kind(r[2]))} in {r[1]}"
                             return r[0], None, r[0]
         # 1'. a click not yet tried in this scene, never one that did nothing on this level (in any scene): a kind
         # never clicked first, then any at random
@@ -469,7 +510,9 @@ class Atlas:
                 o = next((o for o in objs if o["cx"] == p["x"] and o["cy"] == p["y"]), None)
                 if o is None or self.harmful(self.clicked[kind(o)]):
                     continue
-                cands.append((0 if not self.clicked[kind(o)] else 1, n, p, k))
+                own, pr = self.clicked[kind(o)], self.prior(kind(o), "click")
+                t = 1 if own else -1 if (pr["level"] or pr["event"]) else 1 if pr and not pr["harm"] else 0
+                cands.append((t, n, p, k))
             if cands:
                 t = min(c[0] for c in cands)
                 _, n, p, k = self.rng.choice([c for c in cands if c[0] == t])
