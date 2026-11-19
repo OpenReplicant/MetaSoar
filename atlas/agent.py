@@ -404,12 +404,44 @@ class Atlas:
             return []
         if out is None:
             return []
-        if isinstance(out, tuple) and len(out) == 2 and all(isinstance(v, int) for v in out):
+        if isinstance(out, (str, dict)) or (isinstance(out, tuple) and len(out) == 2 and not isinstance(out[0], tuple)
+                                            and not isinstance(out[0], list)):
             out = [out]
+        items = []
         try:
-            return [tuple(k) for k in out][:6]
+            for k in list(out)[:6]:
+                if isinstance(k, str):
+                    items.append(("action", k))
+                elif isinstance(k, (tuple, list)) and len(k) == 2 and k[0] == "click":
+                    items.append(("click", tuple(k[1])))
+                else:
+                    items.append(("touch", tuple(k)))
         except Exception:
             return []
+        return items
+
+    def follow(self, g, objs, mk, me, box, fatal, acts):
+        """The first item of the plan on trial that can be done now, as an action (None: explore as usual)."""
+        for what, k in self.planned(g, objs, mk, me):
+            if what == "action":
+                a = next((a for a in acts if a[1] is None and a[0] == k and a[2] not in fatal), None)
+                r = a and (a[0], None, a[2])
+            elif what == "click":
+                o = next((o for o in objs if kind(o) == k), None)
+                r = None
+                if o is not None and self.point:
+                    n = sorted(self.point)[0]
+                    p = {"x": o["cx"], "y": o["cy"]}
+                    akey = f"{n}@{p['x']},{p['y']}"
+                    r = (n, p, akey) if akey not in fatal else None
+            else:
+                r = None if me is None else self.go(g, objs, box, mk, [o for o in objs if kind(o) == k and kind(o) != mk],
+                                                    fatal)
+            if r is not None:
+                self.plan_named[(what, k)] += 1
+                self.why = f"plan: {what} {k} " + (self.why if what == "touch" else "")
+                return r
+        return None
 
     # --- choosing ---
     def actions(self, objs):
@@ -618,21 +650,18 @@ class Atlas:
         mk = self.mover()
         acts = self.actions(objs)
         fatal = self.fatal[state]
+        me, box = self.body(objs, mk) if mk is not None else (None, None)
+        if self.proposer is not None:  # 0. the model tier's plan on trial, if any
+            self.consult(g, objs, me)
+            if self.plan is not None:
+                r = self.follow(g, objs, mk, me, box, fatal, acts)
+                if r is not None:
+                    return r
         # 1. touch what is untested, by a route
         if mk is not None:
-            me, box = self.body(objs, mk)
             if me is not None:
                 if self.home is None:
                     self.home = (me["cx"], me["cy"])
-                if self.proposer is not None:
-                    self.consult(g, objs, me)
-                    if self.plan is not None:
-                        for k in self.planned(g, objs, mk, me):
-                            r = self.go(g, objs, box, mk, [o for o in objs if kind(o) == k and kind(o) != mk], fatal)
-                            if r is not None:
-                                self.plan_named[k] += 1
-                                self.why = f"plan: {k} " + self.why
-                                return r
                 presses = [o for o in self.testable(objs, g) if self.contact[kind(o)]["event"]
                            and not self.harmful(self.contact[kind(o)])]
                 if presses and self.lock and self.dial and self.lock_rule:  # turn the key until it fits the lock, then go to the lock

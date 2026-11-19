@@ -37,15 +37,18 @@ GUIDE = """You are the hypothesis-forming part of an agent that is learning an u
 The agent cannot read the game's rules or code. It sees a 64x64 frame of colours 0-15 (written below as hex digits,
 one row per line, row 0 first), and it has learned some things by experiment, listed below.
 
-The agent controls a player that it moves with plain actions; it interacts with objects by moving into contact with
-them ("touching"). It already routes to any object you name, through what it believes passable, picking up a refill
-on the way if its step budget would run out. Your job is to say what this level most likely requires, given the
+The agent may control a player that it moves with plain actions and that interacts with objects by moving into
+contact with them ("touching"); it routes to any object you name, through what it believes passable, picking up a
+refill on the way if its step budget would run out. Some games also or instead take clicks on a point, and some have
+actions with no direction (their effect is in the events below). Your job is to say what this level most likely requires, given the
 evidence, and write a small program that steers the agent's touching toward it.
 
 Write:
 1. one line starting "HYPOTHESIS:" with the claim in plain words;
-2. one ```python block defining `plan(w)`, called once per step, returning the kind (a (colour, size) tuple) of the
-   object to touch next, a list of kinds in order of preference, or None to let the agent explore on its own.
+2. one ```python block defining `plan(w)`, called once per step, returning what to do next, or a list of options
+   in order of preference (the first that can be done now is done), or None to let the agent explore on its own.
+   An option is a kind, a (colour, size) tuple, to walk into; ("click", kind) to click an object of that kind; or an
+   action's name, such as "ACTION5", to do it.
 
 `w` has:
 - w.step: steps since this level began; w.frame: list of 64 strings of hex digits (the current frame)
@@ -148,8 +151,15 @@ def compile_plan(text):
 def prompt_for(agent, g, objs, me, tried):
     lines = [GUIDE, "## What the agent has learned"]
     mk = agent.mover()
-    lines.append(f"- the player: kind {mk}, at {None if me is None else (me['x'], me['y'], me['w'], me['h'])}; "
-                 f"moves: " + ", ".join(f"{a} {agent.vec(a, mk)}" for a in agent.plain))
+    lines.append(f"- actions: {agent.names}; those taking a point: {sorted(agent.point)}")
+    if mk is None:
+        lines.append("- no player found yet (nothing the plain actions move)")
+    else:
+        lines.append(f"- the player: kind {mk}, at {None if me is None else (me['x'], me['y'], me['w'], me['h'])}; "
+                     f"moves: " + ", ".join(f"{a} {agent.vec(a, mk)}" for a in agent.plain))
+    clicks = "; ".join(f"{k}: {dict(v)}" for k, v in agent.clicked.items() if v)
+    if clicks:
+        lines.append("- what clicking each kind did: " + clicks)
     lines.append(f"- step budget: {agent.budget} (steps since it last filled: {agent.since}); refills: "
                  f"{[k for k, n in agent.refill.items() if n]}")
     lines.append("- passable colours (passed, blocked): " + json.dumps({str(c): v for c, v in agent.passable.items()}))
