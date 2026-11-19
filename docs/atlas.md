@@ -35,6 +35,77 @@ and tested.
 - **The judge is nearly blind at the floor.** With most cases at 0 levels on both sides, almost everything ties.
   A measure with a gradient (progress within a level) is needed before any author's changes can be judged.
 
+## What the closest work shows (read 2026-11-19)
+
+Three systems learn a game's rules from playing or watching it, and report results. All three were read in full
+(the PDFs' text).
+
+**EMPA** (Tsividis et al. 2021, arXiv 2107.12544, "Human-Level Reinforcement Learning through Theory-Based
+Modeling, Exploration, and Planning").
+- A theory is a game description in a subset of VGDL: object classes with dynamic types, pairwise interaction
+  rules by class, win and loss conditions. Inferred by Bayesian inference over that space, per game.
+- Exploration seeks the most informative events, which "are always agent-object and object-object interactions for
+  classes of objects that have not previously been observed in contact"; plans can be long and exist only to cause
+  such contacts.
+- Planning: best-first search with the most probable theory as simulator, intrinsic rewards for goals, subgoals and
+  goal gradients, novelty pruning (Iterative Width), and a meta-controller that switches search modes on
+  prediction errors.
+- Results on 90 games: within 0.1x to 10x of human efficiency "on 79 out of 90 games"; DDQN "more than 100x less
+  efficient on 67 out of 90 games" (DDQN capped at 1 million steps). Ablations: replacing its exploration with
+  epsilon-greedy "fail[s] dramatically" on exploration-hard games; removing planner heuristics leaves some games
+  with no level solved.
+- Given to it, not learned: the state "is fully observed" (objects, no pixels); "which object corresponds to the
+  avatar, its type ... as well as the projectile"; which objects are walls; deterministic interactions; 14
+  predefined interaction types. Up to 24 hours per game, with an unoptimised engine. No cross-game transfer.
+
+**WorldCoder** (Tang, Key and Ellis 2024, arXiv 2402.12275).
+- The world model is Python: a transition function and a reward function, written and debugged by an LLM (GPT-4)
+  until they reproduce every recorded transition; programs to refine are chosen by a bandit (REx).
+- **Optimism under uncertainty**, as a logical constraint: the model must let the planner reach a rewarded end
+  from the start state, so where the goal is not yet understood the LLM writes an optimistic reward (touching the
+  key counts), and the agent goes and tests it. Without it, nothing is solved in AlfWorld ("necessary for any
+  non-zero performance") or MiniGrid's harder environments; on Sokoban, with dense reward, it makes little
+  difference.
+- Sample efficiency: Sokoban's model built "over the first 50 actions" (deep RL takes over a million); MiniGrid
+  UnlockPickup from "no more than 100 actions" (PPO had no reward after 3×10^8). Cost: "after front-loading 400k
+  LLM tokens (about $15), it can issue as many actions as needed without subsequent LLM queries", against an LLM
+  call per action for ReAct (which solved 15% ± 8% of basic Sokoban levels).
+- Given to it, not learned: symbolic, discrete states (its authors: "the real world is messy and continuous");
+  deterministic dynamics; the goal in words. Transfer is refining the previous program, "a very basic mechanism";
+  no library. Fails on Sokoban with 5+ boxes (planning).
+
+**AutumnSynth** (Das, Tenenbaum, Solar-Lezama and Tavares, POPL 2023, "Combining Functional and Automata Synthesis
+to Discover Causal Reactive Programs"; inspired by ARC, the paper says).
+- Learns a program in Autumn, a reactive language for grid worlds: objects, update functions, and on-clauses ("on
+  event, update"). Four steps: perception (one-colour regions, as ours), tracking (nearest match), update functions
+  for each object's change, then **cause synthesis**: an observable event that fires exactly when each update
+  happens, and where none exists, **invented latent state** (a small automaton: a counter, a mode, a switch).
+- Results: 27 of 30 of its own programs, 24 of them with latent state (up to 11 states); 21 of 27 EMPA games' first
+  levels, mostly matching unseen traces. Traces were curated by hand to show every dynamic.
+- Cost: 2 minutes to 13 hours per program on its own corpus, up to 38.8 hours on EMPA's; offline, not online
+  ("synthesized incrementally ... with each new observation" is future work). Hand-tuned biases, which it hopes to
+  learn ("a library of higher-level Autumn functions ... in the style of DreamCoder"). Deterministic causes only.
+
+What they mean here:
+1. **Rules over objects, plus latent state, are the right form of transition claim.** EMPA's interaction rules,
+   WorldCoder's programs and Autumn's on-clauses are the same idea. Autumn adds what LS20 needed: hidden state
+   invented when no visible cause explains a change (the key's rotation count, the budget, lives).
+2. **Two exploration mechanisms with evidence behind them:** cause the interactions not yet observed (EMPA), and
+   act on an optimistic model of the goal and let reality correct it (WorldCoder). My hand-written curiosity was
+   a crude version of the first; the ablations say both matter.
+3. **The generalist-as-teacher has a measured instance.** WorldCoder pays an LLM once (about $15 of tokens) and
+   then acts with no model calls; ReAct pays per action. That is the atlas's falling model calls per step.
+4. **Nobody has solved perception for them.** EMPA is told the avatar and the walls; WorldCoder needs symbolic
+   states; AutumnSynth's parsing works only on clean grids. ARC-AGI-3's frames are clean grids, so this is the
+   right place to start, and MetaSoar's perception (objects, the mover, ticking cells) is already most of
+   AutumnSynth's step 1 to 2.
+5. **Speed is the open problem for learning within an episode.** EMPA takes up to a day per game, AutumnSynth hours
+   per program offline, WorldCoder minutes of LLM time. A held-out case here is 500 steps under a time bound. So
+   the provisional tier has to learn incrementally (cheap local fixes as each observation arrives), with full
+   synthesis offline in the slow loop.
+6. **None was judged on games held out from its builders,** and none transfers much. The held-out judge and a
+   growing library are what this project adds.
+
 ## Substrate already has most of it
 
 | Substrate's framework | Soar | In the atlas |
@@ -59,9 +130,10 @@ Substrate goes past it: Soar's chunks are never tested, scoped or retired (the f
 2. **Two speeds of learning.** A **provisional** tier forms and tests hypotheses within seconds, scoped to the
    episode, self-tested, unreviewed. The **durable** tier is today's: author, judge, owner. Promotion from
    provisional to durable is what the judge gates.
-3. **Transition models as a kind of component.** Not only "this signal means X" but "in context C, action A turns
-   pattern P into P′": graph rewrite rules, the mechanics claims at the heart of game learning (touch the
-   rotator, the key turns; a ring refills the budget).
+3. **Transition models as a kind of component.** Not only "this signal means X" but "on event E, objects of kind K
+   update by U": Autumn's on-clauses, EMPA's interaction rules, the mechanics claims at the heart of game learning
+   (touch the rotator, the key turns; a ring refills the budget). Where no visible event explains an update, a
+   latent variable is proposed (a counter, a mode), as AutumnSynth does.
 4. **Models of different kinds behind one interface.** A local model declares its scope, predicts within it, and
    reports cost and latency; whether it is a rule, a network, a physics engine or a model call does not matter to
    the router. Where a simpler or cheaper model predicts as well, it wins (description length against accuracy).
@@ -71,7 +143,8 @@ Substrate goes past it: Soar's chunks are never tested, scoped or retired (the f
    per event, falling.
 
 A claim, for the atlas: subject, relation, object or value; **scope** (the context where it holds); **kind**
-(existence and identity, property, spatial relation, transition, invariant, affordance); **prediction** (what it
+(existence and identity, property, spatial relation, transition, latent variable, invariant, affordance, goal);
+**prediction** (what it
 can be checked against); **evidence and confidence**; **provenance** (perceived, inferred, carried over, proposed by
 a model); **status** (hypothesis, confirmed, refuted). This extends S-135's statement with a reference, rather
 than replacing it.
@@ -109,22 +182,29 @@ The same core serves software (Substrate's focus: components, interfaces, claims
 
 ## The first experiment
 
-ARC-AGI-3 as a Substrate environment: frames as signals, the game's actions as actuators.
-1. **Pass-through:** a vision LLM plays at a deliberate rate (a cheap model, not every frame), everything
-   recorded.
-2. **Distillation:** from the record, perception pipelines, transition claims and exploration habits as
-   components, provisional within a game and promoted when judged.
-3. **Judging:** held-out games through Morphogen, with a measure that moves off zero (progress within a level as
-   well as levels completed), and games improved or regressed counted.
-4. **Arms:** Soar with the hand-built rules (`agent/` as merged in #4, and `claude/agent-routes`), a plain LLM
+ARC-AGI-3 as a Substrate environment: frames as signals, the game's actions as actuators. Built from the three
+papers' parts, with MetaSoar's perception in front:
+1. **Perception (the fast tier, no model calls):** objects, the mover, ticking cells, as MetaSoar has now
+   (AutumnSynth's steps 1 and 2).
+2. **Transition claims (the provisional tier):** rules in an Autumn-like form ("on event, update"), with latent
+   variables where no visible cause explains a change. Proposed by an LLM from the record of the game so far, as
+   WorldCoder does, and repaired incrementally against each new observation rather than rewritten.
+3. **Exploration:** cause the interactions not yet seen (EMPA), and act on an optimistic guess of the goal
+   (WorldCoder); surprise (a rule's prediction failing) triggers repair.
+4. **Planning:** search with the current rules as the simulator, toward the goal or the next informative contact.
+5. **The slow loop:** rules and perception that held across games go to the library, judged on held-out games
+   through Morphogen, with a measure that moves off zero (progress within a level as well as levels completed),
+   and games improved or regressed counted.
+6. **Arms:** Soar with the hand-built rules (`agent/` as merged in #4, and `claude/agent-routes`), a plain LLM
    player, and the atlas. The plan's three-way comparison, with the atlas as the third arm.
 
-The main risk is cost: a model in the loop for 48 cases of 500 steps. Model calls per step, falling as components
-take over, is the number that says whether it works.
+Risks, now with numbers to set against: an LLM per step costs per action (ReAct's way); WorldCoder's way front-loads
+about $15 of tokens per environment, too much for 48 held-out cases per verdict unless the library makes repairs
+small. The time bound needs learning in seconds, where the papers take minutes to a day. Model calls and tokens
+per game, falling as the library grows, are the numbers that say whether it works.
 
-## Read for it (from memory, to be read before citing)
+## Read for it
 
-EMPA (Tsividis et al. 2021, theory-based RL on video games); WorldCoder (Tang, Key and Ellis 2024, world models
-written as code); AutumnSynth (Das et al. 2023, causal programs for grid games); DreamCoder (Ellis et al. 2021,
-growing a library across tasks); truth-maintenance systems (Doyle 1979); mixtures of experts and Dyna for local
-models in RL.
+Read in full (2026-11-19): EMPA (arXiv 2107.12544); WorldCoder (arXiv 2402.12275); AutumnSynth (POPL 2023,
+doi 10.1145/3571249). Still from memory, to be read before citing: DreamCoder (Ellis et al. 2021, growing a library
+across tasks); truth-maintenance systems (Doyle 1979); mixtures of experts and Dyna for local models in RL.
