@@ -53,9 +53,32 @@ rotator's corner the door is about 22 steps by the only way out, against a budge
 survives a lost life (so that pressing twice in one life and walking to the door in the next works) is untested.
 The rest of the training games are unchanged (51 levels, seeds 0 to 19).
 
+## Claims carried between games (the library)
+
+At the end of a game the agent writes what each look (shape mask and colour) did when touched or clicked; at the
+start of the next it reads those counts as priors for kinds it has not tried itself (a look that ended a level is
+tried first, one that harmed is tried last). Measured leave one out: each training game, seeds 0 to 19, cold and
+then warm from the other eight games' libraries for the same seed (about 260 to 310 looks each).
+
+| game | cold | warm | episodes better | worse | mean step of first level (both scored) |
+|---|---|---|---|---|---|
+| VC33 | 23 | 28 | 7 | 3 | 32 cold, 39 warm |
+| BP35 | 3 | 1 | 1 | 3 | |
+| S5I5 | 5 | 3 | 0 | 2 | 95, 95 |
+| LS20 | 20 | 20 | 0 | 0 | 29, 29 |
+| the other five | 0 | 0 | 0 | 0 | |
+| total | 51 | 52 | 8 | 8 | |
+
+No effect to speak of: as many episodes got worse as better, and where both scored the first level came no sooner.
+Looks shared between games are mostly small plain pieces whose outcomes differ by game, so a prior keyed on look
+alone points the wrong way about as often as the right way. What would have to carry is the rule rather than the
+look (a thing that changes the scene beyond itself is worth touching again; a ticking bar is a budget), which the
+agent already brings to every game as code.
+
 ## Next
 
 - LS20 level 2: test whether the key survives a lost life; plan presses and refills as one sequence under the
   budget rather than one target at a time.
-- Claims carried between games: the library (the slow loop).
+- Transfer by rule, not by look: carry roles (refill, rotator, door) matched by what an object does in its first
+  contacts, not by its appearance.
 - An LLM proposing rules where the enumerated outcomes do not explain an observation (the WorldCoder tier).
