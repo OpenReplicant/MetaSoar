@@ -27,14 +27,19 @@ def episode(case: dict) -> dict:
         except (OSError, ValueError):
             pass
     proposer = None
-    if case.get("propose"):  # the model tier: {"cache": dir, "model": id}; needs the network
+    if case.get("propose"):  # the model tier: {"cache": dir}; answers come through the cache (propose.py)
         from atlas.propose import MODEL, Proposer
         proposer = Proposer(case["propose"].get("cache"), model=case["propose"].get("model", MODEL))
     agent = Atlas(names, u.takes_point, seed=int(case["seed"]), library=library,
                   lock_rule=case.get("lock_rule", True), proposer=proposer)
     total, steps, done, success, trace = 0.0, 0, False, False, []
     while not done:
-        name, params = agent.step(obs)
+        try:
+            name, params = agent.step(obs)
+        except Exception as e:
+            if type(e).__name__ != "Pending":
+                raise
+            return {"env": case["env"], "seed": case["seed"], "pending": e.key, "steps": steps}
         u.set_params(params or {})
         obs, reward, terminated, truncated, _ = env.step(names.index(name))
         steps += 1

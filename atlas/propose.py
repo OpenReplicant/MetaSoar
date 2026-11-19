@@ -9,23 +9,23 @@ that changed. It answers with `plan(w)`, a function the agent calls each step, w
 touch next (or None, and the agent goes on exploring). A plan that brings no level in `TRIAL` steps is refuted;
 the next call is told what it proposed and what happened.
 
-Every call is cached by the hash of its prompt, so an experiment can be replayed without calling again.
+Every call is cached by the hash of its prompt, so an experiment can be replayed without calling again. With no
+way to call a model from where the episode runs (the sandbox has no network), the cache is the mailbox: a prompt
+not yet answered is written to `<cache>/pending/<key>.txt` and the episode stops (`Pending`); whoever answers
+writes `<cache>/<key>.json` ({"model": ..., "text": ...}), and the episode, replayed from the start with the same
+seed, reaches the same prompt and reads the answer.
 """
 from __future__ import annotations
 
 import hashlib
 import json
-import os
 import re
-import time
-import urllib.request
 from pathlib import Path
 
 PATIENCE = 40  # steps on a level without completing it before asking
 TRIAL = 60  # steps a plan has to bring a level before it counts as refuted
 CALLS_PER_LEVEL = 4
-MODEL = os.environ.get("ATLAS_MODEL", "anthropic/claude-sonnet-5.5")
-URL = "https://openrouter.ai/api/v1/chat/completions"
+MODEL = "claude-haiku-5-5"  # the label recorded with each answer; whoever answers the mailbox sets it
 HEX = "0123456789abcdef"
 
 SAFE = {n: __builtins__[n] if isinstance(__builtins__, dict) else getattr(__builtins__, n) for n in (
@@ -94,34 +94,32 @@ class World:
         return hexrows(self._g, max(0, x0), max(0, y0), min(63, x1), min(63, y1))
 
 
+class Pending(Exception):
+    """A prompt with no answer yet in the cache (offline mode)."""
+
+    def __init__(self, key):
+        super().__init__(key)
+        self.key = key
+
+
 class Proposer:
     def __init__(self, cache_dir=None, ask=None, model=MODEL):
+        """`ask(prompt) -> (text, usage)` answers in process; without it, unanswered prompts go to the mailbox."""
         self.cache = Path(cache_dir) if cache_dir else None
-        self.ask = ask or self._ask
+        self.ask = ask
         self.model = model
         self.calls = []  # (level, hypothesis, cached, usage)
 
-    def _ask(self, prompt):
-        body = json.dumps({"model": self.model, "max_tokens": 2500, "temperature": 0,
-                           "messages": [{"role": "user", "content": prompt}]}).encode()
-        req = urllib.request.Request(URL, data=body, headers={"Content-Type": "application/json",
-                                                              "Authorization": "Bearer " + os.environ.get(
-                                                                  "OPENROUTER_API_KEY", "x")})
-        for attempt in range(3):
-            try:
-                d = json.load(urllib.request.urlopen(req, timeout=180))
-                return d["choices"][0]["message"]["content"], d.get("usage")
-            except Exception:
-                if attempt == 2:
-                    raise
-                time.sleep(5 * (attempt + 1))
-
     def propose(self, prompt, level):
-        key = hashlib.sha256((self.model + "\n" + prompt).encode()).hexdigest()[:20]
+        key = hashlib.sha256(prompt.encode()).hexdigest()[:20]
         path = self.cache / f"{key}.json" if self.cache else None
         if path and path.exists():
             d = json.loads(path.read_text())
             cached = True
+        elif self.ask is None:
+            (self.cache / "pending").mkdir(parents=True, exist_ok=True)
+            (self.cache / "pending" / f"{key}.txt").write_text(prompt)
+            raise Pending(key)
         else:
             text, usage = self.ask(prompt)
             d = {"model": self.model, "text": text, "usage": usage}
