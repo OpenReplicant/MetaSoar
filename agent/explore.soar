@@ -1,0 +1,513 @@
+# Exploring a game it does not know (answering the hook's first ARC-AGI-3 request, M-09). Active only when the
+# agent's perception reports a scene (agent/perception/main.py): `state`, a symbol for what is on screen leaving out
+# ticking counters; `did`, the last step as one symbol (the state it was taken in, the action, and its point); `act`,
+# the same without the state.
+#
+# Nothing here knows any particular game. It builds a map as it plays: a node per state seen, and on each node, per
+# action taken there:
+#   tried  - it has been taken there;
+#   dead   - it changed nothing (the state stayed the same); and for moves, where the mover was when a move did
+#            nothing or sent it back home, on this level (blocked: a wall or a trap there, whatever else the
+#            scene shows);
+#   fatal  - it ended the attempt;
+#   edge   - where it led.
+# and for points, whatever the state, on this level: which were clicked (tried-act) and which changed nothing
+# (dead-act), since a point that did nothing in one scene usually does nothing in another. Moves are not judged
+# across states: a move that hits a wall here may not elsewhere.
+#
+# It prefers a fresh action (not tried here; a point, not clicked on this level), and among those, one whose known
+# effect does not take what it moves back to a place already visited, takes what was dead or fatal here
+# only when nothing else is left (an attempt can end because its budget ran out, not because of the action), never
+# clicks a point that did nothing on this level, and where nothing is fresh, takes the known step toward the nearest state that still has something fresh.
+# Everything it keeps hangs off a node, so each test looks under one identifier, not across the whole map.
+
+# --- each step, one record operator first: what the last action did ---
+sp {propose*record
+   (state <s> ^superstate nil ^io.input-link.env <e>)
+   (<e> ^step <n> ^percept.did)
+  -(<s> ^recorded <n>)
+-->
+   (<s> ^operator <o> +)
+   (<o> ^name record ^step <n>)}
+
+sp {select*record*first
+   (state <s> ^operator <r> + ^operator <o> +)
+   (<r> ^name record)
+   (<o> ^name act)
+-->
+   (<s> ^operator <r> > <o>)}
+
+sp {apply*record*step
+   (state <s> ^operator <o>)
+   (<o> ^name record ^step <n>)
+-->
+   (<s> ^recorded <n>)}
+
+sp {apply*record*forget-step
+   (state <s> ^operator <o> ^recorded <old>)
+   (<o> ^name record ^step { <n> <> <old> })
+-->
+   (<s> ^recorded <old> -)}
+
+# --- the map: a node per state ---
+sp {apply*record*node*from
+   (state <s> ^operator.name record ^io.input-link.env.percept.from <f>)
+  -{(<s> ^node <n>)
+    (<n> ^state <f>)}
+-->
+   (<s> ^node <n2>)
+   (<n2> ^state <f>)}
+
+sp {apply*record*node*to
+   (state <s> ^operator.name record ^io.input-link.env.percept <p>)
+   (<p> ^state <t> ^from { <f> <> <t> })
+  -{(<s> ^node <n>)
+    (<n> ^state <t>)}
+-->
+   (<s> ^node <n2>)
+   (<n2> ^state <t>)}
+
+sp {apply*record*tried
+   (state <s> ^operator.name record ^io.input-link.env.percept <p> ^was <n>)
+   (<p> ^did <d>)
+-->
+   (<n> ^tried <d>)}
+
+sp {apply*record*dead
+   (state <s> ^operator.name record ^io.input-link.env.percept <p> ^was <n>)
+   (<p> ^did <d> ^from <f> ^state <f>)
+-->
+   (<n> ^dead <d>)}
+
+sp {apply*record*fatal
+   (state <s> ^operator.name record ^io.input-link.env.percept <p> ^was <n>)
+   (<p> ^did <d> ^lost yes)
+-->
+   (<n> ^fatal <d>)}
+
+sp {apply*record*edge
+   (state <s> ^operator.name record ^io.input-link.env.percept <p> ^was <fn> ^here { <tn> <> <fn> })
+   (<p> ^did <d> -^lost)
+  -(<fn> ^went <d>)
+-->
+   (<fn> ^went <d> ^edge <e>)
+   (<e> ^key <d> ^to <tn>)}
+
+# Where it is now, with nothing fresh left to do here.
+sp {apply*record*exhausted
+   (state <s> ^operator.name record ^here <h> ^operator <any> +)
+   (<any> ^name act ^key)
+  -{(<s> ^operator <a> +)
+    (<a> ^fresh yes)}
+-->
+   (<h> ^exhausted yes)}
+
+# --- what moves do, whatever the state: how each action moved the mover (the kind of object, colour and size, that
+# perception finds the plain actions move most often), and by how much;
+# and the places moved objects have been on this level, before and after, one symbol per kind and place ---
+sp {apply*record*knows
+   (state <s> ^operator.name record ^io.input-link.env.percept <p>)
+   (<p> ^last-action <a> -^last-x ^moved <m> ^mover <mv>)
+   (<mv> ^color <c> ^size <z>)
+   (<m> ^color <c> ^size <z> ^dx <dx> ^dy <dy>)
+  -{(<s> ^knows <k>)
+    (<k> ^action <a> ^color <c> ^size <z>)}
+-->
+   (<s> ^knows <k2>)
+   (<k2> ^action <a> ^color <c> ^size <z> ^dx <dx> ^dy <dy>)}
+
+sp {apply*record*visited
+   (state <s> ^operator.name record ^io.input-link.env.percept <p>)
+   (<p> ^moved <m> ^objects <ob>)
+   (<m> ^id <i> ^dx <dx> ^dy <dy>)
+   (<ob> ^id <i> ^color <c> ^size <z> ^cx <x> ^cy <y>)
+-->
+   (<s> ^visited (concat |c| <c> |s| <z> |x| <x> |y| <y>)
+                 (concat |c| <c> |s| <z> |x| (- <x> <dx>) |y| (- <y> <dy>)))}
+
+# A move that did nothing where the mover was: a wall there, whatever else the scene shows.
+sp {apply*record*blocked
+   (state <s> ^operator.name record ^io.input-link.env.percept <p>)
+   (<p> ^last-action <a> -^last-x ^was-at <w> ^from <st> ^state <st>)
+-->
+   (<s> ^blocked (concat <w> |-| <a>))}
+
+# A move that sent the mover home from where it was: as bad as a wall there, whatever else the scene shows.
+sp {apply*record*reset
+   (state <s> ^operator.name record ^io.input-link.env.percept <p>)
+   (<p> ^last-action <a> ^was-at <w> ^reset yes)
+-->
+   (<s> ^blocked (concat <w> |-| <a>))}
+
+sp {apply*record*new-level*blocked
+   (state <s> ^operator.name record ^io.input-link.env.reward > 0 ^blocked <b>)
+-->
+   (<s> ^blocked <b> -)}
+
+sp {apply*record*new-level*visited
+   (state <s> ^operator.name record ^io.input-link.env.reward > 0 ^visited <v>)
+-->
+   (<s> ^visited <v> -)}
+
+# --- points, whatever the state, on this level ---
+sp {apply*record*tried-act
+   (state <s> ^operator.name record ^io.input-link.env.percept <p>)
+   (<p> ^act <a> ^last-x)
+-->
+   (<s> ^tried-act <a>)}
+
+sp {apply*record*dead-act
+   (state <s> ^operator.name record ^io.input-link.env.percept <p>)
+   (<p> ^act <a> ^last-x ^from <st> ^state <st>)
+-->
+   (<s> ^dead-act <a>)}
+
+# A level completed: the scene is new, so what points did on the last one no longer holds.
+sp {apply*record*new-level*dead-act
+   (state <s> ^operator.name record ^io.input-link.env.reward > 0 ^dead-act <a>)
+-->
+   (<s> ^dead-act <a> -)}
+
+sp {apply*record*new-level*tried-act
+   (state <s> ^operator.name record ^io.input-link.env.reward > 0 ^tried-act <a>)
+-->
+   (<s> ^tried-act <a> -)}
+
+# The nodes of where it is now and of where the last step was taken: every test on the map starts from one of these.
+sp {explore*here
+   (state <s> ^superstate nil ^io.input-link.env.percept.state <st> ^node <h>)
+   (<h> ^state <st>)
+-->
+   (<s> ^here <h>)}
+
+sp {explore*was
+   (state <s> ^superstate nil ^io.input-link.env.percept.from <f> ^node <w>)
+   (<w> ^state <f>)
+-->
+   (<s> ^was <w>)}
+
+# --- clicking: on each object it sees, not only at random points ---
+sp {propose*act*click-object
+   (state <s> ^superstate nil ^io.input-link.env <e> ^io.output-link <ol>)
+   (<e> ^actions.action <a> ^percept.objects <ob>)
+   (<a> ^name <n> ^param x)
+   (<ob> ^cx <x> ^cy <y>)
+  -(<ol> ^act)
+-->
+   (<s> ^operator <op> + =)
+   (<op> ^name act ^action <n> ^x <x> ^y <y> ^object yes)}
+
+# --- each proposed action as the same symbol perception gives the step once it is taken (actions at random
+# points get none: they never repeat) ---
+sp {explore*key*plain
+   (state <s> ^operator <o> + ^io.input-link.env.percept.state <st>)
+   (<o> ^name act ^action <a> -^x)
+-->
+   (<o> ^key (concat <st> |-| <a>))}
+
+sp {explore*key*object
+   (state <s> ^operator <o> + ^io.input-link.env.percept.state <st>)
+   (<o> ^name act ^action <a> ^object yes ^x <x> ^y <y>)
+-->
+   (<o> ^key (concat <st> |-| <a> |-| <x> |-| <y>) ^act (concat <a> |-| <x> |-| <y>))}
+
+sp {explore*fresh
+   (state <s> ^operator <o> +)
+   (<o> ^name act ^key <k>)
+  -{(<s> ^here <h>)
+    (<h> ^tried <k>)}
+  -{(<o> ^act <a>)
+    (<s> ^tried-act <a>)}
+-->
+   (<o> ^fresh yes)}
+
+# A move whose known effect would take what it moves to a place already visited is not expected to show anything new.
+sp {explore*expect
+   (state <s> ^operator <o> + ^knows <k> ^io.input-link.env.percept <p>)
+   (<o> ^name act ^action <a> -^x)
+   (<p> ^mover <mv> ^objects <ob>)
+   (<mv> ^color <c> ^size <z>)
+   (<k> ^action <a> ^color <c> ^size <z> ^dx <dx> ^dy <dy>)
+   (<ob> ^color <c> ^size <z> ^cx <x> ^cy <y>)
+-->
+   (<o> ^expect (concat |c| <c> |s| <z> |x| (+ <x> <dx>) |y| (+ <y> <dy>)))}
+
+sp {explore*seen
+   (state <s> ^operator <o> + ^visited <v>)
+   (<o> ^name act ^expect <v>)
+-->
+   (<o> ^seen yes)}
+
+sp {explore*bump
+   (state <s> ^operator <o> + ^io.input-link.env.percept.at <w>)
+   (<o> ^name act ^action <a> -^x)
+-->
+   (<o> ^bump (concat <w> |-| <a>))}
+
+sp {explore*worst*blocked
+   (state <s> ^operator <o> + ^blocked <b>)
+   (<o> ^name act ^bump <b>)
+-->
+   (<s> ^operator <o> <)}
+
+# --- preferences on act ---
+sp {explore*worst*dead
+   (state <s> ^operator <o> + ^here <h>)
+   (<o> ^name act ^key <k>)
+   (<h> ^dead <k>)
+-->
+   (<s> ^operator <o> <)}
+
+sp {explore*worst*fatal
+   (state <s> ^operator <o> + ^here <h>)
+   (<o> ^name act ^key <k>)
+   (<h> ^fatal <k>)
+-->
+   (<s> ^operator <o> <)}
+
+sp {explore*reject*dead-act
+   (state <s> ^operator <o> + ^dead-act <a>)
+   (<o> ^name act ^act <a>)
+-->
+   (<s> ^operator <o> -)}
+
+sp {explore*best*fresh-new
+   (state <s> ^operator <o> +)
+   (<o> ^name act ^fresh yes -^seen yes)
+-->
+   (<s> ^operator <o> >)}
+
+sp {explore*best*fresh
+   (state <s> ^operator <o> +)
+   (<o> ^name act ^fresh yes ^seen yes)
+  -{(<s> ^operator <a> +)
+    (<a> ^name act ^fresh yes -^seen yes)}
+-->
+   (<s> ^operator <o> >)}
+
+# --- how far each node is from something fresh: reach-D on a node that leads, in D known steps or fewer, to a node
+# not exhausted (one never visited, or visited with something fresh left) ---
+sp {explore*reach-0
+   (state <s> ^superstate nil ^node <n>)
+   (<n> -^exhausted yes)
+-->
+   (<n> ^reach-0 yes)}
+
+sp {explore*reach-1*keep
+   (state <s> ^superstate nil ^node <n>)
+   (<n> ^reach-0 yes)
+-->
+   (<n> ^reach-1 yes)}
+
+sp {explore*reach-1*step
+   (state <s> ^superstate nil ^node <f>)
+   (<f> ^edge.to.reach-0 yes)
+-->
+   (<f> ^reach-1 yes)}
+
+sp {explore*reach-2*keep
+   (state <s> ^superstate nil ^node <n>)
+   (<n> ^reach-1 yes)
+-->
+   (<n> ^reach-2 yes)}
+
+sp {explore*reach-2*step
+   (state <s> ^superstate nil ^node <f>)
+   (<f> ^edge.to.reach-1 yes)
+-->
+   (<f> ^reach-2 yes)}
+
+sp {explore*reach-3*keep
+   (state <s> ^superstate nil ^node <n>)
+   (<n> ^reach-2 yes)
+-->
+   (<n> ^reach-3 yes)}
+
+sp {explore*reach-3*step
+   (state <s> ^superstate nil ^node <f>)
+   (<f> ^edge.to.reach-2 yes)
+-->
+   (<f> ^reach-3 yes)}
+
+sp {explore*reach-4*keep
+   (state <s> ^superstate nil ^node <n>)
+   (<n> ^reach-3 yes)
+-->
+   (<n> ^reach-4 yes)}
+
+sp {explore*reach-4*step
+   (state <s> ^superstate nil ^node <f>)
+   (<f> ^edge.to.reach-3 yes)
+-->
+   (<f> ^reach-4 yes)}
+
+sp {explore*reach-5*keep
+   (state <s> ^superstate nil ^node <n>)
+   (<n> ^reach-4 yes)
+-->
+   (<n> ^reach-5 yes)}
+
+sp {explore*reach-5*step
+   (state <s> ^superstate nil ^node <f>)
+   (<f> ^edge.to.reach-4 yes)
+-->
+   (<f> ^reach-5 yes)}
+
+sp {explore*reach-6*keep
+   (state <s> ^superstate nil ^node <n>)
+   (<n> ^reach-5 yes)
+-->
+   (<n> ^reach-6 yes)}
+
+sp {explore*reach-6*step
+   (state <s> ^superstate nil ^node <f>)
+   (<f> ^edge.to.reach-5 yes)
+-->
+   (<f> ^reach-6 yes)}
+
+sp {explore*reach-7*keep
+   (state <s> ^superstate nil ^node <n>)
+   (<n> ^reach-6 yes)
+-->
+   (<n> ^reach-7 yes)}
+
+sp {explore*reach-7*step
+   (state <s> ^superstate nil ^node <f>)
+   (<f> ^edge.to.reach-6 yes)
+-->
+   (<f> ^reach-7 yes)}
+
+sp {explore*reach-8*keep
+   (state <s> ^superstate nil ^node <n>)
+   (<n> ^reach-7 yes)
+-->
+   (<n> ^reach-8 yes)}
+
+sp {explore*reach-8*step
+   (state <s> ^superstate nil ^node <f>)
+   (<f> ^edge.to.reach-7 yes)
+-->
+   (<f> ^reach-8 yes)}
+
+# Nothing fresh here: take the known step toward the nearest node that has something fresh.
+sp {explore*best*toward-fresh-0
+   (state <s> ^operator <o> + ^here <h>)
+   (<o> ^name act ^key <k>)
+   (<h> ^edge <e>)
+   (<e> ^key <k> ^to.reach-0 yes)
+  -{(<s> ^operator <a> +)
+    (<a> ^fresh yes)}
+-->
+   (<s> ^operator <o> >)}
+
+sp {explore*best*toward-fresh-1
+   (state <s> ^operator <o> + ^here <h>)
+   (<o> ^name act ^key <k>)
+   (<h> ^edge <e>)
+   (<e> ^key <k> ^to.reach-1 yes)
+  -{(<s> ^operator <a> +)
+    (<a> ^fresh yes)}
+  -{(<h> ^edge <e2>)
+    (<e2> ^key <k2> ^to.reach-0 yes)
+    (<s> ^operator <b> +)
+    (<b> ^name act ^key <k2>)}
+-->
+   (<s> ^operator <o> >)}
+
+sp {explore*best*toward-fresh-2
+   (state <s> ^operator <o> + ^here <h>)
+   (<o> ^name act ^key <k>)
+   (<h> ^edge <e>)
+   (<e> ^key <k> ^to.reach-2 yes)
+  -{(<s> ^operator <a> +)
+    (<a> ^fresh yes)}
+  -{(<h> ^edge <e2>)
+    (<e2> ^key <k2> ^to.reach-1 yes)
+    (<s> ^operator <b> +)
+    (<b> ^name act ^key <k2>)}
+-->
+   (<s> ^operator <o> >)}
+
+sp {explore*best*toward-fresh-3
+   (state <s> ^operator <o> + ^here <h>)
+   (<o> ^name act ^key <k>)
+   (<h> ^edge <e>)
+   (<e> ^key <k> ^to.reach-3 yes)
+  -{(<s> ^operator <a> +)
+    (<a> ^fresh yes)}
+  -{(<h> ^edge <e2>)
+    (<e2> ^key <k2> ^to.reach-2 yes)
+    (<s> ^operator <b> +)
+    (<b> ^name act ^key <k2>)}
+-->
+   (<s> ^operator <o> >)}
+
+sp {explore*best*toward-fresh-4
+   (state <s> ^operator <o> + ^here <h>)
+   (<o> ^name act ^key <k>)
+   (<h> ^edge <e>)
+   (<e> ^key <k> ^to.reach-4 yes)
+  -{(<s> ^operator <a> +)
+    (<a> ^fresh yes)}
+  -{(<h> ^edge <e2>)
+    (<e2> ^key <k2> ^to.reach-3 yes)
+    (<s> ^operator <b> +)
+    (<b> ^name act ^key <k2>)}
+-->
+   (<s> ^operator <o> >)}
+
+sp {explore*best*toward-fresh-5
+   (state <s> ^operator <o> + ^here <h>)
+   (<o> ^name act ^key <k>)
+   (<h> ^edge <e>)
+   (<e> ^key <k> ^to.reach-5 yes)
+  -{(<s> ^operator <a> +)
+    (<a> ^fresh yes)}
+  -{(<h> ^edge <e2>)
+    (<e2> ^key <k2> ^to.reach-4 yes)
+    (<s> ^operator <b> +)
+    (<b> ^name act ^key <k2>)}
+-->
+   (<s> ^operator <o> >)}
+
+sp {explore*best*toward-fresh-6
+   (state <s> ^operator <o> + ^here <h>)
+   (<o> ^name act ^key <k>)
+   (<h> ^edge <e>)
+   (<e> ^key <k> ^to.reach-6 yes)
+  -{(<s> ^operator <a> +)
+    (<a> ^fresh yes)}
+  -{(<h> ^edge <e2>)
+    (<e2> ^key <k2> ^to.reach-5 yes)
+    (<s> ^operator <b> +)
+    (<b> ^name act ^key <k2>)}
+-->
+   (<s> ^operator <o> >)}
+
+sp {explore*best*toward-fresh-7
+   (state <s> ^operator <o> + ^here <h>)
+   (<o> ^name act ^key <k>)
+   (<h> ^edge <e>)
+   (<e> ^key <k> ^to.reach-7 yes)
+  -{(<s> ^operator <a> +)
+    (<a> ^fresh yes)}
+  -{(<h> ^edge <e2>)
+    (<e2> ^key <k2> ^to.reach-6 yes)
+    (<s> ^operator <b> +)
+    (<b> ^name act ^key <k2>)}
+-->
+   (<s> ^operator <o> >)}
+
+sp {explore*best*toward-fresh-8
+   (state <s> ^operator <o> + ^here <h>)
+   (<o> ^name act ^key <k>)
+   (<h> ^edge <e>)
+   (<e> ^key <k> ^to.reach-8 yes)
+  -{(<s> ^operator <a> +)
+    (<a> ^fresh yes)}
+  -{(<h> ^edge <e2>)
+    (<e2> ^key <k2> ^to.reach-7 yes)
+    (<s> ^operator <b> +)
+    (<b> ^name act ^key <k2>)}
+-->
+   (<s> ^operator <o> >)}

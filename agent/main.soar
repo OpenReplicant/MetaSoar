@@ -3,7 +3,8 @@
 # one is written to the output link; once the adapter marks it complete, it is cleared.
 
 sp {propose*act
-   (state <s> ^superstate nil ^io.input-link.env.actions.action.name <n> ^io.output-link <ol>)
+   (state <s> ^superstate nil ^io.input-link.env.actions.action <a> ^io.output-link <ol>)
+   (<a> ^name <n> -^param x)
   -(<ol> ^act)
 -->
    (<s> ^operator <o> + =)
@@ -11,7 +12,7 @@ sp {propose*act
 
 sp {apply*act
    (state <s> ^operator <o> ^io.output-link <ol>)
-   (<o> ^name act ^action <n>)
+   (<o> ^name act ^action <n> -^x)
 -->
    (<ol> ^act <c>)
    (<c> ^action <n>)}
@@ -29,3 +30,22 @@ sp {apply*clear-act
    (<ol> ^act <c> -)}
 
 source navigate.soar
+
+# An action that takes a point (^param x, ^param y): with nothing better to go on, a point at random, chosen when
+# the operator is proposed and written with the command in one rule (the proposal is withdrawn as soon as a command
+# exists, so nothing can be added to it after).
+sp {propose*act*point
+   (state <s> ^superstate nil ^io.input-link.env.actions.action <a> ^io.output-link <ol>)
+   (<a> ^name <n> ^param x)
+  -(<ol> ^act)
+-->
+   (<s> ^operator <o> + =)
+   (<o> ^name act ^action <n> ^x (rand-int 63) ^y (rand-int 63))}
+
+sp {apply*act*point
+   (state <s> ^operator <o> ^io.output-link <ol>)
+   (<o> ^name act ^action <n> ^x <x> ^y <y>)
+-->
+   (<ol> ^act <c>)
+   (<c> ^action <n> ^x <x> ^y <y>)}
+source explore.soar
