@@ -1,3 +1,6 @@
 .state/
 __pycache__/
 *.pyc
+
+# ROMs are the owner's, never committed (mounted at run time)
+*.nes

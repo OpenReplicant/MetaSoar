@@ -1,0 +1,38 @@
+# An ARC-AGI-3 game, run offline from the sandbox image's game files (metasoar/envs/arc3.py).
+[environment]
+name = "arc3"
+doc = "One ARC-AGI-3 game: a 64x64 grid of colours a step, actions by name, one taking a point."
+
+[params]
+game = "LS20"
+seed = 0
+max_steps = 500
+
+[[module]]
+name = "game"
+driver = "gym"
+make = "metasoar.envs:make"
+id = "arc3:{game}"
+seed = "{seed}"
+kwargs = { max_steps = "{max_steps}" }
+rate = 10.0
+
+[module.readings]
+frame = { key = "frame", type = "grid16", doc = "the grid the game shows" }
+levels_completed = { key = "levels_completed", type = "scalar" }
+state = { key = "state", type = "text" }
+attempt = { key = "attempt", type = "scalar", doc = "how many times the game has been started over" }
+
+[expose]
+frame = "game.frame"
+levels_completed = "game.levels_completed"
+state = "game.state"
+attempt = "game.attempt"
+reward = "game.reward"
+actions = "game.actions"
+event = "game.event"
+tick = "game.tick"
+cmd = "game.cmd"
+
+[profiles]
+judged = ["frame", "levels_completed", "state", "attempt", "reward", "actions", "event", "tick"]
