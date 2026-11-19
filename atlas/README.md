@@ -126,6 +126,19 @@ lock on, the training games are unchanged by it (70 levels).
 So far: the small model did not find the rule; the stronger one did, in three calls, from a prompt that holds only
 what the agent saw. The bottleneck then moved from forming the hypothesis to executing it.
 
+Then Sonnet on the five training games where nothing has scored (SK48, RE86, DC22, SB26, TR87), seed 0, four
+calls each (plans may now also click a kind or name an action; the model is consulted whether or not there is a
+player): **0 levels on all five.** The hypotheses became specific over the calls: SK48, reorder the squares on the
+right to match the reference at the bottom; SB26, place four tiles into slots in the order the top row shows, by
+click to select and click to place; TR87, scroll a strip under a cursor until a tile matches the active panel;
+RE86, switches that recolour a wire network; DC22, buttons that open walls on the way to a goal. Whether any is
+right cannot be checked here (the games' source is not read). What the plans could express limited them too: a
+plan names one thing a step, and these games want sequences (select then place; scroll n times then confirm),
+which a plan can only build through `w.memory`, and none did so for long.
+
+So on unseen kinds of game, four calls of a capable model did not find a level. The one success (LS20 level 2) was
+on a level whose objects the agent had already learned to use on level 1.
+
 ## Next
 
 - LS20 level 3 and beyond; plan presses and refills as one sequence under the budget rather than one target at a
