@@ -110,6 +110,22 @@ with the same prompt (which separates the model from the representation), and wh
 objects (equal shapes up to scale, as core knowledge of objects rather than a rule for this game) would let a
 small one.
 
+Then Claude Sonnet 5.5 on the same setup, seed 0, as an upper bound (it separates the model from the
+representation). Its first call: the door's pattern must match "the target", and the switch probably changes it.
+Second: the switch changes the pattern in the bottom-left box, and the door is shut until it matches. Third: **the
+3x3 pattern in the bottom-left box, drawn at 2 cells a dot, must equal the door's 3x3 pattern; the switch edits it
+and it resets when a life is lost; press until they match, then touch the door**, with a `plan(w)` that reads both
+patterns from the frame and compares them: the hand-written dial and lock, found from the evidence. The level still
+did not fall, and the trace says why: the plan was right and the agent ran out of budget carrying it out (the
+pattern matched with 2 steps left and the door 20 away), because it refills only for the target in front of it.
+
+One generic change to the executor, **top up while it is cheap** (a refill within 3 steps once less than half the
+budget is left), and the same plans solve level 2 on seed 0 with the dial and lock turned off. With the dial and
+lock on, the training games are unchanged by it (70 levels).
+
+So far: the small model did not find the rule; the stronger one did, in three calls, from a prompt that holds only
+what the agent saw. The bottleneck then moved from forming the hypothesis to executing it.
+
 ## Next
 
 - LS20 level 3 and beyond; plan presses and refills as one sequence under the budget rather than one target at a

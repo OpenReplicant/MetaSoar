@@ -598,6 +598,12 @@ class Atlas:
         if r is None:
             return None
         fills = [o for o in objs if self.refill[kind(o)]]
+        left = None if self.budget is None else self.budget - self.since
+        if left is not None and fills and left < self.budget // 2 and kind(r[2]) not in self.refill:
+            f = self.route(g, objs, box, mk, fills)  # top up while it is cheap: a refill within a few steps
+            if f is not None and f[1] <= 3 and f[1] < left and f[0] not in fatal:
+                self.why = f"top up, {left} left"
+                return f[0], None, f[0]
         if self.budget is not None and fills and r[1] + 2 > self.budget - self.since:
             a = self.via(g, objs, box, mk, fills, r[2], self.budget - self.since)
             if a is not None and a not in fatal:
