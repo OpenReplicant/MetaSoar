@@ -13,7 +13,9 @@ rules read):
   those that what moved explains (its boxes, before and after); the region it belonged to (its bounding box, at its
   size before the tick) is left out of every signature from then on.
 - `mover`: the colour and size of what the plain actions (those without a point) move most often so far: what the
-  player most likely controls
+  player most likely controls; `at`: where it is, one symbol of colour, size and centre (the first such object);
+  `was-at`: the same for the last frame; `reset`: the last plain action sent the mover back to where it was when the
+  attempt began, by a jump that is not that action's usual step (progress thrown away)
 - `from`: the last step's `state`; `did`: the last step as one symbol, `from`-action, or `from`-action-x-y for a
   point, the same symbol the rules build for an action they propose; `act`, the same without the state; `lost`: the
   last action ended the attempt (the attempt count went up)
@@ -134,6 +136,8 @@ def signature(g, masked):
 def main():
     prev_grid, prev_objs, masked, prev_state, attempt = None, [], None, None, None
     moves = {}  # (colour, size) -> plain-action steps it moved on
+    steps = {}  # (action, colour, size) -> {(dx, dy): count}
+    first = None  # the objects of the attempt's first frame
     for line in sys.stdin:
         msg = json.loads(line)
         g = grid_of(msg.get("observation"))
@@ -182,11 +186,29 @@ def main():
             if "last-x" not in res:
                 for kind in {(m["color"], m["size"]) for m in res.get("moved", [])}:
                     moves[kind] = moves.get(kind, 0) + 1
+                for m in res.get("moved", []):
+                    d = steps.setdefault((last["action"], m["color"], m["size"]), {})
+                    d[(m["dx"], m["dy"])] = d.get((m["dx"], m["dy"]), 0) + 1
             if attempt is not None and obs.get("attempt", attempt) > attempt:
                 res["lost"] = "yes"
         if moves:
             (c, z), _ = max(moves.items(), key=lambda kv: (kv[1], kv[0][1]))
             res["mover"] = {"color": c, "size": z}
+            where = {}
+            for when, os_ in (("at", objs), ("was-at", prev_objs), ("home", first or [])):
+                o = next((o for o in os_ if o["color"] == c and o["size"] == z), None)
+                if o is not None:
+                    where[when] = o
+                    if when != "home":
+                        res[when] = f"c{c}s{z}x{o['cx']}y{o['cy']}"
+            m = next((m for m in res.get("moved", []) if (m["color"], m["size"]) == (c, z)), None)
+            if m and "last-x" not in res and "lost" not in res and {"at", "home"} <= set(where):
+                usual = steps.get((last.get("action"), c, z), {})
+                if (where["at"]["cx"], where["at"]["cy"]) == (where["home"]["cx"], where["home"]["cy"]) and usual \
+                        and (m["dx"], m["dy"]) != max(usual, key=usual.get):
+                    res["reset"] = "yes"
+        if first is None or "lost" in res or obs.get("attempt", attempt) != attempt:
+            first = objs
         attempt = obs.get("attempt", attempt)
         prev_grid, prev_objs, prev_state = g, objs, state
         print(json.dumps(res), flush=True)

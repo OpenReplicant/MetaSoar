@@ -6,7 +6,9 @@
 # Nothing here knows any particular game. It builds a map as it plays: a node per state seen, and on each node, per
 # action taken there:
 #   tried  - it has been taken there;
-#   dead   - it changed nothing (the state stayed the same);
+#   dead   - it changed nothing (the state stayed the same); and for moves, where the mover was when a move did
+#            nothing or sent it back home, on this level (blocked: a wall or a trap there, whatever else the
+#            scene shows);
 #   fatal  - it ended the attempt;
 #   edge   - where it led.
 # and for points, whatever the state, on this level: which were clicked (tried-act) and which changed nothing
@@ -123,6 +125,25 @@ sp {apply*record*visited
    (<s> ^visited (concat |c| <c> |s| <z> |x| <x> |y| <y>)
                  (concat |c| <c> |s| <z> |x| (- <x> <dx>) |y| (- <y> <dy>)))}
 
+# A move that did nothing where the mover was: a wall there, whatever else the scene shows.
+sp {apply*record*blocked
+   (state <s> ^operator.name record ^io.input-link.env.percept <p>)
+   (<p> ^last-action <a> -^last-x ^was-at <w> ^from <st> ^state <st>)
+-->
+   (<s> ^blocked (concat <w> |-| <a>))}
+
+# A move that sent the mover home from where it was: as bad as a wall there, whatever else the scene shows.
+sp {apply*record*reset
+   (state <s> ^operator.name record ^io.input-link.env.percept <p>)
+   (<p> ^last-action <a> ^was-at <w> ^reset yes)
+-->
+   (<s> ^blocked (concat <w> |-| <a>))}
+
+sp {apply*record*new-level*blocked
+   (state <s> ^operator.name record ^io.input-link.env.reward > 0 ^blocked <b>)
+-->
+   (<s> ^blocked <b> -)}
+
 sp {apply*record*new-level*visited
    (state <s> ^operator.name record ^io.input-link.env.reward > 0 ^visited <v>)
 -->
@@ -216,6 +237,18 @@ sp {explore*seen
    (<o> ^name act ^expect <v>)
 -->
    (<o> ^seen yes)}
+
+sp {explore*bump
+   (state <s> ^operator <o> + ^io.input-link.env.percept.at <w>)
+   (<o> ^name act ^action <a> -^x)
+-->
+   (<o> ^bump (concat <w> |-| <a>))}
+
+sp {explore*worst*blocked
+   (state <s> ^operator <o> + ^blocked <b>)
+   (<o> ^name act ^bump <b>)
+-->
+   (<s> ^operator <o> <)}
 
 # --- preferences on act ---
 sp {explore*worst*dead
