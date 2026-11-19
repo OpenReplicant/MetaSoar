@@ -36,7 +36,7 @@ Later:
   source of held-out games. A cloud session gets GitHub access to this repository only.
 - **Learn ARC games by playing them.** Only the 9 training games may be played: SK48, S5I5, TR87, BP35,
   RE86, DC22, LS20, VC33 and SB26 (`deploy/sandbox/fetch_arc3.py`). Never read their source.
-- **Pinned versions:** Soar 9.6.5 from the release zip (its sha256 is in `deploy/sandbox/fetch.py`),
+- **Pinned versions:** Soar 9.6.5 from the release zip (its sha256 is in `deploy/sandbox/Containerfile`),
   gymnasium 1.4.0, minigrid 3.2.0, arc-agi 0.9.9 and arcengine 0.9.3. The sandbox image is
   `ghcr.io/openreplicant/metasoar-sandbox@sha256:846875ecea32834ee9d44635128d382502086362341cf91c559a1b195ab1033d`.
   Without a container engine, install these exact versions directly.
