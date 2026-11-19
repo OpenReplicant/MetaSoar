@@ -48,3 +48,4 @@ sp {apply*act*point
 -->
    (<ol> ^act <c>)
    (<c> ^action <n> ^x <x> ^y <y>)}
+source explore.soar
