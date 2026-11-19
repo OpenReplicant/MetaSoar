@@ -8,6 +8,7 @@ Input link, rebuilt each step under ^env:
                 an array as ^cell elements, each with its index (^i, ^j, ...) and its values (^value0, ^value1, ...: not ^v0, which Soar would read as an identifier);
                 an array of more than MAX_CELLS cells only as ^omitted yes and its ^size-i, ^size-j (perception digests it);
                 text of more than one word also as ^ATTR-words, one ^word (^text, lower-cased; ^index) per word
+  (a list, anywhere, becomes one attribute per element: ^objects <o1> ^objects <o2> ...)
   ^percept      what the agent's own perception made of the observation, if it has any (agent/perception/main.py)
   ^actions      one ^action per action of a Discrete action space, with ^name (the environment's own name for it,
                 where it gives one, else the number) and ^id, and ^param x ^param y for an action that takes a point
@@ -49,6 +50,9 @@ class Adapter:
             node = self.agent.CreateIdWME(parent, attr)
             for k, v in value.items():
                 self._put(node, str(k), v)
+        elif isinstance(value, (list, tuple)):
+            for item in value:
+                self._put(parent, attr, item)
         elif isinstance(value, np.ndarray) and value.ndim >= 1 and value.size > MAX_CELLS:
             node = self.agent.CreateIdWME(parent, attr)
             self.agent.CreateStringWME(node, "omitted", "yes")
