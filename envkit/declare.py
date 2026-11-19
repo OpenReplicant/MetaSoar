@@ -3,8 +3,8 @@
     [environment]  name, doc
     [params]       defaults, each overridable when the environment is loaded; "{name}" in any string below is
                    replaced by its value (a whole-string "{name}" keeps the value's type)
-    [[module]]     name, driver (a key of modules.DRIVERS) or env (another declaration, nested), and the
-                   driver's own arguments
+    [[module]]     name, driver (a key of modules.DRIVERS) or env (another declaration, nested), the driver's
+                   own arguments, and `wire` (input port -> "module.port": what it reads inside the environment)
     [expose]       exposed name -> "module.port"
     [profiles]     profile -> the exposed readings fair under it
 
@@ -60,8 +60,13 @@ def load(name: str, **overrides) -> Environment:
             child = load(spec.pop("env"), **spec.pop("params", {}))
             modules += nest(mname, child)
             continue
-        driver = DRIVERS[spec.pop("driver")]
-        modules.append(driver(mname, **spec))
+        wire = spec.pop("wire", {})
+        m = DRIVERS[spec.pop("driver")](mname, **spec)
+        for port, src in wire.items():
+            if port not in m.inputs:
+                raise KeyError(f"{mname} has no input {port!r}")
+            m.wired_in[port] = src
+        modules.append(m)
     env = Environment(d["environment"]["name"], modules, expose=d.get("expose", {}),
                       profiles=d.get("profiles", {}), doc=d["environment"].get("doc", ""))
     env.params = params

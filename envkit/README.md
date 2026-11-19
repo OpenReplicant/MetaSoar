@@ -39,12 +39,46 @@ offers only the screen. The agent reconfigures itself within what the profile of
 The scheduler is separate from the modules, so the same modules run both ways:
 
 - **Lockstep** (training, judging, fast runs): each tick, every world emits its readings; messages are delivered
-  until nothing more is emitted (every agent has answered); then the clock advances and each world steps with the
+  depth first until nothing more is emitted (what a module emits while handling a message goes before the next
+  queued message, so an encoder's output reaches the agent before the world's tick; every agent has answered); then the clock advances and each world steps with the
   latest command it has (or its declared no-op). Deterministic for a seed, and as fast as the computer allows.
 - **Realtime** (watching, streaming, people in the loop): each world steps at its declared rate on the wall clock
   with whatever command is latest; agents run concurrently and may be late. A slow path (a model call) cannot hold
   the game up; something fast has to keep playing meanwhile. That is the fast and slow design made necessary
   rather than chosen.
+
+## Drivers and taps so far
+
+| name | what | file |
+|---|---|---|
+| `gym` | any Gymnasium environment (the ARC-AGI-3 games through `metasoar.envs`) | `modules.py` |
+| `nes` | a NES cartridge through nes-py: buttons, the title-screen sequence, memory readings by address, lives and levels as fair counts | `nes.py` |
+| `quantize` | an encoder: an RGB screen to a grid of up to 16 colour indices, block by block | `nes.py` |
+| `chat` | a scripted audience | `modules.py` |
+| `Film`, `Live` | taps: the screen with the agent's reasons beside it, as a GIF (`--film`) or served live on 127.0.0.1 (`--live PORT`, an MJPEG page a browser or OBS can show) | `watch.py` |
+
+Declarations: `environments/arc3.toml`, `environments/mario.toml` (Super Mario Bros.), `environments/stream.toml`
+(a game plus a chat). ROMs are the owner's: a declaration reads the path from `NES_ROM`, `*.nes` is ignored by git,
+and no image contains one.
+
+    NES_ROM=~/roms/smb.nes python3 -m envkit.run mario --realtime --live 8765     # then open http://127.0.0.1:8765
+    NES_ROM=~/roms/smb.nes python3 -m envkit.run mario --param max_steps=3000 --film run.gif
+
+nes-py needs `pip install nes-py` (it builds a small C++ extension; wheels exist for Python 3.13 on Linux). Hacks
+of a cartridge on mappers 0 to 3 run if their memory map matches the declaration; one that moves the player's
+position or lives elsewhere needs its own declaration.
+
+### First runs on Mario (1-1, frameskip 4, seed 0)
+
+| agent | steps | progress (pixels) | lives lost | end |
+|---|---|---|---|---|
+| atlas (claims from ARC, no Mario knowledge) | 3000 | 1620 | 1 (the timer, stuck at the third pipe) | step limit |
+| fixed: hold right, jump 8 steps in 16 | 553 | 2093 | 3 | game over |
+
+The atlas moves right and jumps the first pipes but stalls where a pipe is taller than one jump from a walk,
+until the clock runs out. A fixed rule gets further, faster. The atlas's ideas (objects, contact, claims) were made
+for still grids where nothing moves unless the agent does; a platformer has gravity, momentum, enemies that move
+on their own and a camera that scrolls, so its first job is to tell its own motion from the world's.
 
 ## Why actors
 

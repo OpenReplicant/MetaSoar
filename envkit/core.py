@@ -158,14 +158,17 @@ class _Runtime:
 
 
 class Lockstep(_Runtime):
-    """Deterministic: each tick the worlds step, then messages are delivered until nothing more is emitted."""
+    """Deterministic: each tick the worlds step, then messages are delivered until nothing more is emitted.
+    Delivery is depth first: what a module emits while handling a message is delivered before the next message in
+    the queue, so an encoder's output reaches an agent before the world's `tick` that follows the reading."""
 
     def __init__(self, modules):
         super().__init__(modules)
         self.queue = collections.deque()
+        self.fresh = None  # messages emitted while one is being delivered
 
     def publish(self, source, channel, data):
-        self.queue.append(self._msg(source, channel, data))
+        (self.queue if self.fresh is None else self.fresh).append(self._msg(source, channel, data))
 
     def run(self, max_ticks: int | None = None):
         for m in self.modules:
@@ -177,8 +180,11 @@ class Lockstep(_Runtime):
                         w.tick(self.t)
                 while self.queue:
                     msg = self.queue.popleft()
+                    self.fresh = []
                     for m, p in self.subs.get(msg.channel, ()):
                         m.on(p, msg)
+                    self.queue.extendleft(reversed(self.fresh))
+                    self.fresh = None
                 self.t += 1
         finally:
             for m in self.modules:

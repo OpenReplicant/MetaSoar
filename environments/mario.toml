@@ -1,0 +1,70 @@
+# Super Mario Bros. from the owner's own cartridge image. The ROM is never stored here or in any image: the
+# machine names it in NES_ROM (envkit/nes.py). Addresses are the game's well-known memory map.
+[environment]
+name = "mario"
+doc = "A side-scrolling platformer on the NES: run right, jump over gaps and enemies, reach the flag."
+
+[params]
+rom = "$NES_ROM"
+seed = 0
+max_steps = 3000
+frameskip = 4
+
+[[module]]
+name = "game"
+driver = "nes"
+rom = "{rom}"
+seed = "{seed}"
+max_steps = "{max_steps}"
+frameskip = "{frameskip}"
+start = [["", 40], ["start", 10], ["", 160]]
+progress = "x"
+life = "lives"
+level = "stage"
+ends = [{ reading = "lives", equals = 255 }, { reading = "world", changes = true }]
+rate = 15.0
+
+[module.buttons]
+noop = []
+right = ["right"]
+jump_right = ["right", "A"]
+run_right = ["right", "B"]
+leap_right = ["right", "A", "B"]
+jump = ["A"]
+left = ["left"]
+
+[module.readings]
+screen = { type = "rgb", doc = "the picture, 256 by 240" }
+x = { ram = [0x6D, 0x86], type = "scalar", fair = false, doc = "the player's distance into the level" }
+lives = { ram = 0x75A, type = "scalar", fair = false }
+world = { ram = 0x75F, type = "scalar", fair = false }
+stage = { ram = 0x75C, type = "scalar", fair = false }
+pstate = { ram = 0x0E, type = "scalar", fair = false, doc = "the player's state: 8 normal, 11 dying, 4 at the flag" }
+
+[[module]]
+name = "encode"
+driver = "quantize"
+block = 4
+crop = [32, 0]       # the score, coins, world and timer along the top; lives and world are offered as counts
+wire = { rgb = "game.screen" }
+
+[expose]
+frame = "encode.grid"
+screen = "game.screen"
+attempt = "game.attempt"
+levels_completed = "game.levels_completed"
+x = "game.x"
+lives = "game.lives"
+world = "game.world"
+stage = "game.stage"
+pstate = "game.pstate"
+reward = "game.reward"
+actions = "game.actions"
+event = "game.event"
+tick = "game.tick"
+cmd = "game.cmd"
+
+[profiles]
+judged = ["frame", "screen", "attempt", "levels_completed", "reward", "actions", "event", "tick"]
+train = ["frame", "screen", "attempt", "levels_completed", "x", "lives", "world", "stage", "pstate", "reward",
+         "actions", "event", "tick"]

@@ -104,7 +104,7 @@ class PolicyAgent(Module):
         self.inputs = {"actions": Port("event", keep="all"), trigger: Port("event"), **{k: Port("json") for k in observe}}
         self.outputs = {"cmd": Port("command"), "why": Port("text")}
         super().__init__(name)
-        self.build, self.trigger, self.policy, self.latest = build, trigger, None, {}
+        self.build, self.trigger, self.policy, self.latest, self.observe = build, trigger, None, {}, list(observe)
 
     def on(self, port: str, msg: Msg):
         if port == "actions":
@@ -112,7 +112,8 @@ class PolicyAgent(Module):
             return
         if port != self.trigger:
             self.latest[port] = msg.data
-        elif self.policy is not None:
+        elif self.policy is not None and all(k in self.latest for k in self.observe if k in self.wired_in):
+            # under the realtime scheduler a tick can come before an encoder's first output: wait for it
             name, params = self.policy.step(dict(self.latest))
             self.emit("cmd", {"action": name, "params": params})
             if getattr(self.policy, "why", None):
@@ -154,4 +155,6 @@ class ScriptedChat(World):
         self.done = self.k >= len(self.lines) and t > self.every * len(self.lines)
 
 
-DRIVERS = {"gym": GymWorld, "chat": ScriptedChat}
+from envkit.nes import NESWorld, Quantize  # noqa: E402  (nes-py itself is imported only when a NES world starts)
+
+DRIVERS = {"gym": GymWorld, "chat": ScriptedChat, "nes": NESWorld, "quantize": Quantize}
