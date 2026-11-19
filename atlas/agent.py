@@ -101,8 +101,14 @@ def fits(a, b):
 
 
 class Atlas:
-    def __init__(self, names, takes_point, seed=0, library=None):
+    def __init__(self, names, takes_point, seed=0, library=None, lock_rule=True, proposer=None):
         self.names = names
+        self.lock_rule = lock_rule  # the hand-written dial and lock (off to test whether the model tier finds it)
+        # the model tier (propose.py): notable events of this level, steps on it, the plan on trial and its record
+        self.proposer = proposer
+        self.events, self.level_steps = [], 0
+        self.plan, self.plan_since, self.plan_named, self.plan_hyp = None, 0, collections.Counter(), ""
+        self.refuted, self.level_calls, self.plan_memory = [], 0, {}
         self.point = {n for i, n in enumerate(names) if takes_point(i)}
         self.plain = [n for n in names if n not in self.point]
         self.rng = random.Random(seed)
@@ -312,6 +318,8 @@ class Atlas:
                     self.dial = grow(g, b)
                 if sent_home:  # a life lost: what the presses changed is put back
                     self.presses = 0
+                if contacts and outcome in ("event", "take", "harm", "level", "block") or sent_home:
+                    self.note(name, outcome if contacts else "sent home", [kind(o) for o in contacts], pg, g, rest)
         hit = None
         if params is not None:
             x, y = params["x"], params["y"]
@@ -321,6 +329,8 @@ class Atlas:
             if hit is not None:
                 self.clicked[kind(hit)][outcome] += 1
                 self.tested.add((self.epoch, key(hit)))
+            if outcome != "none":
+                self.note(f"{name} at {x},{y}", outcome, [kind(hit)] if hit else [], pg, g, rest)
 
         # the map of scenes
         f = pv["state"]
@@ -336,6 +346,9 @@ class Atlas:
         if level or lost:
             self.since = 0
             self.presses = 0
+        self.level_steps += 1
+        if level:
+            self.events, self.level_steps, self.plan, self.refuted, self.level_calls = [], 0, None, [], 0
         if level:
             self.blocked_at = set()
             self.dial = self.lock = None
@@ -352,6 +365,51 @@ class Atlas:
         if params is not None and not (event or moved or level or lost):
             self.dead_pts.add((obs.get("levels_completed", 0), params["x"], params["y"]))
         return state, lost or level
+
+    def note(self, action, outcome, kinds, pg, g, rest):
+        """A notable event, for the model tier: what was done, what came of it, and the cells it changed."""
+        ys, xs = np.nonzero(rest & ~self.masked)
+        e = {"step": self.level_steps, "action": action, "outcome": outcome, "kinds": kinds, "changed": []}
+        if len(ys):
+            b = (int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max()))
+            e["changed"] = [b]
+            if (b[2] - b[0]) < 12 and (b[3] - b[1]) < 12:
+                from atlas.propose import hexrows
+                e["before"], e["after"] = hexrows(pg, *b), hexrows(g, *b)
+        self.events.append(e)
+        del self.events[:-60]
+
+    def consult(self, g, objs, me):
+        """Ask for a plan when a level has gone on too long; drop a plan whose trial has passed without a level."""
+        from atlas import propose as M
+        if self.plan is not None and self.level_steps - self.plan_since >= M.TRIAL:
+            named = ", ".join(f"{k} x{n}" for k, n in self.plan_named.most_common(4)) or "nothing"
+            self.refuted.append({"hypothesis": self.plan_hyp, "named": named, "note": f"{M.TRIAL} steps, no level"})
+            self.plan = None
+        if self.plan is None and self.level_steps >= M.PATIENCE and self.level_calls < M.CALLS_PER_LEVEL:
+            self.level_calls += 1
+            prompt = M.prompt_for(self, g, objs, me, self.refuted)
+            self.plan_hyp, self.plan = self.proposer.propose(prompt, self.prev["levels"] if self.prev else 0)
+            self.plan_since, self.plan_named, self.plan_memory = self.level_steps, collections.Counter(), {}
+            if self.plan is None:
+                self.refuted.append({"hypothesis": self.plan_hyp or "(no plan given)", "named": "nothing",
+                                     "note": "the program did not compile"})
+
+    def planned(self, g, objs, mk, me):
+        """The kinds the plan on trial asks to touch now, most preferred first (empty: explore as usual)."""
+        from atlas.propose import World
+        try:
+            out = self.plan(World(self, g, objs, mk, me))
+        except Exception:
+            return []
+        if out is None:
+            return []
+        if isinstance(out, tuple) and len(out) == 2 and all(isinstance(v, int) for v in out):
+            out = [out]
+        try:
+            return [tuple(k) for k in out][:6]
+        except Exception:
+            return []
 
     # --- choosing ---
     def actions(self, objs):
@@ -560,9 +618,18 @@ class Atlas:
             if me is not None:
                 if self.home is None:
                     self.home = (me["cx"], me["cy"])
+                if self.proposer is not None:
+                    self.consult(g, objs, me)
+                    if self.plan is not None:
+                        for k in self.planned(g, objs, mk, me):
+                            r = self.go(g, objs, box, mk, [o for o in objs if kind(o) == k and kind(o) != mk], fatal)
+                            if r is not None:
+                                self.plan_named[k] += 1
+                                self.why = f"plan: {k} " + self.why
+                                return r
                 presses = [o for o in self.testable(objs, g) if self.contact[kind(o)]["event"]
                            and not self.harmful(self.contact[kind(o)])]
-                if presses and self.lock and self.dial:  # turn the key until it fits the lock, then go to the lock
+                if presses and self.lock and self.dial and self.lock_rule:  # turn the key until it fits the lock, then go to the lock
                     dial = shapes(g, self.dial)
                     lk = {k for b, k in self.lock if fits(shapes(g, b), dial)}
                     if lk:

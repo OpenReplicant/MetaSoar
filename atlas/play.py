@@ -26,7 +26,12 @@ def episode(case: dict) -> dict:
                         library[look][what][o] = library[look][what].get(o, 0) + n
         except (OSError, ValueError):
             pass
-    agent = Atlas(names, u.takes_point, seed=int(case["seed"]), library=library)
+    proposer = None
+    if case.get("propose"):  # the model tier: {"cache": dir, "model": id}; needs the network
+        from atlas.propose import MODEL, Proposer
+        proposer = Proposer(case["propose"].get("cache"), model=case["propose"].get("model", MODEL))
+    agent = Atlas(names, u.takes_point, seed=int(case["seed"]), library=library,
+                  lock_rule=case.get("lock_rule", True), proposer=proposer)
     total, steps, done, success, trace = 0.0, 0, False, False, []
     while not done:
         name, params = agent.step(obs)
@@ -43,6 +48,8 @@ def episode(case: dict) -> dict:
            "stuck_steps": 0, "invalid_steps": 0, "percept_failures": 0, "seconds": round(time.perf_counter() - t0, 3)}
     out["first_level"] = next((i + 1 for i, t in enumerate(trace) if t[3]), None)
     out["library_size"] = len(library)
+    if proposer is not None:
+        out["proposals"] = proposer.calls
     if case.get("trace"):
         out["trace"] = trace
     return out
