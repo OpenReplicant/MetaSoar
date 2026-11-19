@@ -1,0 +1,132 @@
+# Exploring a game it does not know (answering the hook's first ARC-AGI-3 request, M-09). Active only when the
+# agent's perception reports objects (agent/perception/main.py). Nothing here knows any particular game: it learns
+# what each action does, then prefers what it has not tried, places it has not been, objects it has not clicked, and
+# avoids what did nothing.
+
+# --- each step, one record operator first: what the last action did, kept in working memory ---
+sp {propose*record
+   (state <s> ^superstate nil ^io.input-link.env <e>)
+   (<e> ^step <n> ^percept.last-action <a>)
+  -(<s> ^recorded <n>)
+-->
+   (<s> ^operator <o> +)
+   (<o> ^name record ^step <n>)}
+
+sp {select*record*first
+   (state <s> ^operator <r> + ^operator <o> +)
+   (<r> ^name record)
+   (<o> ^name act)
+-->
+   (<s> ^operator <r> > <o>)}
+
+sp {apply*record*step
+   (state <s> ^operator <o>)
+   (<o> ^name record ^step <n>)
+-->
+   (<s> ^recorded <n>)}
+
+sp {apply*record*forget-step
+   (state <s> ^operator <o> ^recorded <old>)
+   (<o> ^name record ^step { <n> <> <old> })
+-->
+   (<s> ^recorded <old> -)}
+
+sp {apply*record*tried
+   (state <s> ^operator.name record ^io.input-link.env.percept.last-action <a>)
+  -(<s> ^tried <a>)
+-->
+   (<s> ^tried <a>)}
+
+sp {apply*record*move
+   (state <s> ^operator.name record ^io.input-link.env.percept <p>)
+   (<p> ^last-action <a> ^moved <m>)
+   (<m> ^color <c> ^size <z> ^dx <dx> ^dy <dy>)
+  -{(<s> ^knows <k>) (<k> ^action <a> ^color <c> ^size <z>)}
+-->
+   (<s> ^knows <k2>)
+   (<k2> ^action <a> ^color <c> ^size <z> ^dx <dx> ^dy <dy>)}
+
+sp {apply*record*visited
+   (state <s> ^operator.name record ^io.input-link.env.percept.objects <ob> ^knows <k>)
+   (<k> ^color <c> ^size <z>)
+   (<ob> ^color <c> ^size <z> ^cx <x> ^cy <y>)
+  -{(<s> ^visited <v>) (<v> ^color <c> ^size <z> ^x <x> ^y <y>)}
+-->
+   (<s> ^visited <v2>)
+   (<v2> ^color <c> ^size <z> ^x <x> ^y <y>)}
+
+sp {apply*record*clicked
+   (state <s> ^operator.name record ^io.input-link.env.percept <p>)
+   (<p> ^last-x <x> ^last-y <y> ^effect <ef>)
+  -{(<s> ^clicked <c>) (<c> ^x <x> ^y <y>)}
+-->
+   (<s> ^clicked <c2>)
+   (<c2> ^x <x> ^y <y> ^effect <ef>)}
+
+# A level completed: the scene is new, so where it has been and what it clicked no longer hold.
+sp {apply*record*new-level*visited
+   (state <s> ^operator.name record ^io.input-link.env.reward > 0 ^visited <v>)
+-->
+   (<s> ^visited <v> -)}
+
+sp {apply*record*new-level*clicked
+   (state <s> ^operator.name record ^io.input-link.env.reward > 0 ^clicked <c>)
+-->
+   (<s> ^clicked <c> -)}
+
+# --- clicking: on each object it sees, not only at random points ---
+sp {propose*act*click-object
+   (state <s> ^superstate nil ^io.input-link.env <e> ^io.output-link <ol>)
+   (<e> ^actions.action <a> ^percept.objects <ob>)
+   (<a> ^name <n> ^param x)
+   (<ob> ^cx <x> ^cy <y>)
+  -(<ol> ^act)
+-->
+   (<s> ^operator <op> + =)
+   (<op> ^name act ^action <n> ^x <x> ^y <y> ^object yes)}
+
+# --- where each known move would take what it moves ---
+sp {explore*next
+   (state <s> ^knows <k> ^io.input-link.env.percept.objects <ob>)
+   (<k> ^action <a> ^color <c> ^size <z> ^dx <dx> ^dy <dy>)
+   (<ob> ^color <c> ^size <z> ^cx <x> ^cy <y>)
+-->
+   (<s> ^next <n>)
+   (<n> ^action <a> ^color <c> ^size <z> ^x (+ <x> <dx>) ^y (+ <y> <dy>))}
+
+# --- preferences on act ---
+sp {explore*best*untried
+   (state <s> ^operator <o> + ^io.input-link.env.percept.objects)
+   (<o> ^name act ^action <a> -^x)
+  -(<s> ^tried <a>)
+-->
+   (<s> ^operator <o> >)}
+
+sp {explore*best*unvisited
+   (state <s> ^operator <o> + ^next <n>)
+   (<o> ^name act ^action <a> -^x)
+   (<n> ^action <a> ^color <c> ^size <z> ^x <x> ^y <y>)
+  -{(<s> ^visited <v>) (<v> ^color <c> ^size <z> ^x <x> ^y <y>)}
+-->
+   (<s> ^operator <o> >)}
+
+sp {explore*best*unclicked
+   (state <s> ^operator <o> + ^io.input-link.env.percept.objects)
+   (<o> ^name act ^object yes ^x <x> ^y <y>)
+  -{(<s> ^clicked <c>) (<c> ^x <x> ^y <y>)}
+-->
+   (<s> ^operator <o> >)}
+
+sp {explore*reject*no-effect
+   (state <s> ^operator <o> + ^io.input-link.env.percept <p>)
+   (<p> ^last-action <a> ^effect none -^last-x)
+   (<o> ^name act ^action <a> -^x)
+-->
+   (<s> ^operator <o> -)}
+
+sp {explore*reject*dead-click
+   (state <s> ^operator <o> + ^clicked <c>)
+   (<o> ^name act ^x <x> ^y <y>)
+   (<c> ^x <x> ^y <y> ^effect none)
+-->
+   (<s> ^operator <o> -)}
