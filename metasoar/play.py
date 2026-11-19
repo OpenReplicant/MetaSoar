@@ -9,7 +9,8 @@ the judge's case; written to /tmp, loaded, and deleted before the agent starts),
 the actions taken). The agent is `agent/main.soar` in the checkout (`/work` in the judge's sandbox), loaded into Soar
 9.6.5 unchanged, with its perception, `agent/perception/main.py`, if it has one (M-09).
 
-Perception runs in a process of its own: each step it gets one line of JSON ({"env", "step", "observation"}) on stdin
+Perception runs in a process of its own: each step it gets one line of JSON ({"env", "step", "observation", "last": the
+action just taken and its parameters, or null at the start}) on stdin
 and answers one line of JSON, which goes onto the input link as ^percept. It cannot reach this process's output, so
 it cannot change the result this prints; if it fails or takes longer than PERCEPT_SECONDS, the step goes on without
 a percept (counted as percept_failures).
@@ -59,11 +60,12 @@ class Perception:
             self.proc = subprocess.Popen([sys.executable, "-I", str(main)], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                          stderr=subprocess.DEVNULL, cwd=str(main.parent), text=True, bufsize=1)
 
-    def __call__(self, step: int, obs) -> dict | None:
+    def __call__(self, step: int, obs, last: dict | None = None) -> dict | None:
         if self.proc is None:
             return None
         try:
-            self.proc.stdin.write(json.dumps({"env": self.env_id, "step": step, "observation": jsonable(obs)}) + "\n")
+            self.proc.stdin.write(json.dumps({"env": self.env_id, "step": step, "observation": jsonable(obs),
+                                              "last": last}) + "\n")
             self.proc.stdin.flush()
             ready, _, _ = select.select([self.proc.stdout], [], [], PERCEPT_SECONDS)
             if not ready:
@@ -140,7 +142,8 @@ def episode(case: dict) -> dict:
             won = isinstance(obs, dict) and obs.get("state") == "WIN"
             success = bool(won or (terminated and reward > 0 and "state" not in (obs if isinstance(obs, dict) else {})))
             invalid += 1 if info.get("invalid") else 0
-        ad.show(obs, steps, reward if action is not None else 0.0, done, perceive(steps, obs))
+        last = {"action": ad.names[action] if action is not None else None, "params": ad.params}
+        ad.show(obs, steps, reward if action is not None else 0.0, done, perceive(steps, obs, last))
     perceive.close()
     kernel.Shutdown()
     return {"env": case["env"], "seed": case["seed"], "success": success, "return": round(total, 6), "steps": steps,
