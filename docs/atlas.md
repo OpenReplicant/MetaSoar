@@ -203,6 +203,44 @@ about $15 of tokens per environment, too much for 48 held-out cases per verdict 
 small. The time bound needs learning in seconds, where the papers take minutes to a day. Model calls and tokens
 per game, falling as the library grows, are the numbers that say whether it works.
 
+## Notes (2026-11-19, the owner and Claude)
+
+**Pretrained models as instinct, and first principles, in one catalog.** A perception option is a component like
+any other, with a scope, a cost and a record:
+- on ARC-AGI-3's clean 64×64 grids, exact one-colour regions (MetaSoar's perception) are correct and take
+  microseconds; a pretrained backbone (DINOv2, SAM) adds little there;
+- what a pretrained model adds even on ARC is **prior knowledge**: a vision-language model looking at a frame can
+  guess "a player, a key display, a door, pickups", a hypothesis for play to test, once a level rather than once a
+  step (WorldCoder's use of GPT-4, as perception rather than code);
+- in robotics, 3D and VR, pretrained models are the instinct (segmentation, depth, pose, grasping); learning is
+  what is built around them. A large model can hand narrow work to a smaller one; the router decides by record.
+
+**Similarity as online learning.** Two places it fits:
+- the provisional tier: act on what happened in the most similar past situations, learning from a handful of
+  episodes (episodic control: Blundell et al. 2016, Pritzel et al. 2017; from memory, to be read before citing);
+- transfer: objects and situations embedded by appearance, so a claim about a look in one game is proposed for a
+  similar look in another; clusters of situations instead of exact scene hashes, whose exactness made click games'
+  scenes look new when they were not.
+- The caveat: looking alike is not acting alike, so a retrieved claim enters as a hypothesis (provenance: carried
+  over) and is confirmed or refuted by play.
+
+**The store as a module, and maybe a product: governed belief, not memory.** Agent memory on Postgres with
+provenance and time travel is no longer open ground (Zep and Graphiti, Mem0, Letta, Cognee, LangMem; Postgres-native
+and recent: pgmnemo, attestari, gnokee; one search, 2026-11-19, not a survey). What that search did not show is
+Substrate's combination:
+1. claims with an interpreter, a confidence and a review status, not facts with times;
+2. belief revision in the database: a changed source flags what cites it and what was derived from that, with no
+   model call (truth maintenance);
+3. a registry of components with scopes and records from held-out judging, routing by that evidence, a verdict
+   itself a statement whose reference is the judge;
+4. independence enforced by Postgres logins (an author cannot read held-out cases; a judge cannot activate);
+5. actors' mailboxes (pgmq) beside the store, under one set of transactions and permissions.
+
+A narrow interface (statements with evidence; claims with status; retraction and its spread; recall by similarity,
+structure and logic; components with scopes and verdicts) is worth having for Substrate's own sake. Its first
+outside user would be the atlas's library across games. Before calling it a product: a real market survey (the
+research skill), and the cost of shipping a Postgres extension (packaging, upgrades, support).
+
 ## Read for it
 
 Read in full (2026-11-19): EMPA (arXiv 2107.12544); WorldCoder (arXiv 2402.12275); AutumnSynth (POPL 2023,
