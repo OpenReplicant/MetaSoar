@@ -58,9 +58,42 @@ sp {apply*record*node*from
    (<s> ^node <n2>)
    (<n2> ^state <f>)}
 
-sp {apply*record*node*to
+# A state seen for the first time. When the step came from a known node, the edge is made with the node, since
+# the ^here pointer to it only comes later.
+sp {apply*record*node*to*edge
+   (state <s> ^operator.name record ^io.input-link.env.percept <p> ^was <fn>)
+   (<p> ^state <t> ^from { <f> <> <t> } ^did <d> -^lost)
+  -(<fn> ^went <d>)
+  -{(<s> ^node <n>)
+    (<n> ^state <t>)}
+-->
+   (<s> ^node <n2>)
+   (<n2> ^state <t>)
+   (<fn> ^went <d> ^edge <e>)
+   (<e> ^key <d> ^to <n2>)}
+
+sp {apply*record*node*to*lost
    (state <s> ^operator.name record ^io.input-link.env.percept <p>)
-   (<p> ^state <t> ^from { <f> <> <t> })
+   (<p> ^state <t> ^from { <f> <> <t> } ^lost)
+  -{(<s> ^node <n>)
+    (<n> ^state <t>)}
+-->
+   (<s> ^node <n2>)
+   (<n2> ^state <t>)}
+
+sp {apply*record*node*to*went
+   (state <s> ^operator.name record ^io.input-link.env.percept <p> ^was <fn>)
+   (<p> ^state <t> ^from { <f> <> <t> } ^did <d> -^lost)
+   (<fn> ^went <d>)
+  -{(<s> ^node <n>)
+    (<n> ^state <t>)}
+-->
+   (<s> ^node <n2>)
+   (<n2> ^state <t>)}
+
+sp {apply*record*node*to*nowhere
+   (state <s> ^operator.name record ^io.input-link.env.percept <p> -^was)
+   (<p> ^state <t> ^from { <f> <> <t> } -^lost)
   -{(<s> ^node <n>)
     (<n> ^state <t>)}
 -->
@@ -93,12 +126,12 @@ sp {apply*record*edge
    (<fn> ^went <d> ^edge <e>)
    (<e> ^key <d> ^to <tn>)}
 
-# Where it is now, with nothing fresh left to do here.
+# Where it is now, with nothing fresh left to do here but moves into a known wall.
 sp {apply*record*exhausted
    (state <s> ^operator.name record ^here <h> ^operator <any> +)
    (<any> ^name act ^key)
   -{(<s> ^operator <a> +)
-    (<a> ^fresh yes)}
+    (<a> ^fresh yes -^blocked yes)}
 -->
    (<h> ^exhausted yes)}
 
@@ -340,6 +373,24 @@ sp {explore*best*fresh
 -->
    (<s> ^operator <o> >)}
 
+# Nothing fresh here: a known move toward the goal, unless it did nothing or was fatal here. Perception's goal
+# comes with a way there, so following it beats wandering to the nearest node with something fresh.
+sp {explore*go
+   (state <s> ^operator <o> + ^here <h>)
+   (<o> ^name act ^toward yes -^blocked yes ^key <k>)
+  -(<h> ^dead <k>)
+  -(<h> ^fatal <k>)
+-->
+   (<o> ^go yes)}
+
+sp {explore*best*go
+   (state <s> ^operator <o> +)
+   (<o> ^name act ^go yes)
+  -{(<s> ^operator <a> +)
+    (<a> ^fresh yes)}
+-->
+   (<s> ^operator <o> >)}
+
 # --- how far each node is from something fresh: reach-D on a node that leads, in D known steps or fewer, to a node
 # not exhausted (one never visited, or visited with something fresh left) ---
 sp {explore*reach-0
@@ -452,6 +503,8 @@ sp {explore*best*toward-fresh-0
    (<e> ^key <k> ^to.reach-0 yes)
   -{(<s> ^operator <a> +)
     (<a> ^fresh yes)}
+  -{(<s> ^operator <g> +)
+    (<g> ^go yes)}
 -->
    (<s> ^operator <o> >)}
 
@@ -462,6 +515,8 @@ sp {explore*best*toward-fresh-1
    (<e> ^key <k> ^to.reach-1 yes)
   -{(<s> ^operator <a> +)
     (<a> ^fresh yes)}
+  -{(<s> ^operator <g> +)
+    (<g> ^go yes)}
   -{(<h> ^edge <e2>)
     (<e2> ^key <k2> ^to.reach-0 yes)
     (<s> ^operator <b> +)
@@ -476,6 +531,8 @@ sp {explore*best*toward-fresh-2
    (<e> ^key <k> ^to.reach-2 yes)
   -{(<s> ^operator <a> +)
     (<a> ^fresh yes)}
+  -{(<s> ^operator <g> +)
+    (<g> ^go yes)}
   -{(<h> ^edge <e2>)
     (<e2> ^key <k2> ^to.reach-1 yes)
     (<s> ^operator <b> +)
@@ -490,6 +547,8 @@ sp {explore*best*toward-fresh-3
    (<e> ^key <k> ^to.reach-3 yes)
   -{(<s> ^operator <a> +)
     (<a> ^fresh yes)}
+  -{(<s> ^operator <g> +)
+    (<g> ^go yes)}
   -{(<h> ^edge <e2>)
     (<e2> ^key <k2> ^to.reach-2 yes)
     (<s> ^operator <b> +)
@@ -504,6 +563,8 @@ sp {explore*best*toward-fresh-4
    (<e> ^key <k> ^to.reach-4 yes)
   -{(<s> ^operator <a> +)
     (<a> ^fresh yes)}
+  -{(<s> ^operator <g> +)
+    (<g> ^go yes)}
   -{(<h> ^edge <e2>)
     (<e2> ^key <k2> ^to.reach-3 yes)
     (<s> ^operator <b> +)
@@ -518,6 +579,8 @@ sp {explore*best*toward-fresh-5
    (<e> ^key <k> ^to.reach-5 yes)
   -{(<s> ^operator <a> +)
     (<a> ^fresh yes)}
+  -{(<s> ^operator <g> +)
+    (<g> ^go yes)}
   -{(<h> ^edge <e2>)
     (<e2> ^key <k2> ^to.reach-4 yes)
     (<s> ^operator <b> +)
@@ -532,6 +595,8 @@ sp {explore*best*toward-fresh-6
    (<e> ^key <k> ^to.reach-6 yes)
   -{(<s> ^operator <a> +)
     (<a> ^fresh yes)}
+  -{(<s> ^operator <g> +)
+    (<g> ^go yes)}
   -{(<h> ^edge <e2>)
     (<e2> ^key <k2> ^to.reach-5 yes)
     (<s> ^operator <b> +)
@@ -546,6 +611,8 @@ sp {explore*best*toward-fresh-7
    (<e> ^key <k> ^to.reach-7 yes)
   -{(<s> ^operator <a> +)
     (<a> ^fresh yes)}
+  -{(<s> ^operator <g> +)
+    (<g> ^go yes)}
   -{(<h> ^edge <e2>)
     (<e2> ^key <k2> ^to.reach-6 yes)
     (<s> ^operator <b> +)
@@ -560,6 +627,8 @@ sp {explore*best*toward-fresh-8
    (<e> ^key <k> ^to.reach-8 yes)
   -{(<s> ^operator <a> +)
     (<a> ^fresh yes)}
+  -{(<s> ^operator <g> +)
+    (<g> ^go yes)}
   -{(<h> ^edge <e2>)
     (<e2> ^key <k2> ^to.reach-7 yes)
     (<s> ^operator <b> +)

@@ -152,6 +152,37 @@ def signature(g, masked):
     return "h" + hashlib.blake2b(cells.tobytes(), digest_size=6).hexdigest()
 
 
+def route(g, free, start, vecs, wanted, stuck=(), limit=400):
+    """Breadth-first over the places the mover's body can stand, stepping by the moves it knows. free: cells it may
+    stand on; start: the body's box (x0, y0, x1, y1); wanted(x0, y0) -> the goal it touches there, or None. Returns
+    {goal: (steps, first move)} for the goals it can reach."""
+    H, W = g.shape
+    ii = np.zeros((H + 1, W + 1), dtype=np.int64)
+    ii[1:, 1:] = (~free).cumsum(0).cumsum(1)
+    bw, bh = start[2] - start[0] + 1, start[3] - start[1] + 1
+
+    def ok(x, y):
+        return 0 <= x and 0 <= y and x + bw <= W and y + bh <= H and \
+            ii[y + bh, x + bw] - ii[y, x + bw] - ii[y + bh, x] + ii[y, x] == 0
+
+    first = {(start[0], start[1]): None}
+    frontier, d, found = [(start[0], start[1])], 0, {}
+    while frontier and len(first) < limit:
+        d += 1
+        nxt = []
+        for x, y in frontier:
+            for v in vecs:
+                n = (x + v[0], y + v[1])
+                if n not in first and (x, y, v) not in stuck and ok(*n):
+                    first[n] = first[(x, y)] or v
+                    nxt.append(n)
+                    t = wanted(*n)
+                    if t is not None and t not in found:
+                        found[t] = (d, first[n])
+        frontier = nxt
+    return found
+
+
 def main():
     prev_grid, prev_objs, masked, prev_state, attempt = None, [], None, None, None
     moves = {}  # (colour, size) -> plain-action steps it moved on
@@ -160,6 +191,8 @@ def main():
     touched, given_up, along = set(), set(), set()  # objects by (colour, size, cx, cy); kinds that move with the mover
     goal, best, stale = None, None, 0
     prev_obs, recent, last_touch = None, set(), set()
+    floor = set()  # colours the mover's body has stood on
+    stuck, body = set(), None  # (x, y, move): where the body's move went nowhere, since the scene last changed
     for line in sys.stdin:
         msg = json.loads(line)
         g = grid_of(msg.get("observation"))
@@ -241,9 +274,15 @@ def main():
                              if (o["dx"], o["dy"]) == (m["dx"], m["dy"]) and (o["color"], o["size"]) != (c, z))
             new_level = obs.get("levels_completed") != (prev_obs or {}).get("levels_completed")
             if "lost" in res or new_level:
-                touched.clear(); given_up.clear(); goal = None
+                touched.clear(); given_up.clear(); stuck.clear(); goal = None
             elif event or "reset" in res:
                 touched = set(recent)  # what it was touching made the change: that stays touched
+                stuck.clear()
+            usual = steps.get((last.get("action"), c, z), {})
+            v = max(usual, key=usual.get) if usual else None
+            if body and v and v != (0, 0) and not m and not new_level and "last-x" not in res \
+                    and not ({"lost", "reset"} & set(res)):
+                stuck.add((body[0], body[1], v))
             if "at" in where:
                 me = where["at"]
                 x0, y0, x1, y1 = me["x"] - 2, me["y"] - 2, me["x"] + me["w"] + 1, me["y"] + me["h"] + 1
@@ -254,12 +293,48 @@ def main():
                 recent = now | last_touch
                 last_touch = now
                 H, W = g.shape
-                cands = [o for o in objs if o["size"] <= GOAL_MAX and (o["color"], o["size"]) != (c, z)
-                         and o["x"] > 0 and o["y"] > 0 and o["x"] + o["w"] < W and o["y"] + o["h"] < H
-                         and (o["color"], o["size"]) not in along and key(o) not in touched and key(o) not in given_up]
+                able = [o for o in objs if o["size"] <= GOAL_MAX and (o["color"], o["size"]) != (c, z)
+                        and o["x"] > 0 and o["y"] > 0 and o["x"] + o["w"] < W and o["y"] + o["h"] < H
+                        and (o["color"], o["size"]) not in along and key(o) not in given_up]
+                cands = [o for o in able if key(o) not in touched]
+                if not cands and touched - now:  # everything touched and nothing won: touching again may differ
+                    touched = set(now)
+                    cands = [o for o in able if key(o) not in touched]
+                # the body: the mover and what moves along with it, next to it
+                bx0, by0, bx1, by1 = me["x"], me["y"], me["x"] + me["w"] - 1, me["y"] + me["h"] - 1
+                for o in objs:
+                    if (o["color"], o["size"]) in along and o["x"] <= bx1 + 1 and o["x"] + o["w"] >= bx0 \
+                            and o["y"] <= by1 + 1 and o["y"] + o["h"] >= by0:
+                        bx0, by0 = min(bx0, o["x"]), min(by0, o["y"])
+                        bx1, by1 = max(bx1, o["x"] + o["w"] - 1), max(by1, o["y"] + o["h"] - 1)
+                body = (bx0, by0)
+                if m and v and (m["dx"], m["dy"]) == v and "reset" not in res \
+                        and "lost" not in res and not new_level and prev_grid is not None and prev_grid.shape == g.shape:
+                    floor.update(np.unique(prev_grid[by0:by1 + 1, bx0:bx1 + 1]).tolist())
+                plan = {}
+                vecs = {max(d, key=d.get) for (a, cc, zz), d in steps.items() if (cc, zz) == (c, z) and d}
+                vecs.discard((0, 0))
+                if cands and floor and vecs:
+                    free = np.isin(g, list(floor))
+                    free[by0:by1 + 1, bx0:bx1 + 1] = True
+                    for o in objs:
+                        if o["size"] <= GOAL_MAX:
+                            free[o["y"]:o["y"] + o["h"], o["x"]:o["x"] + o["w"]] = True
+                    ox, oy = me["x"] - bx0, me["y"] - by0
+
+                    def wanted(x, y):
+                        mx0, my0 = x + ox - 2, y + oy - 2
+                        mx1, my1 = x + ox + me["w"] + 1, y + oy + me["h"] + 1
+                        return next((key(o) for o in cands if mx0 <= o["cx"] <= mx1 and my0 <= o["cy"] <= my1), None)
+                    plan = route(g, free, (bx0, by0, bx1, by1), sorted(vecs), wanted, stuck)
                 if cands:
-                    t = min(cands, key=lambda o: abs(o["cx"] - me["cx"]) + abs(o["cy"] - me["cy"]))
-                    dist = abs(t["cx"] - me["cx"]) + abs(t["cy"] - me["cy"])
+                    # a goal it can find a way to, over colours its body has stood on, the nearest by that way;
+                    # else the nearest as the crow flies. It keeps the goal while it lasts, so two goals at a like
+                    # distance don't take turns.
+                    pool = [o for o in cands if key(o) in plan] or cands
+                    far = lambda o: plan[key(o)][0] if key(o) in plan else abs(o["cx"] - me["cx"]) + abs(o["cy"] - me["cy"])
+                    t = next((o for o in pool if key(o) == goal), None) or min(pool, key=far)
+                    dist = far(t)
                     if key(t) != goal:
                         goal, best, stale = key(t), dist, 0
                     elif dist < best:
@@ -268,8 +343,12 @@ def main():
                         stale += 1
                         if stale > GOAL_PATIENCE:
                             given_up.add(goal)
-                    res["goal-dx"] = (t["cx"] > me["cx"]) - (t["cx"] < me["cx"])
-                    res["goal-dy"] = (t["cy"] > me["cy"]) - (t["cy"] < me["cy"])
+                    if key(t) in plan:
+                        vx, vy = plan[key(t)][1]
+                        res["goal-dx"], res["goal-dy"] = (vx > 0) - (vx < 0), (vy > 0) - (vy < 0)
+                    else:
+                        res["goal-dx"] = (t["cx"] > me["cx"]) - (t["cx"] < me["cx"])
+                        res["goal-dy"] = (t["cy"] > me["cy"]) - (t["cy"] < me["cy"])
         if first is None or "lost" in res or obs.get("attempt", attempt) != attempt:
             first = objs
         attempt = obs.get("attempt", attempt)
