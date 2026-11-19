@@ -6,10 +6,12 @@ Input link, rebuilt each step under ^env:
   ^step N  ^reward R (the last step's)  ^done yes|no
   ^observation  the observation, by its space: a Dict as one attribute per key; Text and Discrete as a value;
                 an array as ^cell elements, each with its index (^i, ^j, ...) and its values (^value0, ^value1, ...: not ^v0, which Soar would read as an identifier);
+                an array of more than MAX_CELLS cells only as ^omitted yes and its ^size-i, ^size-j (perception digests it);
                 text of more than one word also as ^ATTR-words, one ^word (^text, lower-cased; ^index) per word
+  ^percept      what the agent's own perception made of the observation, if it has any (agent/perception/main.py)
   ^actions      one ^action per action of a Discrete action space, with ^name (the environment's own name for it,
-                where it gives one, else the number) and ^id
-Output link: the agent writes (^act.action NAME); the adapter takes it, steps the environment, and marks the
+                where it gives one, else the number) and ^id, and ^param x ^param y for an action that takes a point
+Output link: the agent writes (^act.action NAME), with its parameters beside it (^x, ^y); the adapter takes it, steps the environment, and marks the
 command ^status complete. An agent that writes nothing within `patience` decision cycles is stuck: the step is
 recorded as stuck and, by the hook's rule (M-03), is what goes to Substrate.
 """
@@ -19,7 +21,13 @@ import numpy as np
 import Python_sml_ClientInterface as sml
 
 
+MAX_CELLS = 1024  # an array with more cells than this is not put on the input link raw (M-09): perception digests it
+
+
 def action_names(env) -> list[str]:
+    own = getattr(env.unwrapped, "action_names", None)
+    if callable(own):
+        return list(own())
     n = env.action_space.n
     enum = getattr(env.unwrapped, "actions", None)
     try:
@@ -34,12 +42,18 @@ class Adapter:
         self.names = action_names(env)
         self.input = agent.GetInputLink()
         self.root = None
+        self.params: dict = {}
 
     def _put(self, parent, attr, value):
         if isinstance(value, dict):
             node = self.agent.CreateIdWME(parent, attr)
             for k, v in value.items():
                 self._put(node, str(k), v)
+        elif isinstance(value, np.ndarray) and value.ndim >= 1 and value.size > MAX_CELLS:
+            node = self.agent.CreateIdWME(parent, attr)
+            self.agent.CreateStringWME(node, "omitted", "yes")
+            for axis, n in enumerate(value.shape):
+                self.agent.CreateIntWME(node, f"size-{'ijklmn'[axis]}", int(n))
         elif isinstance(value, np.ndarray) and value.ndim >= 1:
             node = self.agent.CreateIdWME(parent, attr)
             cells = value.reshape(-1, value.shape[-1]) if value.ndim > 1 else value.reshape(-1, 1)
@@ -67,7 +81,7 @@ class Adapter:
                     self.agent.CreateStringWME(wn, "text", w.lower())
                     self.agent.CreateIntWME(wn, "index", k)
 
-    def show(self, obs, step: int, reward: float, done: bool):
+    def show(self, obs, step: int, reward: float, done: bool, percept: dict | None = None):
         if self.root is not None:
             self.agent.DestroyWME(self.root)
         self.root = self.agent.CreateIdWME(self.input, "env")
@@ -75,11 +89,17 @@ class Adapter:
         self.agent.CreateFloatWME(self.root, "reward", float(reward))
         self.agent.CreateStringWME(self.root, "done", "yes" if done else "no")
         self._put(self.root, "observation", obs)
+        if percept:
+            self._put(self.root, "percept", percept)
+        takes_point = getattr(self.env.unwrapped, "takes_point", None)
         acts = self.agent.CreateIdWME(self.root, "actions")
         for i, name in enumerate(self.names):
             a = self.agent.CreateIdWME(acts, "action")
             self.agent.CreateStringWME(a, "name", name)
             self.agent.CreateIntWME(a, "id", i)
+            if callable(takes_point) and takes_point(i):
+                self.agent.CreateStringWME(a, "param", "x")
+                self.agent.CreateStringWME(a, "param", "y")
         self.agent.Commit()
 
     def command(self, patience: int):
@@ -95,6 +115,11 @@ class Adapter:
             if cmd.GetCommandName() != "act" or cmd.GetParameterValue("status"):
                 continue
             name = cmd.GetParameterValue("action")
+            self.params = {}
+            for c in range(cmd.GetNumberChildren()):
+                ch = cmd.GetChild(c)
+                if ch.GetAttribute() not in ("action", "status"):
+                    self.params[ch.GetAttribute()] = ch.GetValueAsString()
             cmd.AddStatusComplete()
             self.agent.Commit()
             self.agent.ClearOutputLinkChanges()

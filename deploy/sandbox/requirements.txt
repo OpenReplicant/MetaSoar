@@ -1,2 +1,4 @@
 gymnasium==1.4.0
 minigrid==3.2.0
+arc-agi==0.9.9
+arcengine==0.9.3

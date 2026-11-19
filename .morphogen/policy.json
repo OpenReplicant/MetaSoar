@@ -1,10 +1,58 @@
-{"policy": "morphogen.policy/v1",
- "scope": ["agent/**/*.soar"],
- "protected": [".github/**", ".morphogen/**", "metasoar/**", "deploy/**", "trials/**", "docs/**", "README.md", "DECISIONS.md"],
- "case_sets": {"babyai-heldout": {
+{
+ "policy": "morphogen.policy/v1",
+ "scope": [
+  "agent/**/*.soar"
+ ],
+ "protected": [
+  ".github/**",
+  ".morphogen/**",
+  "metasoar/**",
+  "deploy/**",
+  "trials/**",
+  "docs/**",
+  "README.md",
+  "DECISIONS.md"
+ ],
+ "case_sets": {
+  "babyai-heldout": {
    "required_kpis": [
-     {"name": "success", "source": "scorer", "direction": "higher", "floor": 0.0, "role": "decide"},
-     {"name": "wall_seconds", "source": "runner", "direction": "lower", "floor": 1.0, "role": "bound"}],
-   "stale_after": 200}},
+    {
+     "name": "success",
+     "source": "scorer",
+     "direction": "higher",
+     "floor": 0.0,
+     "role": "decide"
+    },
+    {
+     "name": "wall_seconds",
+     "source": "runner",
+     "direction": "lower",
+     "floor": 1.0,
+     "role": "bound"
+    }
+   ],
+   "stale_after": 200
+  },
+  "arc3-heldout": {
+   "required_kpis": [
+    {
+     "name": "levels",
+     "source": "scorer",
+     "direction": "higher",
+     "floor": 0.0,
+     "role": "decide"
+    },
+    {
+     "name": "wall_seconds",
+     "source": "runner",
+     "direction": "lower",
+     "floor": 5.0,
+     "role": "bound"
+    }
+   ],
+   "stale_after": 200
+  }
+ },
  "network": [],
- "alpha": 0.05}
+ "alpha": 0.05
+}
