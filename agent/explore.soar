@@ -130,8 +130,7 @@ sp {apply*record*edge
 sp {apply*record*exhausted
    (state <s> ^operator.name record ^here <h> ^operator <any> +)
    (<any> ^name act ^key)
-  -{(<s> ^operator <a> +)
-    (<a> ^fresh yes -^blocked yes)}
+   (<s> -^any-open yes)
 -->
    (<h> ^exhausted yes)}
 
@@ -327,6 +326,37 @@ sp {explore*worst*blocked
 -->
    (<s> ^operator <o> <)}
 
+# --- flags on the state for what the proposed acts include, so a rule tests one WME, not every proposal ---
+sp {explore*any-fresh
+   (state <s> ^operator <o> +)
+   (<o> ^name act ^fresh yes)
+-->
+   (<s> ^any-fresh yes)}
+
+sp {explore*any-open
+   (state <s> ^operator <o> +)
+   (<o> ^name act ^fresh yes -^blocked yes)
+-->
+   (<s> ^any-open yes)}
+
+sp {explore*any-fresh-toward
+   (state <s> ^operator <o> +)
+   (<o> ^name act ^fresh yes ^toward yes -^blocked yes)
+-->
+   (<s> ^any-fresh-toward yes)}
+
+sp {explore*any-fresh-new
+   (state <s> ^operator <o> +)
+   (<o> ^name act ^fresh yes -^seen yes)
+-->
+   (<s> ^any-fresh-new yes)}
+
+sp {explore*any-go
+   (state <s> ^operator <o> +)
+   (<o> ^name act ^go yes)
+-->
+   (<s> ^any-go yes)}
+
 # --- preferences on act ---
 sp {explore*worst*dead
    (state <s> ^operator <o> + ^here <h>)
@@ -358,18 +388,15 @@ sp {explore*best*fresh-toward
 sp {explore*best*fresh-new
    (state <s> ^operator <o> +)
    (<o> ^name act ^fresh yes -^seen yes)
-  -{(<s> ^operator <t> +)
-    (<t> ^name act ^fresh yes ^toward yes -^blocked yes)}
+   (<s> -^any-fresh-toward yes)
 -->
    (<s> ^operator <o> >)}
 
 sp {explore*best*fresh
    (state <s> ^operator <o> +)
    (<o> ^name act ^fresh yes ^seen yes)
-  -{(<s> ^operator <a> +)
-    (<a> ^name act ^fresh yes -^seen yes)}
-  -{(<s> ^operator <t> +)
-    (<t> ^name act ^fresh yes ^toward yes -^blocked yes)}
+   (<s> -^any-fresh-new yes)
+   (<s> -^any-fresh-toward yes)
 -->
    (<s> ^operator <o> >)}
 
@@ -386,8 +413,7 @@ sp {explore*go
 sp {explore*best*go
    (state <s> ^operator <o> +)
    (<o> ^name act ^go yes)
-  -{(<s> ^operator <a> +)
-    (<a> ^fresh yes)}
+   (<s> -^any-fresh yes)
 -->
    (<s> ^operator <o> >)}
 
@@ -501,10 +527,8 @@ sp {explore*best*toward-fresh-0
    (<o> ^name act ^key <k>)
    (<h> ^edge <e>)
    (<e> ^key <k> ^to.reach-0 yes)
-  -{(<s> ^operator <a> +)
-    (<a> ^fresh yes)}
-  -{(<s> ^operator <g> +)
-    (<g> ^go yes)}
+   (<s> -^any-fresh yes)
+   (<s> -^any-go yes)
 -->
    (<s> ^operator <o> >)}
 
@@ -513,10 +537,8 @@ sp {explore*best*toward-fresh-1
    (<o> ^name act ^key <k>)
    (<h> ^edge <e>)
    (<e> ^key <k> ^to.reach-1 yes)
-  -{(<s> ^operator <a> +)
-    (<a> ^fresh yes)}
-  -{(<s> ^operator <g> +)
-    (<g> ^go yes)}
+   (<s> -^any-fresh yes)
+   (<s> -^any-go yes)
   -{(<h> ^edge <e2>)
     (<e2> ^key <k2> ^to.reach-0 yes)
     (<s> ^operator <b> +)
@@ -529,10 +551,8 @@ sp {explore*best*toward-fresh-2
    (<o> ^name act ^key <k>)
    (<h> ^edge <e>)
    (<e> ^key <k> ^to.reach-2 yes)
-  -{(<s> ^operator <a> +)
-    (<a> ^fresh yes)}
-  -{(<s> ^operator <g> +)
-    (<g> ^go yes)}
+   (<s> -^any-fresh yes)
+   (<s> -^any-go yes)
   -{(<h> ^edge <e2>)
     (<e2> ^key <k2> ^to.reach-1 yes)
     (<s> ^operator <b> +)
@@ -545,10 +565,8 @@ sp {explore*best*toward-fresh-3
    (<o> ^name act ^key <k>)
    (<h> ^edge <e>)
    (<e> ^key <k> ^to.reach-3 yes)
-  -{(<s> ^operator <a> +)
-    (<a> ^fresh yes)}
-  -{(<s> ^operator <g> +)
-    (<g> ^go yes)}
+   (<s> -^any-fresh yes)
+   (<s> -^any-go yes)
   -{(<h> ^edge <e2>)
     (<e2> ^key <k2> ^to.reach-2 yes)
     (<s> ^operator <b> +)
@@ -561,10 +579,8 @@ sp {explore*best*toward-fresh-4
    (<o> ^name act ^key <k>)
    (<h> ^edge <e>)
    (<e> ^key <k> ^to.reach-4 yes)
-  -{(<s> ^operator <a> +)
-    (<a> ^fresh yes)}
-  -{(<s> ^operator <g> +)
-    (<g> ^go yes)}
+   (<s> -^any-fresh yes)
+   (<s> -^any-go yes)
   -{(<h> ^edge <e2>)
     (<e2> ^key <k2> ^to.reach-3 yes)
     (<s> ^operator <b> +)
@@ -577,10 +593,8 @@ sp {explore*best*toward-fresh-5
    (<o> ^name act ^key <k>)
    (<h> ^edge <e>)
    (<e> ^key <k> ^to.reach-5 yes)
-  -{(<s> ^operator <a> +)
-    (<a> ^fresh yes)}
-  -{(<s> ^operator <g> +)
-    (<g> ^go yes)}
+   (<s> -^any-fresh yes)
+   (<s> -^any-go yes)
   -{(<h> ^edge <e2>)
     (<e2> ^key <k2> ^to.reach-4 yes)
     (<s> ^operator <b> +)
@@ -593,10 +607,8 @@ sp {explore*best*toward-fresh-6
    (<o> ^name act ^key <k>)
    (<h> ^edge <e>)
    (<e> ^key <k> ^to.reach-6 yes)
-  -{(<s> ^operator <a> +)
-    (<a> ^fresh yes)}
-  -{(<s> ^operator <g> +)
-    (<g> ^go yes)}
+   (<s> -^any-fresh yes)
+   (<s> -^any-go yes)
   -{(<h> ^edge <e2>)
     (<e2> ^key <k2> ^to.reach-5 yes)
     (<s> ^operator <b> +)
@@ -609,10 +621,8 @@ sp {explore*best*toward-fresh-7
    (<o> ^name act ^key <k>)
    (<h> ^edge <e>)
    (<e> ^key <k> ^to.reach-7 yes)
-  -{(<s> ^operator <a> +)
-    (<a> ^fresh yes)}
-  -{(<s> ^operator <g> +)
-    (<g> ^go yes)}
+   (<s> -^any-fresh yes)
+   (<s> -^any-go yes)
   -{(<h> ^edge <e2>)
     (<e2> ^key <k2> ^to.reach-6 yes)
     (<s> ^operator <b> +)
@@ -625,10 +635,8 @@ sp {explore*best*toward-fresh-8
    (<o> ^name act ^key <k>)
    (<h> ^edge <e>)
    (<e> ^key <k> ^to.reach-8 yes)
-  -{(<s> ^operator <a> +)
-    (<a> ^fresh yes)}
-  -{(<s> ^operator <g> +)
-    (<g> ^go yes)}
+   (<s> -^any-fresh yes)
+   (<s> -^any-go yes)
   -{(<h> ^edge <e2>)
     (<e2> ^key <k2> ^to.reach-7 yes)
     (<s> ^operator <b> +)

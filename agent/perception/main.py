@@ -155,7 +155,7 @@ def signature(g, masked):
 def route(g, free, start, vecs, wanted, stuck=(), limit=400):
     """Breadth-first over the places the mover's body can stand, stepping by the moves it knows. free: cells it may
     stand on; start: the body's box (x0, y0, x1, y1); wanted(x0, y0) -> the goal it touches there, or None. Returns
-    {goal: (steps, first move)} for the goals it can reach."""
+    {goal: (steps, {place: (move, steps left)} along the way)} for the goals it can reach."""
     H, W = g.shape
     ii = np.zeros((H + 1, W + 1), dtype=np.int64)
     ii[1:, 1:] = (~free).cumsum(0).cumsum(1)
@@ -165,20 +165,25 @@ def route(g, free, start, vecs, wanted, stuck=(), limit=400):
         return 0 <= x and 0 <= y and x + bw <= W and y + bh <= H and \
             ii[y + bh, x + bw] - ii[y, x + bw] - ii[y + bh, x] + ii[y, x] == 0
 
-    first = {(start[0], start[1]): None}
+    back = {(start[0], start[1]): None}
     frontier, d, found = [(start[0], start[1])], 0, {}
-    while frontier and len(first) < limit:
+    while frontier and len(back) < limit:
         d += 1
         nxt = []
         for x, y in frontier:
             for v in vecs:
                 n = (x + v[0], y + v[1])
-                if n not in first and (x, y, v) not in stuck and ok(*n):
-                    first[n] = first[(x, y)] or v
+                if n not in back and (x, y, v) not in stuck and ok(*n):
+                    back[n] = ((x, y), v)
                     nxt.append(n)
                     t = wanted(*n)
                     if t is not None and t not in found:
-                        found[t] = (d, first[n])
+                        way, here, left = {}, n, 0
+                        while back[here]:
+                            here, v2 = back[here]
+                            left += 1
+                            way[here] = (v2, left)
+                        found[t] = (d, way)
         frontier = nxt
     return found
 
@@ -193,6 +198,7 @@ def main():
     prev_obs, recent, last_touch = None, set(), set()
     floor = set()  # colours the mover's body has stood on
     stuck, body = set(), None  # (x, y, move): where the body's move went nowhere, since the scene last changed
+    way, way_for = {}, None  # the way planned to the goal, kept while the body keeps to it
     for line in sys.stdin:
         msg = json.loads(line)
         g = grid_of(msg.get("observation"))
@@ -314,7 +320,10 @@ def main():
                 plan = {}
                 vecs = {max(d, key=d.get) for (a, cc, zz), d in steps.items() if (cc, zz) == (c, z) and d}
                 vecs.discard((0, 0))
-                if cands and floor and vecs:
+                keep = way_for == (goal, len(stuck)) and body in way and any(key(o) == goal for o in cands)
+                if keep:  # on the way already planned: no need to plan again
+                    plan = {goal: (way[body][1], way)}
+                elif cands and floor and vecs:
                     free = np.isin(g, list(floor))
                     free[by0:by1 + 1, bx0:bx1 + 1] = True
                     for o in objs:
@@ -344,7 +353,8 @@ def main():
                         if stale > GOAL_PATIENCE:
                             given_up.add(goal)
                     if key(t) in plan:
-                        vx, vy = plan[key(t)][1]
+                        way, way_for = plan[key(t)][1], (goal, len(stuck))
+                        vx, vy = way[body][0]
                         res["goal-dx"], res["goal-dy"] = (vx > 0) - (vx < 0), (vy > 0) - (vy < 0)
                     else:
                         res["goal-dx"] = (t["cx"] > me["cx"]) - (t["cx"] < me["cx"])
