@@ -4,14 +4,16 @@ What it reports knows no particular game (each WME on the input link costs every
 rules read):
 - for a grid of colours (an observation key holding a 2-D array larger than the adapter puts on the input link raw):
   `objects`, the connected regions of one colour (4-neighbour), except the grid's most common colour (the
-  background), largest first, at most MAX_OBJECTS: id, color, size, cx, cy (centre, rounded)
+  background), largest first, at most MAX_OBJECTS: id, color, size, cx, cy (the object's own cell nearest its
+  centroid: a point on it to click, which moves with it)
 - `moved`: objects that kept their colour and size but shifted since the last frame (dx, dy)
 - `last-action`, and `last-x`, `last-y` for a point: what was just done
 - `background`: that commonest colour
 - `state`: a signature of the frame without its ticking cells, so the same scene gives the same symbol whatever a
   step counter or budget bar shows. A cell ticks when it changes on a step where at most two cells change besides
   those that what moved explains (its boxes, before and after); the region it belonged to (its bounding box, at its
-  size before the tick) is left out of every signature from then on.
+  size before the tick) is left out of every signature from then on, and objects lying wholly in it are not
+  reported.
 - `mover`: the colour and size of what the plain actions (those without a point) move most often so far: what the
   player most likely controls; `at`: where it is, one symbol of colour, size and centre (the first such object);
   `was-at`: the same for the last frame; `reset`: the last plain action sent the mover back to where it was when the
@@ -86,8 +88,18 @@ def objects(g):
         r[2], r[3], r[4], r[5] = min(r[2], x0), min(r[3], y), max(r[4], x1), max(r[5], y)
         r[6] += n * (x0 + x1) // 2  # the run's x's summed (n * (x0 + x1) is always even)
         r[7] += n * y
-    out = [{"color": c, "size": n, "x": x0, "y": y0, "w": x1 - x0 + 1, "h": y1 - y0 + 1, "cx": round(sx / n),
-            "cy": round(sy / n)} for c, n, x0, y0, x1, y1, sx, sy in groups.values()]
+    # the point given for each object is one of its own cells, the nearest to its centroid (a ring's centre is not on it)
+    near = {}
+    for i, (y, x0, x1, c) in enumerate(runs):
+        root = find(i)
+        r = groups[root]
+        mx, my = r[6] / r[1], r[7] / r[1]
+        x = min(max(round(mx), x0), x1)
+        d = (x - mx) ** 2 + (y - my) ** 2
+        if root not in near or d < near[root][0]:
+            near[root] = (d, x, y)
+    out = [{"color": c, "size": n, "x": x0, "y": y0, "w": x1 - x0 + 1, "h": y1 - y0 + 1, "cx": near[k][1],
+            "cy": near[k][2]} for k, (c, n, x0, y0, x1, y1, sx, sy) in groups.items()]
     # largest first; equal sizes in the order a row-by-row scan first meets them
     firsts = {}
     for i, (y, x0, x1, c) in enumerate(runs):
@@ -147,6 +159,10 @@ def main():
         if masked is None or masked.shape != g.shape:
             masked = np.zeros(g.shape, dtype=bool)
         bg, objs = objects(g)
+        # what lies wholly in the ticking cells (a budget bar, a counter) is not a thing to act on
+        objs = [o for o in objs if not masked[o["y"]:o["y"] + o["h"], o["x"]:o["x"] + o["w"]].all()]
+        for i, o in enumerate(objs):
+            o["id"] = i
         res = {"background": bg, "count": len(objs),
                "objects": [{k: o[k] for k in SHOWN} for o in objs[:MAX_OBJECTS]]}
         if prev_grid is not None and prev_grid.shape == g.shape:
