@@ -16,6 +16,6 @@ jobs:
       judge-ref: 21b347f669b243e01fbd7aabd8c16af1b57fed6c
       cases-repo: OpenReplicant/morphogen-judge
       module: metasoar.play
-      sandbox-image: ghcr.io/openreplicant/metasoar-sandbox@sha256:2b18ab782727b7fd1ce4ddbb3dc11b48957618d785d35221d31c9ba63d7f65e4
+      sandbox-image: ghcr.io/openreplicant/metasoar-sandbox@sha256:846875ecea32834ee9d44635128d382502086362341cf91c559a1b195ab1033d
       case-timeout: 60
       verdict-poster: app
