@@ -34,4 +34,4 @@ echo '{"env": "BabyAI-GoToLocal-v0", "seed": 7}' | podman run --rm -i -v "$PWD:/
 | The agent: its rules, the only thing a judged change may touch | `agent/` |
 | Morphogen: the policy, the scorer, the case generator | `.morphogen/`, `.github/workflows/` |
 
-Soar is under the BSD licence (its `LICENSE.md`); MetaSoar's own licence is not chosen yet.
+MetaSoar is under the Apache License 2.0 (`LICENSE`). What it fetches at setup keeps its own licence: Soar (BSD, its `LICENSE.md`), Minigrid (Apache-2.0), Gymnasium (MIT), the ARC-AGI-3 toolkit, engine and games (MIT).
