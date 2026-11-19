@@ -3,8 +3,9 @@
 Observation (a Dict): `frame`, the last 64x64 grid of colours 0..15 the game shows; `levels_completed`; `state`
 (NOT_FINISHED, WIN, GAME_OVER). Actions: the game's own available actions, by their names (ACTION1..ACTION7);
 one that takes a point (ACTION6) reads `x` and `y` from the command's parameters (`set_params`), and is invalid
-without them. Reward: 1 for each level completed on that step. The episode ends at WIN or GAME_OVER, or at
-`max_steps` (default 500). Nothing here knows any game: it is the toolkit's own interface.
+without them. Reward: 1 for each level completed on that step. After GAME_OVER the game is reset, as a
+player would, and the `attempt` count in the observation goes up; the episode ends at WIN or at `max_steps` (default
+500), so the budget counts every action across attempts. Nothing here knows any game: it is the toolkit's own interface.
 """
 from __future__ import annotations
 
@@ -33,16 +34,18 @@ class Arc3Env(gym.Env):
         self.action_space = gym.spaces.Discrete(1)
 
     def _obs(self, fd):
-        frames = np.asarray(fd.frame) if fd.frame is not None else np.zeros((1, 64, 64), dtype=np.int64)
-        return {"frame": frames[-1].astype(np.int64), "levels_completed": int(fd.levels_completed), "state": fd.state.name}
+        frames = np.asarray(fd.frame) if fd.frame is not None and len(fd.frame) else np.zeros((1, 64, 64), dtype=np.int64)
+        return {"frame": frames[-1].astype(np.int64), "levels_completed": int(fd.levels_completed), "state": fd.state.name,
+                "attempt": self.attempt}
 
     def reset(self, *, seed=None, options=None):
         super().reset(seed=seed)
         self.env = self.arc.make(self.game_id, seed=int(seed or 0))
+        self.attempt = 1
         fd = self.env.reset()
         self.available = [a for a in self.GameAction if a.value in (fd.available_actions or []) and a.name != "RESET"]
         self.action_space = gym.spaces.Discrete(len(self.available))
-        self.steps, self.levels = 0, int(fd.levels_completed)
+        self.steps, self.levels, self.attempt = 0, int(fd.levels_completed), 1
         self._last = self._obs(fd)
         return self._last, {}
 
@@ -71,5 +74,12 @@ class Arc3Env(gym.Env):
         self._last = obs
         reward = float(obs["levels_completed"] - self.levels)
         self.levels = obs["levels_completed"]
-        terminated = obs["state"] in ("WIN", "GAME_OVER")
+        if obs["state"] == "GAME_OVER" and self.steps < self.max_steps:
+            # as a player would: reset and try again (the game keeps the levels already completed); the agent keeps
+            # whatever it learned, and sees the attempt count go up
+            self.attempt += 1
+            fd = self.env.step(self.GameAction.RESET)
+            obs = self._obs(fd)
+            self._last = obs
+        terminated = obs["state"] == "WIN"
         return obs, reward, terminated, self.steps >= self.max_steps, {}
