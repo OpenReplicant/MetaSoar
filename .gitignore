@@ -4,3 +4,6 @@ __pycache__/
 
 # ROMs are the owner's, never committed (mounted at run time)
 *.nes
+
+# An organization's mined history stays on the machine (envkit/org.py)
+orgdata/

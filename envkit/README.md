@@ -134,6 +134,23 @@ thing is self, the pits, the harmful kinds) back into the same workspace.
 A workspace is only as fair as what is posted into it: the Mario declaration posts only readings fair under
 `judged`. (Not yet enforced: a poster wired to a private reading would launder it.)
 
+## An organization as an environment (`org.py`, `environments/openreplicant.toml`)
+
+The same pieces, a different world: OpenReplicant's history replayed a day a tick (commits with their authors,
+co-authors and sessions, mined from the org's repositories; forks keep only the org's own work), the repositories'
+own descriptions, and the people and agents in it as actors that can be **interviewed** (exploration: a question
+to the mailbox, answered by a person) or **delegated** to (exploitation: recorded, no outcome yet). Entity
+resolution posts actors, repositories and commits into the same workspace the Mario agent reads; the cartographer
+(`atlas/cartographer.py`) maps actors, repositories, links and eras from it and asks its principal only what the
+record can't settle, within a budget: who the principal is first.
+
+    python3 -m envkit.org mine CLONES orgdata/openreplicant.jsonl
+    ORG_SNAPSHOT=orgdata/openreplicant.jsonl ORG_MAILBOX=orgdata/mailbox \
+        python3 -m envkit.run openreplicant --agent cartographer --profile member --report orgdata/map.md
+
+The mined history, the mailbox and the map are the org's data and stay on the machine (`orgdata/` is ignored). The
+private judge repository is never mined.
+
 ## Why actors
 
 Nesting, mixed rates (a game at 60 steps a second, chat at a line every few seconds, a model answering in

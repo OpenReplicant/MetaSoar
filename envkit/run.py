@@ -12,6 +12,7 @@ import json
 import sys
 import time
 import warnings
+from pathlib import Path
 
 from envkit.core import Lockstep, Realtime, attach
 from envkit.declare import load
@@ -50,7 +51,13 @@ def mover_ws_agent(seed: int, **opts):
                        observe=[], trigger="state")
 
 
-AGENTS = {"atlas": atlas_agent, "mover": mover_agent, "mover_ws": mover_ws_agent}
+def cartographer_agent(seed: int, **opts):
+    from atlas.cartographer import Cartographer
+    return PolicyAgent("agent", lambda actions: Cartographer(actions["names"], seed=seed, **opts),
+                       observe=[], trigger="state")
+
+
+AGENTS = {"atlas": atlas_agent, "mover": mover_agent, "mover_ws": mover_ws_agent, "cartographer": cartographer_agent}
 
 
 def run(env_name: str, params: dict, agent: str = "atlas", profile: str | None = "judged", realtime: bool = False,
@@ -80,7 +87,8 @@ def run(env_name: str, params: dict, agent: str = "atlas", profile: str | None =
             lives.append(cur)
             cur = 0.0
     lives.append(cur)
-    return {"env": env_name, "params": env.params, "return": sum(d for _, d in rewards),
+    report = a.policy.report() if hasattr(a.policy, "report") else None
+    return {"env": env_name, "params": env.params, "report": report, "return": sum(d for _, d in rewards),
             "reward_ticks": [t for t, _ in rewards], "lives": lives, "end": end, "ticks": ticks,
             "seconds": round(time.perf_counter() - t0, 3)}
 
@@ -96,14 +104,19 @@ def main(argv=None):
     ap.add_argument("--speed", type=float, default=1.0)
     ap.add_argument("--film", help="write the run as an animated GIF with the agent's reasons beside it")
     ap.add_argument("--film-every", type=int, default=2)
+    ap.add_argument("--report", help="write the agent's report (if it has one) to this file")
     ap.add_argument("--live", type=int, metavar="PORT", help="serve the run as it happens on 127.0.0.1:PORT")
     a = ap.parse_args(argv)
     params = {}
     for kv in a.param:
         k, _, v = kv.partition("=")
         params[k] = int(v) if v.lstrip("-").isdigit() else v
-    print(json.dumps(run(a.env, params, a.agent, a.profile or None, a.realtime, a.speed,
-                         film=a.film, film_every=a.film_every, live=a.live)))
+    out = run(a.env, params, a.agent, a.profile or None, a.realtime, a.speed,
+                         film=a.film, film_every=a.film_every, live=a.live)
+    report = out.pop("report", None)
+    if a.report and report:
+        Path(a.report).write_text(report)
+    print(json.dumps(out))
 
 
 if __name__ == "__main__":
