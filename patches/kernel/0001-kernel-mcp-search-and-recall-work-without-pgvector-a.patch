@@ -1,0 +1,94 @@
+From c474f89644e0fbb05594e05acc0e2396a2f14d1c Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Fri, 20 Nov 2026 20:57:32 +0000
+Subject: [PATCH] kernel-mcp: search and recall work without pgvector again
+
+The dense-recall guard named recall_dense.state inside a CASE, and Postgres resolves every table a
+statement names before running it, so on plain Postgres (no recall-dense schema) every search and
+recall failed. Checking the module is installed is now its own query, as INSTALLED and READY are.
+The smoke test passes in full on Postgres 16 both with pgvector and without it.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01KhsqyvSYuJV1UvvdmJ1EP9
+---
+ docs/LESSONS.md                         |  4 ++++
+ modules/kernel-mcp/kernel_mcp/memory.py |  3 ++-
+ modules/kernel-mcp/kernel_mcp/recall.py | 11 ++++++++---
+ modules/kernel-mcp/kernel_mcp/server.py |  3 ++-
+ 4 files changed, 16 insertions(+), 5 deletions(-)
+
+diff --git a/docs/LESSONS.md b/docs/LESSONS.md
+index c4bc4ff..883d1fa 100644
+--- a/docs/LESSONS.md
++++ b/docs/LESSONS.md
+@@ -65,6 +65,10 @@ tools here were checked by experiment (details in `docs/spikes/` and the decisio
+ - Recall quality decides whether the kernel helps at all: with plain full-text search a good model did
+   worse with the kernel than alone (SciFact, D-59); with BM25 it did much better (D-60). Measure recall
+   before building on it.
++- Postgres resolves every table a statement names before it runs it: a `case when to_regclass(...)` guard
++  does not keep a missing table from failing the statement. Check that an optional module is installed in
++  one query and read its tables in a second (kernel-mcp's dense recall broke `search` and `recall` on plain
++  Postgres this way; CI only runs with pgvector, so it never showed).
+ - A CURIE in a change set expands only with a prefix the kernel knows (`kernel.prefix`: rdf, rdfs, owl,
+   dcterms, prov, …); `cito:supports` is refused as "not a known term". Pack vocabularies without a
+   registered prefix go in as full IRIs (D-62).
+diff --git a/modules/kernel-mcp/kernel_mcp/memory.py b/modules/kernel-mcp/kernel_mcp/memory.py
+index f076f7d..1c9044d 100644
+--- a/modules/kernel-mcp/kernel_mcp/memory.py
++++ b/modules/kernel-mcp/kernel_mcp/memory.py
+@@ -196,7 +196,8 @@ async def recall(ctx: Context, question: str, budget: int = 800) -> str:
+     budget = max(100, min(budget, 8000))
+     async with connection(ctx) as conn:
+         indexed = bool(await one(conn, ranked.INSTALLED) and await one(conn, ranked.READY))
+-        model = await one(conn, ranked.DENSE) if indexed and ranked.dense_on() else None
++        dense = indexed and ranked.dense_on() and await one(conn, ranked.DENSE_INSTALLED)
++        model = await one(conn, ranked.DENSE) if dense else None
+         vec = await anyio.to_thread.run_sync(ranked.vector, question, model) if model else None
+         limit = max(10, budget // 25)
+         args = ranked.params(question, ranked.pool(2 * limit) if indexed else 2 * limit, vec)
+diff --git a/modules/kernel-mcp/kernel_mcp/recall.py b/modules/kernel-mcp/kernel_mcp/recall.py
+index af2cb31..379291d 100644
+--- a/modules/kernel-mcp/kernel_mcp/recall.py
++++ b/modules/kernel-mcp/kernel_mcp/recall.py
+@@ -49,8 +49,10 @@ READY = "select exists (select 1 from recall.corpus where n > 0)"   # only once
+ VIA_INDEX = "select api.recall(%(text)s, %(n)s)"
+ 
+ 
+-DENSE = ("select case when to_regclass('recall_dense.vec') is not null then "
+-         "(select model from recall_dense.state where exists (select 1 from recall_dense.vec)) end")
++# Two queries, as INSTALLED and READY: Postgres resolves every table a statement names before it runs, so one
++# statement that guards recall_dense.state with a CASE still fails where recall-dense is not installed.
++DENSE_INSTALLED = "select to_regclass('recall_dense.vec') is not null"
++DENSE = "select model from recall_dense.state where exists (select 1 from recall_dense.vec)"   # only once installed
+ VIA_HYBRID = "select api.recall_hybrid(%(text)s, %(vec)s::vector, %(n)s)"
+ MODEL = "BAAI/bge-small-en-v1.5"   # 384 dimensions, MIT; the recall-dense module's index is built with it
+ QUERY_PREFIX = "Represent this sentence for searching relevant passages: "   # bge's query instruction
+@@ -175,7 +177,10 @@ def dense_on() -> bool:
+ 
+ def dense(conn) -> str | None:
+     """The dense index's model when the recall-dense module is installed and has rows (and dense is on)."""
+-    return conn.execute(DENSE).fetchone()[0] if dense_on() else None
++    if not dense_on() or not conn.execute(DENSE_INSTALLED).fetchone()[0]:
++        return None
++    row = conn.execute(DENSE).fetchone()
++    return row[0] if row else None
+ 
+ 
+ def ranked(indexed: bool, vec: str | None = None) -> str:
+diff --git a/modules/kernel-mcp/kernel_mcp/server.py b/modules/kernel-mcp/kernel_mcp/server.py
+index b800462..8ae0f32 100644
+--- a/modules/kernel-mcp/kernel_mcp/server.py
++++ b/modules/kernel-mcp/kernel_mcp/server.py
+@@ -198,7 +198,8 @@ async def search(ctx: Context, text: str, limit: int = 20) -> list[dict]:
+     full-text search, depending on the recall modules installed, then belief; re-ranked by a cross-encoder when
+     one is downloaded), or by substring on labels and IRIs when no word matches. Each has id, status, belief, rank."""
+     indexed = bool(await query(ctx, recall.INSTALLED) and await query(ctx, recall.READY))
+-    model = await query(ctx, recall.DENSE) if indexed and recall.dense_on() else None
++    dense = indexed and recall.dense_on() and await query(ctx, recall.DENSE_INSTALLED)
++    model = await query(ctx, recall.DENSE) if dense else None
+     vec = await anyio.to_thread.run_sync(recall.vector, text, model) if model else None
+     args = recall.params(text, recall.pool(limit) if indexed else limit, vec)
+     rows = await query(ctx, recall.ranked(indexed, vec), args)
+-- 
+2.43.0
+
