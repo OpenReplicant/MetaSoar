@@ -118,6 +118,22 @@ a jumpy random policy in 1-1):
 | moving things that are an enemy or the player | 79.4% (the rest: score pop-ups, brick fragments, patches where an enemy stood) |
 | time | 7.2 ms a step |
 
+## The workspace (`workspace.py`)
+
+One current picture of the situation: detectors post into it (through small adapters, so a detector needn't know it
+exists), agents read it and post their claims back. Entries are symbols with provenance (`key`, `kind`, `attrs`,
+`source` per attribute, `t`, `conf`, `ttl`, `salience`). Same key, same thing: a second source's attributes merge
+into the entry (binding). Entries expire after `ttl` ticks unposted. `focus` is the few most salient: attention, small
+on purpose. `changed` lists what was added, updated and dropped each tick. Only mechanics live here: what is salient
+and what to post are the agents' choices.
+
+Check that it changes nothing: the mover reading Mario through the workspace (`--agent mover_ws`) makes the same
+choices as the mover reading the detectors' channels, life for life over 2000 steps, while posting its claims (which
+thing is self, the pits, the harmful kinds) back into the same workspace.
+
+A workspace is only as fair as what is posted into it: the Mario declaration posts only readings fair under
+`judged`. (Not yet enforced: a poster wired to a private reading would launder it.)
+
 ## Why actors
 
 Nesting, mixed rates (a game at 60 steps a second, chat at a line every few seconds, a model answering in

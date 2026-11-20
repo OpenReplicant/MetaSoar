@@ -34,14 +34,31 @@ def mover_agent(seed: int, **opts):
                        observe=["things", "camera", "attempt", "reward"])
 
 
-AGENTS = {"atlas": atlas_agent, "mover": mover_agent}
+def mover_ws_agent(seed: int, **opts):
+    """The mover reading the workspace instead of the detectors' channels, and posting its claims back to it."""
+    from atlas.mover import Mover
+    from envkit.workspace import observation
+
+    class FromWorkspace(Mover):
+        def step(self, obs):
+            o = observation(obs["state"])
+            if "reward" not in o:  # as PolicyAgent does: wait until every reading read has arrived (no reward
+                return self.names[0], None  # before the first step; the world idles the same way)
+            return super().step(o)
+
+    return PolicyAgent("agent", lambda actions: FromWorkspace(actions["names"], seed=seed, **opts),
+                       observe=[], trigger="state")
+
+
+AGENTS = {"atlas": atlas_agent, "mover": mover_agent, "mover_ws": mover_ws_agent}
 
 
 def run(env_name: str, params: dict, agent: str = "atlas", profile: str | None = "judged", realtime: bool = False,
         speed: float = 1.0, agent_opts: dict | None = None, film: str | None = None, film_every: int = 2, live: int | None = None):
     env = load(env_name, **params)
     a = AGENTS[agent](int(env.params.get("seed", 0)), **(agent_opts or {}))
-    attach(env, a, {p: p for p in a.inputs if p in env.expose} | {"cmd": "cmd"}, profile=profile)
+    attach(env, a, {p: p for p in a.inputs if p in env.expose} | {"cmd": "cmd"}
+           | ({"post": "post"} if "post" in env.expose and "post" in a.outputs else {}), profile=profile)
     rec = Recorder("record", ["reward", "event"])
     attach(env, rec, {"reward": "reward", "event": "event"})
     modules = env.modules + [a, rec]

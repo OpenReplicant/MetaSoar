@@ -87,6 +87,39 @@ def test_encoder_output_reaches_agent_before_tick():
     assert e.modules[0].got == [0, 2, 4]
 
 
+def test_workspace_binds_expires_and_focuses():
+    from envkit.core import Msg
+    from envkit.workspace import Workspace
+    out = []
+
+    class Bus:
+        def publish(self, m, ch, data):
+            out.append((ch, data))
+
+    w = Workspace("ws", capacity=2)
+    w._rt = Bus()
+    post = lambda t, es: w.on("post", Msg("ws.post", t, 0, "x", es))  # noqa: E731
+    tick = lambda t: w.on("tick", Msg("game.tick", t, 0, "game", {}))  # noqa: E731
+    post(0, [{"key": "thing:1", "attrs": {"box": [0, 0, 1, 1]}, "source": "sight", "ttl": 1},
+             {"key": "claim:self", "attrs": {"thing": 1}, "source": "mover", "salience": 0.5},
+             {"key": "pit", "attrs": {"col": 3}, "source": "mover", "salience": 0.9}])
+    post(0, [{"key": "thing:1", "attrs": {"name": "walker"}, "source": "model"}])
+    tick(0)
+    state = dict(out)["ws.state"]
+    th = next(e for e in state["entries"] if e["key"] == "thing:1")
+    assert th["attrs"] == {"box": [0, 0, 1, 1], "name": "walker"}  # two sources, one entry
+    assert th["by"]["box"][0] == "sight" and th["by"]["name"][0] == "model"
+    assert [e["key"] for e in dict(out)["ws.focus"]] == ["pit", "claim:self"]  # capacity 2, by salience
+    out.clear()
+    tick(1)  # thing:1 not posted again: gone; claims have no ttl and stay
+    assert sorted(e["key"] for e in dict(out)["ws.state"]["entries"]) == ["claim:self", "pit"]
+    assert dict(out)["ws.changed"]["dropped"] == ["thing:1"]
+    out.clear()
+    post(2, [{"key": "pit", "retract": True}])
+    tick(2)
+    assert [e["key"] for e in dict(out)["ws.state"]["entries"]] == ["claim:self"]
+
+
 if __name__ == "__main__":
     for name, fn in list(globals().items()):
         if name.startswith("test_"):

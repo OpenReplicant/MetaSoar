@@ -96,13 +96,14 @@ class GymWorld(World):
 
 class PolicyAgent(Module):
     """A step-by-step policy as an agent. Its input ports are named by the observation keys the policy reads;
-    `actions` (the world's action list) builds the policy; a message on `trigger` (the world's tick) asks it for a
-    command, from the latest message on every other port."""
+    `actions` (the world's action list) builds the policy; a message on `trigger` (the world's tick, or a
+    workspace's state) asks it for a command, from the latest message on every other port and the trigger's own
+    message under its name. A policy with `posts()` has what it returns emitted on `post` (claims for a workspace)."""
     kind = "agent"
 
     def __init__(self, name, build: Callable[[dict], Any], observe: list[str], trigger: str = "tick"):
         self.inputs = {"actions": Port("event", keep="all"), trigger: Port("event"), **{k: Port("json") for k in observe}}
-        self.outputs = {"cmd": Port("command"), "why": Port("text")}
+        self.outputs = {"cmd": Port("command"), "why": Port("text"), "post": Port("json", keep="all")}
         super().__init__(name)
         self.build, self.trigger, self.policy, self.latest, self.observe = build, trigger, None, {}, list(observe)
 
@@ -114,10 +115,13 @@ class PolicyAgent(Module):
             self.latest[port] = msg.data
         elif self.policy is not None and all(k in self.latest for k in self.observe if k in self.wired_in):
             # under the realtime scheduler a tick can come before an encoder's first output: wait for it
-            name, params = self.policy.step(dict(self.latest))
+            name, params = self.policy.step(dict(self.latest) | {self.trigger: msg.data})
             self.emit("cmd", {"action": name, "params": params})
             if getattr(self.policy, "why", None):
                 self.emit("why", self.policy.why)
+            posts = self.policy.posts() if hasattr(self.policy, "posts") else None
+            if posts:  # the policy's own claims, for a workspace
+                self.emit("post", posts)
 
 
 class Recorder(Module):
@@ -157,5 +161,7 @@ class ScriptedChat(World):
 
 from envkit.nes import NESWorld, Quantize  # noqa: E402  (nes-py itself is imported only when a NES world starts)
 from envkit.vision import Sight  # noqa: E402
+from envkit.workspace import Poster, Workspace  # noqa: E402
 
-DRIVERS = {"gym": GymWorld, "chat": ScriptedChat, "nes": NESWorld, "quantize": Quantize, "sight": Sight}
+DRIVERS = {"gym": GymWorld, "chat": ScriptedChat, "nes": NESWorld, "quantize": Quantize, "sight": Sight,
+           "workspace": Workspace, "poster": Poster}

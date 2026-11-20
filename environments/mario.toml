@@ -57,9 +57,55 @@ crop = [32, 0]
 dx = [-4, 12]        # how far the camera can move in a step: this game scrolls right only, at most 3 pixels a frame
 wire = { rgb = "game.screen" }
 
+# The workspace: one picture of the situation built from the fair detectors above (and whatever agents post).
+[[module]]
+name = "ws"
+driver = "workspace"
+capacity = 12
+wire = { post = "ws.post", tick = "game.tick" }
+
+[[module]]
+name = "post_things"
+driver = "poster"
+fn = "envkit.workspace:things"
+source = "sight"
+wire = { in = "sight.things", post = "ws.post" }
+
+[[module]]
+name = "post_camera"
+driver = "poster"
+fn = "envkit.workspace:camera"
+source = "sight"
+wire = { in = "sight.camera", post = "ws.post" }
+
+[[module]]
+name = "post_attempt"
+driver = "poster"
+fn = "envkit.workspace:attempt"
+source = "game"
+wire = { in = "game.attempt", post = "ws.post" }
+
+[[module]]
+name = "post_reward"
+driver = "poster"
+fn = "envkit.workspace:reward"
+source = "game"
+wire = { in = "game.reward", post = "ws.post" }
+
+[[module]]
+name = "post_event"
+driver = "poster"
+fn = "envkit.workspace:event"
+source = "game"
+wire = { in = "game.event", post = "ws.post" }
+
 [expose]
 frame = "encode.grid"
 camera = "sight.camera"
+state = "ws.state"
+focus = "ws.focus"
+changed = "ws.changed"
+post = "ws.post"
 things = "sight.things"
 screen = "game.screen"
 attempt = "game.attempt"
@@ -76,6 +122,6 @@ tick = "game.tick"
 cmd = "game.cmd"
 
 [profiles]
-judged = ["frame", "camera", "things", "screen", "attempt", "levels_completed", "reward", "actions", "event", "tick"]
-train = ["frame", "camera", "things", "screen", "attempt", "levels_completed", "x", "lives", "world", "stage", "pstate", "reward",
+judged = ["frame", "camera", "things", "state", "focus", "changed", "screen", "attempt", "levels_completed", "reward", "actions", "event", "tick"]
+train = ["frame", "camera", "things", "state", "focus", "changed", "screen", "attempt", "levels_completed", "x", "lives", "world", "stage", "pstate", "reward",
          "actions", "event", "tick"]

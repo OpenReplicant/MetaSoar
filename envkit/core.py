@@ -112,7 +112,7 @@ def attach(env: Environment, module: Module, wiring: dict[str, str], profile: st
     only what the profile allows; anything may write to an exposed input (an agent's commands)."""
     for port, exposed in wiring.items():
         if port in module.inputs:
-            if module.kind == "agent" and not env.fair(exposed, profile):
+            if module.kind in ("agent", "workspace") and not env.fair(exposed, profile):
                 raise PermissionError(f"{exposed} is not fair under profile {profile!r}")
             module.wired_in[port] = env.channel(exposed)
         elif port in module.outputs:

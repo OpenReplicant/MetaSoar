@@ -210,7 +210,8 @@ class Mover:
         return m
 
     def step(self, obs):
-        things, cam = obs.get("things") or [], obs.get("camera") or {"area": 0, "x": 0}
+        things = sorted(obs.get("things") or [], key=lambda th: th["id"])  # the order they came in can't matter
+        cam = obs.get("camera") or {"area": 0, "x": 0}
         self.area = cam["area"]
         attempt = obs.get("attempt", 1)
         loss = attempt > self.attempt
@@ -280,6 +281,20 @@ class Mover:
         self.last_action = a
         self.t += 1
         return self.names[a], None
+
+    def posts(self):
+        """Claims for a workspace: which thing is self, the pits, the harmful kinds (each only when it changes)."""
+        out, now = [], {"self": self.self_id, "pits": {a: sorted(c) for a, c in self.pits.items()},
+                        "harm": dict(self.harm.most_common(8))}
+        last = getattr(self, "_posted", {})
+        if now["self"] != last.get("self"):
+            out.append({"key": "claim:self", "kind": "claim", "salience": 0.5, "attrs": {"thing": now["self"]}})
+        if now["pits"] != last.get("pits"):
+            out.append({"key": "claim:pits", "kind": "claim", "salience": 0.8, "attrs": {"columns": now["pits"]}})
+        if now["harm"] != last.get("harm"):
+            out.append({"key": "claim:harm", "kind": "claim", "salience": 0.8, "attrs": {"kinds": now["harm"]}})
+        self._posted = now
+        return [e | {"source": "mover"} for e in out]
 
     def rest(self):
         """One step before a long hold, so the held button counts as a new press: the last action if it doesn't
