@@ -1,16 +1,20 @@
 # MetaSoar
 
-**The original Soar, unchanged, with Substrate on its impasses.** When Soar gets stuck in a way its own knowledge
-cannot get out of, a watcher outside the agent hands the trace to [Substrate](https://github.com/OpenReplicant/Substrate),
-which proposes a change: new rules, new settings, or, eventually, a change to the architecture itself. Each change
-is judged by [Morphogen](https://github.com/OpenReplicant/Morphogen) on cases the builder never sees, and let in by
-a gate. Nothing else is ours. What accumulates, and whether it rediscovers what we might have built in, is the
-result.
+**The cognitive layer of [Substrate](https://github.com/OpenReplicant/Substrate)** (M-15): how an agent inside an
+environment perceives, attends, predicts and learns. Inspired by Soar, not Soar itself; "MetaSoar" is a working title.
+Its hypothesis is [`docs/cognitive-model.md`](docs/cognitive-model.md): detectors and automatic processes post into
+one picture of now, a deliberate process attends to a small part of it, everything learned is a predictive model with
+provenance, and what deliberation solves is compiled into skills that run without it. The predictions there say what
+would show it wrong. What exists, layer by layer, is [`docs/architecture.md`](docs/architecture.md).
 
-**The test:** given an environment it has never seen (a game, a terminal, a conversation), through one generic
-adapter, does it get better over episodes, and does what it learned make the next one faster to learn? Compared
-with vanilla Soar and a vanilla LLM agent. The design is [`docs/spec.md`](docs/spec.md); the reasons are in
-[`DECISIONS.md`](DECISIONS.md).
+Substrate is the framework (environments, gated actuators, pass-through to Claude Code, components judged against
+it); the [Knowledge Kernel](https://github.com/OpenReplicant/kernel) is the store; the judge is held out of the
+agent's reach ([Morphogen](https://github.com/OpenReplicant/Morphogen) is one). MetaSoar adds what an agent needs on
+the inside, and a lockstep runtime (`envkit/`) for worlds faster than the wall clock: ARC-AGI-3, Super Mario Bros.
+from the screen, and an organization's history replayed a day a tick.
+
+**The test** stays: given an environment it has never seen, does it get better over episodes, and does what it
+learned make the next one faster to learn? Judged on held-out cases, never on training results (M-14).
 
 ## Status
 
