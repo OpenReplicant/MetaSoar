@@ -28,7 +28,13 @@ def atlas_agent(seed: int, **opts):
     return PolicyAgent("agent", build, observe=["frame", "attempt", "levels_completed", "state"])
 
 
-AGENTS = {"atlas": atlas_agent}
+def mover_agent(seed: int, **opts):
+    from atlas.mover import Mover
+    return PolicyAgent("agent", lambda actions: Mover(actions["names"], seed=seed, **opts),
+                       observe=["things", "camera", "attempt", "reward"])
+
+
+AGENTS = {"atlas": atlas_agent, "mover": mover_agent}
 
 
 def run(env_name: str, params: dict, agent: str = "atlas", profile: str | None = "judged", realtime: bool = False,
@@ -49,8 +55,16 @@ def run(env_name: str, params: dict, agent: str = "atlas", profile: str | None =
     ticks = (Realtime(modules, speed=speed).run() if realtime else Lockstep(modules).run())
     rewards = [(t, d) for t, p, d in rec.log if p == "reward" and d]
     end = next((d for t, p, d in rec.log if p == "event" and d["kind"] == "end"), None)
+    lives, cur = [], 0.0  # the return of each life (a life ends at a "life" event)
+    for t, p, d in rec.log:
+        if p == "reward" and d:
+            cur += d
+        elif p == "event" and d["kind"] == "life":
+            lives.append(cur)
+            cur = 0.0
+    lives.append(cur)
     return {"env": env_name, "params": env.params, "return": sum(d for _, d in rewards),
-            "reward_ticks": [t for t, _ in rewards], "end": end, "ticks": ticks,
+            "reward_ticks": [t for t, _ in rewards], "lives": lives, "end": end, "ticks": ticks,
             "seconds": round(time.perf_counter() - t0, 3)}
 
 

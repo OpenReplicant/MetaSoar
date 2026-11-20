@@ -14,6 +14,8 @@ made from them; a ROM it can't run fails when the world starts, with nes-py's me
     life = "lives"                      # a drop in this reading is a lost life: an event, and `attempt` goes up
     level = "stage"                     # a change in this reading is a level done: `levels_completed` goes up
     ends = [{ reading = "stage", changes = true }]   # the episode is over when any of these holds
+    poke = [{ addr = 0x75A, value = 2, when = "{keep_lives}" }]   # memory written before every step: a world-side
+                                        # setting (here, lives kept up), on when `when` is true
 
     [module.buttons]                    # the actions, in order: name -> buttons held
     noop = []
@@ -48,7 +50,8 @@ class NESWorld(World):
 
     def __init__(self, name, rom: str, buttons: dict, readings: dict | None = None, frameskip: int = 4,
                  start: list | None = None, progress: str | None = None, life: str | None = None,
-                 level: str | None = None, ends: list | None = None, max_steps: int = 5000, seed: int = 0, rate: float = 15.0):
+                 level: str | None = None, ends: list | None = None, poke: list | None = None,
+                 max_steps: int = 5000, seed: int = 0, rate: float = 15.0):
         self.outputs = {"reward": Port("scalar", keep="all"), "actions": Port("event", keep="all"),
                         "event": Port("event", keep="all"), "tick": Port("event", keep="latest"),
                         "attempt": Port("scalar"), "levels_completed": Port("scalar")}
@@ -70,6 +73,7 @@ class NESWorld(World):
         self.progress, self.life, self.level, self.ends = progress, life, level, list(ends or [])
         self.attempt, self.levels = 1, 0
         self.seed, self.rate = int(seed), rate
+        self.poke = {int(p["addr"]): int(p["value"]) for p in (poke or []) if p.get("when", True)}
         self.env, self.cmd, self.steps, self.total, self.last = None, None, 0, 0.0, {}
 
     def start(self):
@@ -121,6 +125,8 @@ class NESWorld(World):
             return
         cmd, self.cmd = self.cmd, None
         i = self.names.index(cmd["action"]) if cmd else 0
+        for a, v in self.poke.items():
+            self.env.ram[a] = v
         for _ in range(self.frameskip):
             self.env.step(self.masks[i])
         self.steps += 1

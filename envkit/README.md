@@ -71,15 +71,25 @@ position or lives elsewhere needs its own declaration.
 
 ### First runs on Mario (1-1, frameskip 4, seed 0)
 
+Three lives and out:
+
 | agent | steps | progress (pixels) | lives lost | end |
 |---|---|---|---|---|
-| atlas (claims from ARC, no Mario knowledge) | 3000 | 1620 | 1 (the timer, stuck at the third pipe) | step limit |
+| atlas (the grid, claims from ARC) | 3000 | 1620 | 1 (the timer, stuck at the third pipe) | step limit |
 | fixed: hold right, jump 8 steps in 16 | 553 | 2093 | 3 | game over |
+| mover (`atlas/mover.py`, tracked things) | 649 | 2118 | 3 | game over |
 
-The atlas moves right and jumps the first pipes but stalls where a pipe is taller than one jump from a walk,
-until the clock runs out. A fixed rule gets further, faster. The atlas's ideas (objects, contact, claims) were made
-for still grids where nothing moves unless the agent does; a platformer has gravity, momentum, enemies that move
-on their own and a camera that scrolls, so its first job is to tell its own motion from the world's.
+Practice (`--param keep_lives=1`: lives topped up, so a run is many lives), the furthest point reached in each life
+(camera centre, world pixels; the flag is near 3200; past about 1280 a life restarts at the checkpoint):
+
+| agent | steps | lives | furthest, first lives | furthest, last lives | best |
+|---|---|---|---|---|---|
+| fixed hop rule | 3000 | 19 | 693, 717, 717 | the same cycle of four deaths | 717 |
+| mover | 9000 | ~50 | 288, 311, 1130 | 1440 to 1460, now and then 1800 | 1816 |
+
+The fixed rule repeats the same deaths forever. The mover learns which thing is itself, what its actions do, what
+pays, where the pits are and what killed it, and gets past the first pits after the checkpoint, then plateaus at the
+next ones: what it learns is per place and per situation, one life per lesson, so a pit costs many lives.
 
 ### Seeing from the screen (`vision.py`)
 

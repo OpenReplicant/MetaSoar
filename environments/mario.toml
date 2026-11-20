@@ -9,6 +9,7 @@ rom = "$NES_ROM"
 seed = 0
 max_steps = 3000
 frameskip = 4
+keep_lives = 0       # 1: lives are topped up before every step (practice), 0: three and the game is over
 
 [[module]]
 name = "game"
@@ -22,6 +23,7 @@ progress = "x"
 life = "lives"
 level = "stage"
 ends = [{ reading = "lives", equals = 255 }, { reading = "world", changes = true }]
+poke = [{ addr = 0x75A, value = 2, when = "{keep_lives}" }]
 rate = 15.0
 
 [module.buttons]
