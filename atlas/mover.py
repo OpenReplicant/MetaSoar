@@ -29,7 +29,7 @@ THREAT = (56, 40)  # how near (x, y in pixels) a harmful or unknown moving thing
 
 
 class Mover:
-    def __init__(self, names, seed=0, explore=30):
+    def __init__(self, names, seed=0, explore=30, simulate=False, horizon=20):
         self.names, self.rng = list(names), random.Random(seed)
         self.macros = [(a, k) for a in range(len(names)) for k in HOLDS]
         self.queue, self.cur, self.why = [], None, "start"
@@ -51,6 +51,18 @@ class Mover:
         self.rew = collections.defaultdict(list)  # action -> reward each step it was held
         self.history = collections.deque(maxlen=40)  # settled macros: (start, end, q key, situation, macro)
         self.normal_t = 0  # the last step self showed one of its usual pictures: alive and in control
+        self.deaths = []  # (step, attempt, "pit" or "harm", world column): what each lost life is blamed on
+        # the self-motion simulator (P2, docs/cognitive-model.md): how self's velocity changes a step under each
+        # action, from the ground or the air, learned from every step; a macro is simulated against the pits before it
+        # runs, and each prediction is scored against what happened (surprise)
+        self.simulate, self.horizon = simulate, horizon
+        self.dyn_x = collections.defaultdict(list)  # (action, vx) -> next vx; (action,) -> any
+        self.dyn_y = collections.defaultdict(list)  # (action, held, grounded, vy) -> next vy; (action, grounded) -> any
+        self.vel = None  # self's velocity over the last step
+        self.open = []  # predictions being scored: {"start", "pred", "actual"}
+        self.surprise = collections.deque(maxlen=200)  # mean pixel error of finished predictions
+        self.ground_y = {}  # (area, column) -> self's y when standing there
+        self.grounded, self.was_grounded, self.prev_action, self.held, self.was_still = True, True, None, 0, True
 
     # --- perception ------------------------------------------------------------------------------------------
     @staticmethod
@@ -160,12 +172,123 @@ class Mover:
         fell = self.self_c is not None and self.self_c[1] >= self.view_bottom - 24
         if fell:  # a pit: self went out through the bottom; it starts where self last stood
             area, col = self.last_ground
-            self.pits[area].update({col + 1, col + 2})
+            gone = int(self.self_c[0]) // 16
+            lo, hi = sorted((col + (1 if gone >= col else -1), gone))
+            self.pits[area].update(range(lo, hi + 1) if hi - lo <= 4 else {col + 1, col + 2})
+            self.deaths.append((self.t, self.attempt, "pit", gone))
             return
+        self.deaths.append((self.t, self.attempt, "harm", None if self.self_c is None else int(self.self_c[0]) // 16))
         for t, kinds in self.near_log:
             if dt - 6 <= t <= dt + 1:
                 for k in kinds:
                     self.harm[k] += 1
+
+    # --- the self-motion simulator (P2) ---------------------------------------------------------------------
+    @staticmethod
+    def _mean(xs):
+        return sum(xs) / len(xs) if xs else None
+
+    def learn_motion(self, a, held, grounded, v0, v1):
+        """One step of self's motion: velocity v0 (pixels a step, from the step before) became v1 under action a,
+        held for `held` steps before this one (how long a jump is held shapes it; at the top of an arc the speed
+        alone can't tell rising from falling)."""
+        held = min(held, 6)
+        self.dyn_y[(a, held, grounded, round(v0[1]))].append(v1[1])
+        self.dyn_y[(a, held, grounded)].append(v1[1])
+        self.dyn_y[(a, grounded)].append(v1[1])
+        self.dyn_x[(a, round(v0[0]))].append(v1[0])
+        self.dyn_x[(a,)].append(v1[0])
+
+    def next_velocity(self, a, held, grounded, v):
+        """The simulator's step: the mean of what followed the same action from the same state; nearest learned
+        vertical speed when this one is new; the action's overall mean when nothing nearer is known."""
+        held = min(held, 6)
+        vy = self._mean(self.dyn_y.get((a, held, grounded, round(v[1])), []))
+        if vy is None:
+            near = [k for k in self.dyn_y if len(k) == 4 and k[:3] == (a, held, grounded)]
+            if near:
+                k = min(near, key=lambda k: abs(k[3] - v[1]))
+                if abs(k[3] - v[1]) <= 3:
+                    vy = self._mean(self.dyn_y[k])
+        if vy is None:
+            vy = self._mean(self.dyn_y.get((a, held, grounded), []))
+        if vy is None:
+            vy = self._mean(self.dyn_y.get((a, grounded), [])) or 0.0
+        vx = self._mean(self.dyn_x.get((a, round(v[0])), []))
+        if vx is None:
+            vx = self._mean(self.dyn_x.get((a,), [])) or 0.0
+        return vx, vy
+
+    def rollout(self, actions):
+        """Self's simulated path under these actions from now, on flat ground at its current height except over the
+        known pits: [(dx, dy, grounded, over_pit)] per step; stops in a pit (falling below standing height over one)."""
+        if self.self_c is None or self.vel is None:
+            return []
+        cx = self.self_c[0]
+        pits = self.pit_columns()
+        x = y = 0.0
+        v, grounded, prev, held = self.vel, self.grounded, self.last_action, self.held
+        out = []
+        for a in actions:
+            held = held + 1 if a == prev else 0
+            v = self.next_velocity(a, held, grounded, v)
+            prev = a
+            x, y = x + v[0], y + v[1]
+            col = int(cx + x) // 16
+            over = col in pits
+            if y >= 0 and not over:
+                y, grounded, v = 0.0, True, (v[0], 0.0)
+            else:
+                grounded = False
+            out.append((x, y, grounded, over))
+            if over and y > 8:
+                break
+        return out
+
+    def pit_columns(self):
+        """The pits here, less any column self has stood on (a fall's start is only known to a column or so)."""
+        stood = {c for a, c in self.ground_y if a == self.area}
+        return self.pits[self.area] - stood
+
+    def plan(self, macro):
+        a, k = macro
+        rest = self.rest()
+        acts = ([rest] if k >= 6 and rest != a else []) + [a] * k
+        return acts + [rest] * max(0, self.horizon - len(acts))
+
+    def judge_path(self, macro):
+        """What the simulator expects of this macro, against the pits within reach: "falls" (the path drops into
+        one), "clears" (it passes every pit ahead and stands beyond), or None (no pit in reach, or no prediction)."""
+        if self.self_c is None or self.vel is None or len(self.dyn_x) < 4:
+            return None
+        cx = self.self_c[0]
+        fwd = self.forward_sign()
+        ahead = {c for c in self.pit_columns() if 0 <= (c * 16 + 8 - cx) * fwd <= 96}
+        if not ahead:
+            return None
+        path = self.rollout(self.plan(macro))
+        if any(over and y > 8 for _, y, _, over in path):
+            return "falls"
+        far = max(ahead) if fwd > 0 else min(ahead)
+        if any(g and (int(cx + x) // 16 - far) * fwd > 0 for x, _, g, _ in path):
+            return "clears"
+        return None
+
+    def trace(self):
+        """Score the open predictions against where self went (surprise), step by step while they last."""
+        keep = []
+        for tr in self.open:
+            if self.self_c is None:
+                continue
+            i = len(tr["actual"])
+            tr["actual"].append((self.self_c[0] - tr["start"][0], self.self_c[1] - tr["start"][1]))
+            if i + 1 >= len(tr["pred"]):
+                n = len(tr["actual"])
+                err = sum(abs(p[0] - q[0]) + abs(p[1] - q[1]) for p, q in zip(tr["pred"][:n], tr["actual"])) / max(1, n)
+                self.surprise.append(err)
+            else:
+                keep.append(tr)
+        self.open = keep
 
     # --- choosing --------------------------------------------------------------------------------------------
     def value(self, table, key, m, optimistic, bonus=30.0):
@@ -201,12 +324,22 @@ class Mover:
                 v = self.value(self.g, sit, m, 0.0, bonus=10.0)
             else:
                 v = 60.0 if front else 15.0
+            if self.simulate:
+                verdict = self.judge_path(m)
+                if verdict == "falls":
+                    v -= 200.0
+                elif verdict == "clears":
+                    v += 40.0
             scored.append((v + self.rng.random() * 0.01, m))
         v, m = max(scored)
+
         tried = self.q[key][m][1] if col is not None else 0
         self.why = (f"{sit[0]}{', blocked' if sit[1] else ''}{', pit ' + sit[2] if sit[2] != 'none' else ''}: "
                     f"{self.names[m[0]]} x{m[1]}"
                     f" ({'untried here' if not tried else f'{v:.0f} here'}{', frontier' if front else ''})")
+        verdict = self.judge_path(m) if self.simulate else None
+        if verdict:
+            self.why += f", simulated: {verdict}"
         return m
 
     def step(self, obs):
@@ -234,6 +367,10 @@ class Mover:
                 if not jump and self.like_self(me) and (known or self.self_kinds[self.prev_self_kind] >= 3):
                     # a new picture joins self only straight after a known one, on the same track
                     self.effect[self.last_action].append((c[0] - pv[0], c[1] - pv[1]))
+                    v1 = (c[0] - pv[0], c[1] - pv[1])
+                    if self.vel is not None:
+                        self.learn_motion(self.last_action, self.held, self.was_grounded, self.vel, v1)
+                    self.vel = v1
                     self.self_kinds[me["kind"]] += 1
                     self.self_px.append(me["px"])
                 self.strange = 0 if known else self.strange + 1
@@ -255,13 +392,19 @@ class Mover:
             if self.self_kinds[me["kind"]] >= 10:
                 self.normal_t = self.t
             area, col = self.place(me, cam)
-            if self.prev_y is not None and abs(cy - self.prev_y) < 0.5:  # standing on something
+            still = self.prev_y is not None and abs(cy - self.prev_y) < 0.5
+            self.grounded = still and self.was_still  # two still steps: at the top of a jump only one is
+            self.was_still = still
+            if self.grounded:  # standing on something
                 self.last_ground = (area, col)
+                self.ground_y[(area, col)] = cy
             self.prev_y = cy
             self.frontier[area] = max(self.frontier[area], col)
         if self.cur is not None:
             self.cur["ret"] += r
+        self.trace()
         if loss:
+            self.open, self.vel = [], None
             self.queue = []
             self.settle(loss=False)
             self.blame()
@@ -276,8 +419,14 @@ class Mover:
             rest = self.rest()
             self.queue = ([rest] if k >= 6 and rest != a else []) + [a] * k
             self.last_macro_action = a
+            if self.simulate and me is not None and self.grounded and len(self.dyn_x) >= 4:
+                pred = [(x, y) for x, y, _, _ in self.rollout(self.queue)][:len(self.queue)]
+                if pred:
+                    self.open.append({"start": self.self_c, "pred": pred, "actual": []})
         a = self.queue.pop(0)
         self.prev = {th["id"]: self.centre(th) for th in things}
+        self.prev_action, self.was_grounded = self.last_action, self.grounded
+        self.held = self.held + 1 if a == self.last_action else 0  # steps this action was already held
         self.last_action = a
         self.t += 1
         return self.names[a], None

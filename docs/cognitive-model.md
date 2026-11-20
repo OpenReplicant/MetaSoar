@@ -143,6 +143,25 @@ place-bound learning plateaus at one life a lesson (the mover near 1450 pixels);
 mover chooses identically through it); privileged data used as an answer key scores perception without leaking into
 it.
 
+## P2, first attempt (2026-11-20)
+
+`atlas/mover.py` with `simulate=True`: a model of self's motion learned from every step (how self's horizontal and
+vertical speed change under each action, by how long the button has been held and whether self stands), rolled
+forward over flat ground at self's height except at the known pits, and used to judge each candidate macro before
+it runs ("falls" is penalised, "clears" favoured). Practice on 1-1, 3000 steps, lives kept, three seeds:
+
+| | pit deaths (seeds 0, 1, 3) | furthest point | prediction error, pixels a step |
+|---|---|---|---|
+| place memory only | 9, 6, 0 | 2473, 1691, 643 | - |
+| with the simulator | 9, 7, 0 | 1789, 1537, 643 | 8 to 13 (26 before standing was detected correctly) |
+
+**No gain yet: P2 is not supported by this attempt, and not refuted.** What was found: (1) "standing" by a still
+step also fired at the top of every jump, which erased pits from the map; two still steps fixed it, and that fix
+alone moved the place-memory mover (it is in both rows). (2) At the decisive moment before the wider pit the
+simulator gives no verdict: its predicted arcs do not come back down within its 20-step horizon, so neither "falls"
+nor "clears" is said and the place values decide as before. Next: predict the landing (roll until self stands or
+falls out of view, not for a fixed horizon), and give the pit its extent from where self was last seen falling.
+
 ## What it does not yet explain
 
 - **Where goals come from.** The principal supplies them; intrinsic drive is open (reducing surprise is one
