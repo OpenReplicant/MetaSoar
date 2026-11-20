@@ -3,7 +3,8 @@
 The same loop runs whether the world is a game, a live stream or an organization: perceive, post what was seen into
 one picture of now, bind and map it to shared terms, reason, decide, act or ask, and revise claims when the outcome
 arrives (usually late). This document is the map of the layers, what holds them together, where OpenReplicant's
-repositories sit in it (placed by their own descriptions), and what exists so far.
+repositories sit in it (placed by their own descriptions), and what exists so far. The cognitive model it serves,
+with the predictions that would show it wrong, is `docs/cognitive-model.md`.
 
 ```
   judgment       Morphogen: every change to an agent is judged on held-out cases
