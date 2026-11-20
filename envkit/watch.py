@@ -44,16 +44,21 @@ class Film(Module):
 
     def __init__(self, name, path: str, every: int = 2, scale: int = 2, fps: float = 15.0, grid: bool = False):
         self.inputs = {"screen": Port("rgb"), "reward": Port("scalar", keep="all"), "event": Port("event", keep="all"),
-                       "why": Port("text"), "tick": Port("event")}
+                       "why": Port("text"), "tick": Port("event"), "things": Port("json"), "camera": Port("json")}
         super().__init__(name)
         self.path, self.every, self.scale, self.fps, self.grid = path, int(every), int(scale), fps, grid
         self.frames, self.screen, self.why, self.total, self.events, self.n = [], None, "", 0.0, [], 0
+        self.things, self.cam = [], None
 
     def on(self, port, msg):
         if port == "screen":
             self.screen = msg.data
         elif port == "reward":
             self.total += float(msg.data)
+        elif port == "things":
+            self.things = msg.data
+        elif port == "camera":
+            self.cam = msg.data
         elif port == "why":
             self.why = msg.data
         elif port == "event":
@@ -75,11 +80,19 @@ class Film(Module):
             img = pal[np.clip(img, 0, 15)].repeat(4, 0).repeat(4, 1)
         pic = Image.fromarray(img.astype(np.uint8)).resize((img.shape[1] * self.scale, img.shape[0] * self.scale),
                                                            Image.NEAREST)
+        if self.things and self.cam is not None:  # what the sight sees: a box per thing, its id; yellow if it moves
+            dp, k, cx = ImageDraw.Draw(pic), self.scale, self.cam["x"]
+            for th in self.things:
+                x0, y0, x1, y1 = th["box"]
+                col = (255, 230, 0) if th.get("moved") else (0, 220, 255)
+                dp.rectangle([(x0 - cx) * k, y0 * k, (x1 - cx) * k - 1, y1 * k - 1], outline=col)
+                dp.text(((x0 - cx) * k, y1 * k + 1), str(th["id"]), fill=col, font=_font(10))
         out = Image.new("RGB", (pic.width + PANEL, pic.height), (16, 16, 20))
         out.paste(pic, (0, 0))
         d, f = ImageDraw.Draw(out), _font()
         y = 8
-        for line in [f"step {t}", f"return {self.total:.0f}", ""] + ["why:"] + _wrap(self.why) + [""] + \
+        cam = [f"camera {self.cam['x']} area {self.cam['area']}"] if self.cam else []
+        for line in [f"step {t}", f"return {self.total:.0f}"] + cam + [""] + ["why:"] + _wrap(self.why) + [""] + \
                 ["events:"] + self.events[-6:]:
             d.text((pic.width + 8, y), line, fill=(220, 220, 220), font=f)
             y += 14

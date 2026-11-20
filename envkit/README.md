@@ -54,6 +54,7 @@ The scheduler is separate from the modules, so the same modules run both ways:
 | `gym` | any Gymnasium environment (the ARC-AGI-3 games through `metasoar.envs`) | `modules.py` |
 | `nes` | a NES cartridge through nes-py: buttons, the title-screen sequence, memory readings by address, lives and levels as fair counts | `nes.py` |
 | `quantize` | an encoder: an RGB screen to a grid of up to 16 colour indices, block by block | `nes.py` |
+| `sight` | an encoder: from the screen alone, where the camera is in the world and the things on screen, each with an id kept from step to step, a kind (its exact pixels) and a velocity | `vision.py` |
 | `chat` | a scripted audience | `modules.py` |
 | `Film`, `Live` | taps: the screen with the agent's reasons beside it, as a GIF (`--film`) or served live on 127.0.0.1 (`--live PORT`, an MJPEG page a browser or OBS can show) | `watch.py` |
 
@@ -79,6 +80,33 @@ The atlas moves right and jumps the first pipes but stalls where a pipe is talle
 until the clock runs out. A fixed rule gets further, faster. The atlas's ideas (objects, contact, claims) were made
 for still grids where nothing moves unless the agent does; a platformer has gravity, momentum, enemies that move
 on their own and a camera that scrolls, so its first job is to tell its own motion from the world's.
+
+### Seeing from the screen (`vision.py`)
+
+Hand-written and exact, because pixel art repeats pixel for pixel; for 3D games the same slots take pre-made models
+(optical flow, segmentation, image features, depth), as encoders with the same ports.
+
+- **Camera**: each frame is matched against the last over the declared range of moves. When nothing matches (a
+  death, a door) the frame is looked up in the map of everything seen, so a place keeps its world position across
+  lives; a frame found nowhere starts a new area.
+- **Background**: per world pixel, a running vote of the colours seen there; a pixel that disagrees with a settled
+  vote belongs to a thing. Things whose picture has been seen travelling are left out of the vote, so a player
+  standing still stays a thing.
+- **Things**: connected groups of those pixels, each with a kind (its pixels, either way it faces) and an id kept by
+  matching to the nearest track's predicted place. `moved` marks tracks that have travelled (enemies, the player),
+  not blinking blocks.
+
+Scored against the game's memory, which the agent never gets (`python3 -m envkit.bench.mario_sight`, 3000 steps of
+a jumpy random policy in 1-1):
+
+| | |
+|---|---|
+| camera within 2 px of the game's own | 95.9% (worst 5 px: the memory runs about a frame ahead of the picture) |
+| player found | 98.3% |
+| enemies found | 92.5% |
+| player keeps its id from one step to the next | 97.0% |
+| moving things that are an enemy or the player | 79.4% (the rest: score pop-ups, brick fragments, patches where an enemy stood) |
+| time | 7.2 ms a step |
 
 ## Why actors
 

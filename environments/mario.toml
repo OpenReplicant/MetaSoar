@@ -48,8 +48,17 @@ block = 4
 crop = [32, 0]       # the score, coins, world and timer along the top; lives and world are offered as counts
 wire = { rgb = "game.screen" }
 
+[[module]]
+name = "sight"
+driver = "sight"     # the camera and the things on screen, from pixels alone (envkit/vision.py)
+crop = [32, 0]
+dx = [-4, 12]        # how far the camera can move in a step: this game scrolls right only, at most 3 pixels a frame
+wire = { rgb = "game.screen" }
+
 [expose]
 frame = "encode.grid"
+camera = "sight.camera"
+things = "sight.things"
 screen = "game.screen"
 attempt = "game.attempt"
 levels_completed = "game.levels_completed"
@@ -65,6 +74,6 @@ tick = "game.tick"
 cmd = "game.cmd"
 
 [profiles]
-judged = ["frame", "screen", "attempt", "levels_completed", "reward", "actions", "event", "tick"]
-train = ["frame", "screen", "attempt", "levels_completed", "x", "lives", "world", "stage", "pstate", "reward",
+judged = ["frame", "camera", "things", "screen", "attempt", "levels_completed", "reward", "actions", "event", "tick"]
+train = ["frame", "camera", "things", "screen", "attempt", "levels_completed", "x", "lives", "world", "stage", "pstate", "reward",
          "actions", "event", "tick"]

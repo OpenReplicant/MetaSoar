@@ -156,5 +156,6 @@ class ScriptedChat(World):
 
 
 from envkit.nes import NESWorld, Quantize  # noqa: E402  (nes-py itself is imported only when a NES world starts)
+from envkit.vision import Sight  # noqa: E402
 
-DRIVERS = {"gym": GymWorld, "chat": ScriptedChat, "nes": NESWorld, "quantize": Quantize}
+DRIVERS = {"gym": GymWorld, "chat": ScriptedChat, "nes": NESWorld, "quantize": Quantize, "sight": Sight}

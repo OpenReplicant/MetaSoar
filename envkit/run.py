@@ -42,7 +42,7 @@ def run(env_name: str, params: dict, agent: str = "atlas", profile: str | None =
     from envkit.watch import Film, Live
     for f in ([Film("film", film, every=film_every)] if film else []) + ([Live("live", live)] if live else []):
         attach(env, f, {"screen": "screen" if "screen" in env.expose else "frame", "reward": "reward",
-                        "event": "event", "tick": "tick"})
+                        "event": "event", "tick": "tick"} | {p: p for p in ("things", "camera") if p in env.expose})
         f.wired_in["why"] = a.wired_out.get("why", f"{a.name}.why")  # a tap may read the agent too
         modules.append(f)
     t0 = time.perf_counter()
