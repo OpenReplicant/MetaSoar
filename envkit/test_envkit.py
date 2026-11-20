@@ -120,6 +120,25 @@ def test_workspace_binds_expires_and_focuses():
     assert [e["key"] for e in dict(out)["ws.state"]["entries"]] == ["claim:self"]
 
 
+def test_cartographer_takes_an_earlier_answer_without_asking_again():
+    """An answer given since an earlier run settles its question: a claim, no new interview, budget kept."""
+    from atlas.cartographer import Cartographer
+    from envkit.org import qid
+    c = Cartographer(["wait", "interview", "delegate"], budget=1)
+    day = 20000
+    commits = [{"repo": "r", "sha": f"s{i}", "t": (day + i) * 86400, "author": who, "coauthors": [], "areas": []}
+               for i, who in enumerate(["Ann", "Bot", "Ann"])]
+    q = "Which of these identities are you (or act for you): Ann, Bot? The history can't tell an organization's account from a person's."
+    entries = [{"key": f"commit:{x['sha']}", "kind": "commit", "attrs": x} for x in commits]
+    entries += [{"key": "e", "kind": "event", "attrs": {"kind": "start", "day": day, "until": day + 2}},
+                {"key": "reply", "kind": "reply", "attrs": {"id": qid("principal", q), "answer": "I am Ann"}}]
+    act, params = c.step({"state": {"t": 3, "entries": entries}})
+    assert c.principal == ["Ann"], c.principal
+    assert act == "wait" or params["why"] != "principal", params
+    f = c.predict(horizon=7)
+    assert 0 < f["r"] < 1
+
+
 if __name__ == "__main__":
     for name, fn in list(globals().items()):
         if name.startswith("test_"):

@@ -186,13 +186,133 @@ def reply(data, t):
     return [{"key": f"reply:{data['id']}", "kind": "reply", "salience": 1.0, "attrs": data}]
 
 
+REPOS = ("Alpine-Handlebars", "DiscordPrototype", "Hyperexpress-MiddleWrap", "MetaSoar", "Morphogen",
+         "ProtoReplicant", "Substrate", "actor-model", "cognee-enhanced", "kernel", "openreplicant.github.io",
+         "webClient-VAD-faster-whisper")  # never morphogen-judge: its held-out cases are not to be read
+
+
+def fetch(home: Path, org: str = "OpenReplicant", repos=REPOS):
+    """Bare clones of the org's repositories under home/clones, history only (file contents on demand)."""
+    (home / "clones").mkdir(parents=True, exist_ok=True)
+    for r in repos:
+        d = home / "clones" / f"{r}.git"
+        if d.exists():
+            subprocess.run(["git", f"--git-dir={d}", "fetch", "-q", "--prune", "origin",
+                            "+refs/heads/*:refs/heads/*"], check=False)
+        else:
+            subprocess.run(["git", "clone", "-q", "--bare", "--filter=blob:none",
+                            f"https://github.com/{org}/{r}.git", str(d)], check=False)
+
+
+def map_org(home: Path, end: str = "", present: int = 7, ask: bool = True):
+    """Run the cartographer over the snapshot up to `end` (default: today) and return it. With ask=False it
+    writes nothing to the mailbox (a held-out run must not ask about the past)."""
+    import os
+    import datetime as dt
+    os.environ["ORG_SNAPSHOT"], os.environ["ORG_MAILBOX"] = str(home / "openreplicant.jsonl"), str(home / "mailbox")
+    end = end or dt.date.today().isoformat()
+    from envkit import run as R
+    from envkit.run import run
+    box = {}
+    real = R.AGENTS["cartographer"]
+
+    def keep(seed, **o):  # keep the agent, to read its map after the run
+        a = real(seed, **o)
+        box["agent"] = a
+        return a
+    R.AGENTS["cartographer"] = keep
+    try:
+        out = run("openreplicant", {"end": end, "present": present}, agent="cartographer", profile="member",
+                  agent_opts=None if ask else {"budget": 0})
+    finally:
+        R.AGENTS["cartographer"] = real
+    return box["agent"].policy, out
+
+
+def brief(home: Path, end: str = "", offline: bool = False):
+    import datetime as dt
+    if not offline:
+        fetch(home)
+    n, own = mine(home / "clones", home / "openreplicant.jsonl")
+    carto, _ = map_org(home, end)
+    text = carto.report()
+    day = end or dt.date.today().isoformat()
+    (home / "map.md").write_text(text)
+    (home / "briefs").mkdir(exist_ok=True)
+    (home / "briefs" / f"{day}.md").write_text(text)
+    return text, n
+
+
+def answer(home: Path, q: str, text: str):
+    path = home / "mailbox" / "questions" / f"{q}.json"
+    if not path.exists():
+        raise SystemExit(f"no question {q} in {home / 'mailbox' / 'questions'}")
+    (home / "mailbox" / "answers").mkdir(parents=True, exist_ok=True)
+    (home / "mailbox" / "answers" / f"{q}.json").write_text(json.dumps({"answer": text}, indent=1))
+
+
+def holdout(home: Path, cuts, horizon: int = 28):
+    """The map judged on time it has not seen: learn the record up to each cut, forecast which repositories see
+    work in the `horizon` days after, score against what happened (Brier: 0 is perfect, 0.25 is a coin). The
+    baseline forecasts every repository at the share that were active."""
+    import datetime as dt
+    events = [json.loads(ln) for ln in (home / "openreplicant.jsonl").read_text().splitlines()]
+    rows = []
+    for cut in cuts:
+        carto, _ = map_org(home, cut, present=0, ask=False)
+        c = int(dt.datetime.fromisoformat(cut).replace(tzinfo=dt.timezone.utc).timestamp()) // DAY
+        f = carto.predict(horizon)
+        actual = {r: any(e["repo"] == r and c < e["t"] // DAY <= c + horizon and e["kind"] != "repo"
+                         for e in events) for r in f}
+        base = sum(actual.values()) / max(1, len(actual))
+        brier = sum((f[r] - actual[r]) ** 2 for r in f) / max(1, len(f))
+        b0 = sum((base - actual[r]) ** 2 for r in f) / max(1, len(f))
+        hits = sum((f[r] >= 0.5) == actual[r] for r in f)
+        rows.append({"cut": cut, "repos": len(f), "active_after": sum(actual.values()), "brier": round(brier, 3),
+                     "baseline_brier": round(b0, 3), "right": f"{hits}/{len(f)}"})
+    return rows
+
+
 def main(argv=None):
-    a = argv or sys.argv[1:]
-    if a and a[0] == "mine":
-        n, own = mine(Path(a[1]), Path(a[2]))
+    import argparse
+    import os
+    ap = argparse.ArgumentParser(prog="python3 -m envkit.org")
+    sub = ap.add_subparsers(dest="cmd")
+    m = sub.add_parser("mine", help="mine bare clones into a snapshot")
+    m.add_argument("clones")
+    m.add_argument("out")
+    home = os.environ.get("ORG_HOME", "orgdata")
+    b = sub.add_parser("brief", help="fetch, mine and map the org; write map.md and briefs/DATE.md under ORG_HOME")
+    b.add_argument("--end", default="", help="map up to this date (default today)")
+    b.add_argument("--offline", action="store_true", help="use the clones as they are")
+    sub.add_parser("questions", help="the questions waiting on the principal")
+    an = sub.add_parser("answer", help="answer a question: answer ID TEXT")
+    an.add_argument("id")
+    an.add_argument("text", nargs="+")
+    h = sub.add_parser("holdout", help="score the map's forecasts on time it has not seen")
+    h.add_argument("cuts", nargs="+", help="dates to cut the record at")
+    h.add_argument("--horizon", type=int, default=28)
+    a = ap.parse_args(argv)
+    home = Path(home)
+    if a.cmd == "mine":
+        n, own = mine(Path(a.clones), Path(a.out))
         print(f"{n} events, {own} of the org's own actors")
-        return
-    print(__doc__)
+    elif a.cmd == "brief":
+        text, n = brief(home, a.end, a.offline)
+        print(text)
+    elif a.cmd == "questions":
+        for q in sorted((home / "mailbox" / "questions").glob("*.json")):
+            if not (home / "mailbox" / "answers" / q.name).exists():
+                d = json.loads(q.read_text())
+                print(f"{d['id']}  {d['question']}")
+    elif a.cmd == "answer":
+        answer(home, a.id, " ".join(a.text))
+        print("saved; the next brief reads it")
+    elif a.cmd == "holdout":
+        for row in holdout(home, a.cuts, a.horizon):
+            print(json.dumps(row))
+    else:
+        ap.print_help()
 
 
 if __name__ == "__main__":

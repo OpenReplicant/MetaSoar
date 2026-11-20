@@ -10,12 +10,16 @@ snapshot = "$ORG_SNAPSHOT"
 mailbox = "$ORG_MAILBOX"
 start = ""
 end = ""
+present = 7
 
 [[module]]
 name = "org"
 driver = "org"
 snapshot = "{snapshot}"
 mailbox = "{mailbox}"
+start = "{start}"
+end = "{end}"
+present = "{present}"
 
 [[module]]
 name = "ws"

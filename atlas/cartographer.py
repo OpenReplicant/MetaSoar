@@ -41,6 +41,7 @@ class Cartographer:
         self.principal, self.day, self.why = None, None, ""
         self.d0, self.until = 0, None
         self.seen = set()
+        self.log = []  # (day, repo, author, session, subject): the record the brief and the forecasts read
 
     # --- reading the workspace ----------------------------------------------------------------------------------
     def read(self, state):
@@ -62,6 +63,7 @@ class Cartographer:
         d, repo = c["t"] // DAY, c["repo"]
         r = self.repos.setdefault(repo, {"description": "", "fork": False, "commits": 0, "first": None, "last": None})
         r["commits"] += 1
+        self.log.append((d, repo, c["author"], c.get("session"), c.get("subject", "")))
         r["first"] = d if r["first"] is None else min(r["first"], d)
         r["last"] = d if r["last"] is None else max(r["last"], d)
         self.month[day_str(d)[:7]][repo] += 1
@@ -143,6 +145,11 @@ class Cartographer:
                 q = qid("principal", question)
                 if q in self.asked or any(v["about"] == about for v in self.asked.values()):
                     continue
+                if q in self.answers:  # asked in an earlier run and answered since: a claim, not a question
+                    self.asked[q] = {"about": about, "question": question}
+                    self.answered(self.answers[q])
+                    self.budget += 1  # an answered question costs the principal nothing more
+                    continue
                 self.asked[q] = {"about": about, "question": question}
                 self.why = f"asking the principal about {about}"
                 return "interview", {"who": "principal", "question": question, "why": about}
@@ -156,12 +163,62 @@ class Cartographer:
                      "attrs": {"actors": self.principal}}]
         return None
 
+    # --- forecasts: what the map expects of the weeks ahead, scored later against what happened -------------------
+    def predict(self, horizon=28, lookback=56):
+        """For each repository, the chance it gets any commit in the next `horizon` days: the share of the last
+        `lookback` days' windows of that length in which it did (a claim about rhythm, judged on held-out time)."""
+        today = self.until if self.until is not None else self.day
+        out = {}
+        for name, r in self.repos.items():
+            if not r.get("commits"):
+                continue
+            days = {d for d, repo, *_ in self.log if repo == name and today - lookback < d <= today}
+            starts = range(today - lookback, today - horizon + 1, 7)
+            hits = [any(s < d <= s + horizon for d in days) for s in starts]
+            out[name] = (sum(hits) + 0.5) / (len(hits) + 1)  # a little doubt either way
+        return out
+
+    def week(self, days=7):
+        """What happened in the last `days` days, by repository, and what changed against the month before."""
+        today = self.until if self.until is not None else self.day
+        recent = [x for x in self.log if today - days < x[0] <= today]
+        before = [x for x in self.log if today - days - 30 < x[0] <= today - days]
+        L = [f"## The last {days} days ({day_str(today - days + 1)} to {day_str(today)})\n"]
+        if not recent:
+            L.append("No commits.\n")
+        by = collections.defaultdict(list)
+        for x in recent:
+            by[x[1]].append(x)
+        for repo, xs in sorted(by.items(), key=lambda kv: -len(kv[1])):
+            who = collections.Counter(x[2] for x in xs)
+            sessions = {x[3] for x in xs if x[3]}
+            first = self.repos.get(repo, {}).get("first")
+            new = " (new)" if first is not None and first > today - days else ""
+            L.append(f"- **{repo}**{new}: {len(xs)} commits by {', '.join(f'{w} {n}' for w, n in who.most_common(3))}"
+                     + (f", from {len(sessions)} sessions" if sessions else ""))
+            for subj in list(dict.fromkeys(x[4] for x in xs))[:3]:
+                L.append(f"  - {subj[:100]}")
+        quiet = sorted({x[1] for x in before} - set(by), key=lambda r: -sum(1 for x in before if x[1] == r))
+        quiet = [r for r in quiet if sum(1 for x in before if x[1] == r) >= 5]
+        if quiet:
+            L.append("\nWent quiet (5 or more commits in the 30 days before, none in these days): " + ", ".join(quiet))
+        f = self.predict(horizon=7)
+        likely = [f"{r} {p:.0%}" for r, p in sorted(f.items(), key=lambda kv: -kv[1]) if p >= 0.3]
+        L.append("\nLikely to see work next week (recent weekly rhythm; scored on held-out weeks with "
+                 "`python3 -m envkit.org holdout`): " + (", ".join(likely) or "none"))
+        return "\n".join(L) + "\n"
+
     # --- the map -------------------------------------------------------------------------------------------------
     def report(self):
         agents, L = self.agents(), []
         L.append("# OpenReplicant, as mapped from its history\n")
         who = ", ".join(self.principal) if self.principal else "not known yet (asked)"
         L.append(f"**Principal:** {who}\n")
+        open_q = [v for q, v in self.asked.items() if q not in self.answers]
+        if open_q:
+            L.append(f"**Waiting on you:** {len(open_q)} question{'s' * (len(open_q) > 1)} "
+                     "(listed at the end; answer with `python3 -m envkit.org answer ID TEXT`)\n")
+        L.append(self.week())
         L.append("## Actors\n")
         L.append("| actor | works as | commits | days active | repositories (most first) | alongside |")
         L.append("|---|---|---|---|---|---|")
@@ -195,5 +252,5 @@ class Cartographer:
         L.append("\n## Asked of the principal\n")
         for q, v in self.asked.items():
             a = self.answers.get(q)
-            L.append(f"- {v['question']}\n  - " + (f"answer: {a['answer']}" if a else "not answered yet"))
+            L.append(f"- `{q}` {v['question']}\n  - " + (f"answer: {a['answer']}" if a else "not answered yet"))
         return "\n".join(L) + "\n"

@@ -151,6 +151,33 @@ record can't settle, within a budget: who the principal is first.
 The mined history, the mailbox and the map are the org's data and stay on the machine (`orgdata/` is ignored). The
 private judge repository is never mined.
 
+### The weekly brief
+
+One command fetches the repositories (history only), mines them, maps them and writes `map.md` and
+`briefs/DATE.md` under `ORG_HOME` (default `orgdata/`): the last seven days by repository (commits, who, how many
+sessions, what they were about), what went quiet, what is likely next week, the map, and the questions waiting on
+the principal.
+
+    python3 -m envkit.org brief
+    python3 -m envkit.org questions
+    python3 -m envkit.org answer 2096d97217b1 "OpenReplicant and Pete are me"
+
+An answer settles its question in the next brief (a claim with the principal as its source) and frees the budget
+for the next question. The forecast is judged on held-out weeks: learn the record up to a date, predict which
+repositories see work the week after, score with the Brier score against what happened (0 is perfect; the
+baseline gives every repository the share that turned out active).
+
+    python3 -m envkit.org holdout 2026-10-15 2026-10-22 2026-10-29 2026-11-05 2026-11-12 --horizon 7
+
+| forecast | Brier, 7 days (5 cuts) | Brier, 14 days (4 cuts) |
+|---|---|---|
+| baseline (share active) | 0.131 | 0.145 |
+| rhythm (share of recent weeks with work; kept) | 0.097 | 0.090 |
+| rhythm weighted to recent weeks | 0.081 | 0.091 |
+
+The weighted forecast wins at a week and ties at two, on five cuts of seven weeks of history: not a clear win, so
+the simpler one stays until more weeks are in.
+
 ## Why actors
 
 Nesting, mixed rates (a game at 60 steps a second, chat at a line every few seconds, a model answering in
