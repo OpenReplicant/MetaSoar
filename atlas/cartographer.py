@@ -107,6 +107,8 @@ class Cartographer:
             self.principal = named or None
         elif q.get("about", "").startswith("repo:"):
             self.repos.setdefault(q["about"][5:], {}).update({"purpose": text})
+        elif q.get("about", "").startswith("dormant:"):
+            self.repos.setdefault(q["about"][8:], {}).update({"status": text})
         elif q.get("about", "").startswith("link:"):
             self.link_notes = getattr(self, "link_notes", {})
             self.link_notes[q["about"][5:]] = text
@@ -128,7 +130,8 @@ class Cartographer:
                                                f"{r.get('description') or 'nothing'!r}."))
         if self.day is not None:
             for name, r in sorted(self.repos.items()):
-                if r.get("last") is not None and self.day - r["last"] > 365 and r.get("commits", 0) >= 5:
+                if (r.get("last") is not None and self.day - r["last"] > 365 and r.get("commits", 0) >= 5
+                        and "status" not in r):
                     out.append((3, f"dormant:{name}", f"{name} has had no commits since {day_str(r['last'])}. "
                                                       f"Done, archived, or waiting?"))
         return sorted(out)
@@ -238,7 +241,9 @@ class Cartographer:
             if not r.get("commits"):
                 continue
             desc = r.get("purpose") or r.get("description") or "-"
-            L.append(f"| {name}{' (fork)' if r.get('fork') else ''} | {desc[:90]} | {r['commits']} | "
+            if r.get("status"):
+                desc = f"principal: {r['status']}"
+            L.append(f"| {name}{' (fork)' if r.get('fork') else ''} | {desc[:120]} | {r['commits']} | "
                      f"{day_str(r['first'])} to {day_str(r['last'])} | "
                      f"{', '.join(a for a, _ in self.areas[name].most_common(4))} |")
         L.append("\n## Linked repositories (same actor, same day)\n")
