@@ -125,6 +125,24 @@ Custody runs through every part: which readings are fair under which profile (pr
 never a sense), who may act for whom, whose data stays where. Judgment is held-out: a change to the agent stays
 only if it wins on cases it was not built on. The agent may change itself; it may not grade itself.
 
+## Where H-JEPA fits (2026-11-22, M-18)
+
+LeCun's hierarchical joint-embedding predictive architecture (the JEPA family: I-JEPA, V-JEPA and its successors) is a
+world model that predicts in a learned latent space, at several time scales. In this model it is a part, not the
+whole mind. LeCun's other modules already have homes here: short-term memory is the workspace, the configurator is
+attention, the cost module is goals and the judge, and the actor's fast and slow modes are the skill ladder and
+deliberation at impasses.
+
+Where it plugs in:
+- **Perception:** a pretrained V-JEPA encoder as a detector's features for frames (games, the camera).
+- **Simulators:** an action-conditioned JEPA as a learned simulator, judged before it is used, for P2's kind of test.
+- **Surprise:** latent prediction error as the surprise signal P7 compares against recency.
+- **Hierarchy:** its time scales line up with nested environments and with the skill ladder's levels.
+
+Where we differ: knowledge stays as claims with provenance, and the decision cycle stays explicit; a JEPA is one
+more predictive model, scored like the others by how well it predicts. Before using one: the weights' licence and
+what runs on the owner's GPU (we would use pretrained weights, not train one).
+
 ## The loop
 
 perceive → post → enrich (subconsciously) → bind and map → predict and compare (surprise) → decide (compiled path,
