@@ -3,6 +3,14 @@
 `docs/architecture.md` records what exists. This document states what we think a mind is, in terms the framework
 can build and test: the parts, how they work together, and the predictions that would show it wrong.
 
+## The headline (M-17, 2026-11-22)
+
+**Impasse-driven compilation:** an agent that calls the model only at impasses, and compiles what it solved into
+judged skills, gets cheaper on recurring tasks with no loss of success, against the same model with memory and no
+compilation (the Knowledge Kernel's memory profile). That is P1 and P5 below; the rest follow it. Lineage: Soar
+(decision cycle, impasses, chunking, elaboration), global workspace theory (attention), predictive processing
+(surprise).
+
 ## The thesis
 
 A mind is an environment nested in a world. Inside it, detectors and automatic processes post into one shared
