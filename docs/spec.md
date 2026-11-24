@@ -1,4 +1,11 @@
-# MetaSoar: Soar, with Substrate on its impasses
+# MetaSoar: Soar, with an improver on its impasses
+
+**Read with M-20 (2026-11-24).** This spec was written when Substrate was the improver. Since Substrate's S-209
+to S-214, the improver is an ordinary agent harness with Morphogen's kit (map, research, catalog, optimise behind
+the judge). It runs on Substrate's default distribution when that is wanted, and the knowledge kernel is an
+optional store. Experiments run on OpenEnv. Wherever the text below says Substrate proposes or changes something,
+read: the improver. Wherever it says "the kernel", it means Soar's kernel (its C++), not the knowledge kernel.
+The text is kept as written, as the record of the design.
 
 The spec for Substrate's first target, the repository `OpenReplicant/MetaSoar` (S-160, S-161, 2026-11-18; supersedes S-154's design, which is kept below as
 hypotheses). **The original Soar, unchanged, with one hook: an impasse its own knowledge cannot get out of goes
