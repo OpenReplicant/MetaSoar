@@ -1,22 +1,35 @@
 # MetaSoar
 
-**The original Soar, unchanged, with Substrate on its impasses.** When Soar gets stuck in a way its own knowledge
-cannot get out of, a watcher outside the agent hands the trace to [Substrate](https://github.com/OpenReplicant/Substrate),
-which proposes a change: new rules, new settings, or, eventually, a change to the architecture itself. Each change
-is judged by [Morphogen](https://github.com/OpenReplicant/Morphogen) on cases the builder never sees, and let in by
-a gate. Nothing else is ours. What accumulates, and whether it rediscovers what we might have built in, is the
-result.
+**The research layer: cognitive architecture for agents that get better from their own experience.** Its
+baseline is the original Soar 9.6.5, unchanged. When the agent gets stuck in a way its own knowledge cannot get
+out of (an impasse), a watcher outside the agent hands the trace to an improver: an ordinary agent harness with
+[Morphogen](https://github.com/OpenReplicant/Morphogen)'s kit. The improver proposes a change (new rules, new
+settings, eventually a change to the architecture). Morphogen judges each change on cases the improver never
+sees, and a gate lets it in. What accumulates, and whether it rediscovers what we might have built in, is the
+result. The headline hypothesis is impasse-driven compilation (M-17). Its first product-shaped output is
+**System 1 skills** ([`docs/system1-skills.md`](docs/system1-skills.md), M-19): learned responses, triggers and
+observers kept in an Agent Skill folder, each one judged.
 
 **The test:** given an environment it has never seen (a game, a terminal, a conversation), through one generic
 adapter, does it get better over episodes, and does what it learned make the next one faster to learn? Compared
 with vanilla Soar and a vanilla LLM agent. The design is [`docs/spec.md`](docs/spec.md); the reasons are in
 [`DECISIONS.md`](DECISIONS.md).
 
+## Where MetaSoar sits (M-20)
+
+| Project | Is | For MetaSoar |
+| --- | --- | --- |
+| [Morphogen](https://github.com/OpenReplicant/Morphogen) | the kit: map, research, catalog and optimise behind a judge (Substrate's S-209) | the judge of every change, and the improver's tools |
+| [OpenEnv](https://huggingface.co/docs/openenv) | the environment standard | where experiments run (BabyAI and ARC-AGI-3 move onto it) |
+| [the kernel](https://github.com/OpenReplicant/kernel) | Postgres made into a knowledge kernel | an optional store for claims and the record, when one is needed |
+| [Substrate](https://github.com/OpenReplicant/Substrate) | the default distribution: a harness set up with the kernel and Morphogen, plus optional parts (S-211 to S-214) | where MetaSoar's agents can run; not required |
+
 ## Status
 
 Soar 9.6.5 plays BabyAI (Minigrid) through one generic adapter, starting from four rules that pick actions at
 random (success 5 to 55% by level, `trials/baseline`). Morphogen judges every change to the agent's rules on 60
-held-out episodes (M-05). Next: the hook, sending a stuck step to Substrate.
+held-out episodes (M-05). Next: the hook, sending a stuck step to the improver, and the System 1 skills
+experiments (M-19).
 
 ```sh
 podman build -t localhost/metasoar-sandbox -f deploy/sandbox/Containerfile .

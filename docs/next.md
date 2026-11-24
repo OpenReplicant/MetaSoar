@@ -2,6 +2,11 @@
 
 A handoff for the next session, local or in the cloud. Read `README.md`, `docs/spec.md` and `DECISIONS.md` first.
 
+**Since then (2026-11-24, M-19, M-20):** MetaSoar is the research layer. The improver on its impasses is an agent
+harness with Morphogen's kit, experiments move onto OpenEnv, the knowledge kernel is an optional store, and
+Substrate is the default distribution the agents can run on. A new line of work is open: System 1 skills
+(`docs/system1-skills.md`), whose experiments 1 and 2 are the smallest next steps. The list below is unchanged.
+
 ## State
 
 - `main`: Soar 9.6.5 unchanged, the adapter (`metasoar/`), the hook, and Morphogen as the judge
@@ -35,8 +40,8 @@ more thing for the held-out games to break.
    from rules written against the training games.
 
 Later:
-- the store: claims with evidence and status in Substrate's Postgres once a model proposes them (provenance,
-  retraction), not before;
+- the store: claims with evidence and status in the knowledge kernel (optional, M-20) once a model proposes them
+  (provenance, retraction), not before;
 - the three-way comparison: plain Soar, Soar with the hook, and Haiku 5.5 as the plain LLM player;
 - ARC-AGI-1 as the next suite.
 
