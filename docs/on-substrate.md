@@ -97,8 +97,12 @@ gone.
 
 ## The smallest first build
 
-1. **Observed state** (in Substrate, written as a kernel module per Substrate's S-212, or in Morphogen if it belongs
-   in the kit): `observe` writes observed component files from Docker, model files, the GPU and git, and `drift`
+The kernel has already planned part of this. Milestone 6 lists a self encoder, a git and pull-request encoder and
+session hooks, and `encoder-compose` exists (kernel D-125). So the observers below are kernel encoders first, with a
+file-only version in the kit for users without a kernel (`docs/docs-unification.md`).
+
+1. **Observed state** (a kernel encoder next to `encoder-compose`, or in Morphogen if a file-only version comes
+   first): `observe` writes observed component files from Docker, model files, the GPU and git, and `drift`
    compares them with the catalog. There are no model calls; it runs in seconds.
 2. **Model facts as catalog properties:** the thinking switch, log-probabilities, speed and memory for Inkling and
    LFM3, from today's probes and S-169.
