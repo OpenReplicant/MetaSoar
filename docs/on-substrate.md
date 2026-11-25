@@ -121,6 +121,58 @@ file-only version in the kit for users without a kernel (`docs/docs-unification.
 
 E-04, the runner and E-01 then follow as trials on the same path.
 
+## The orchestrator: Haiku first, escalating on evidence
+
+The owner, 2026-11-25: the top-level agent that watches the system and handles the moment to moment should run on
+Haiku 5.5 and models scoring like it, handing work to more capable models only when it needs them.
+
+This is Substrate's earlier ladder, rebuilt at the level of the harness. That ladder ranked handlers by measured
+cost, had each one either answer with a confidence or escalate with a reason, and compiled what a costlier rank
+worked out into a cheaper one, kept only on Morphogen's verdict. It was removed with the old assistant in Substrate
+S-195. Substrate S-136 already ran the companion on Haiku 5.5 through the gateway, with a key held to
+`regex:claude-haiku.*`.
+
+| Rung | What | Does |
+| --- | --- | --- |
+| 0 | rules, scripts, compiled skills | what is already learned (System 1) |
+| 1 | LFM3, Inkling (local) | routing, typed decisions, quick lookups (Substrate S-170: "don't use haiku when you could use the local model") |
+| 2 | Haiku 5.5 | the orchestrator: watching, triage, ordinary work |
+| 3 | Opus 5.5 or Fable, as subagents or forked skills | design, hard debugging, anything rung 2 has failed at |
+
+**What Claude Code provides** (its documentation, read 2026-11-25):
+- The main session's model is set by `--model haiku`, `"model": "haiku"` in settings, or `ANTHROPIC_MODEL`. `haiku`
+  resolves to Haiku 5.5.
+- A subagent definition sets `model: opus` or `fable` (or a full ID), and a subagent call can also pass a model.
+  The per-call model wins, then the definition's, then `CLAUDE_CODE_SUBAGENT_MODEL`, then the session's.
+- A skill with `context: fork` runs in a subagent with its own `model`, so a heavy procedure can always run on Opus.
+- `claude -p --output-format json` reports cost with a per-model breakdown.
+
+**What it does not provide:**
+- **Escalation by difficulty.** `opusplan` splits by plan mode only, and `fallbackModel` is for outages.
+- **A Haiku-main, Opus-subagent example.** The docs imply it works through the resolution order but show none.
+  Test it once.
+- **Cheap long sessions.** Haiku 5.5 costs more per token above 100K prompt tokens, so a watcher that stays open
+  accumulates cost. Prefer short, periodic sessions that start from a briefing, as the kernel's milestone 6 plans.
+
+**When to escalate** is the same question as E-04 (when to think), one level up, and the same evidence applies
+(`docs/decision-backends.md`). Asking the model whether it needs help is the weakest signal; agreement and outcomes
+are stronger. So the triggers, from cheapest to most work:
+1. **Instructions in the orchestrator's prompt:** a short rubric of what goes to rung 3. This is a starting point,
+   not something to rely on.
+2. **Outcome triggers:** a test failing twice, the same tool error twice, the judge refusing a change, or a task
+   over its budget. Counted by hooks, and the orchestrator then hands the task up with a reason. Whether a hook can
+   add that nudge to the context is still to check in the hooks documentation.
+3. **A measured gate:** E-04's best observer, once E-04 has picked one, applied to whether a task leaves rung 2.
+
+**The routing policy is a Morphogen cell.**
+- `change`: the rubric, the subagent definitions and the triggers' thresholds.
+- `run`: a set of recorded tasks.
+- `better`: cost per task, from the gateway's meter, not the agent's own count.
+- `tests`: each task's own checks must pass, so a cheaper policy that fails more is refused.
+
+Each escalation is also a case: what rung 3 worked out is a candidate to compile into a skill at rung 0 or 1, which
+is M-17. Registered as E-16 in `docs/experiments.md`.
+
 ## Open, for the owner
 
 - Where observed state lives: in the kit (Morphogen), so every user gets it, or in Substrate's distribution.
