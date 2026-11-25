@@ -146,11 +146,18 @@ S-195. Substrate S-136 already ran the companion on Haiku 5.5 through the gatewa
   The per-call model wins, then the definition's, then `CLAUDE_CODE_SUBAGENT_MODEL`, then the session's.
 - A skill with `context: fork` runs in a subagent with its own `model`, so a heavy procedure can always run on Opus.
 - `claude -p --output-format json` reports cost with a per-model breakdown.
+- **Tested 2026-11-25** (Claude Code 2.1.332): a headless Haiku 5.5 session started an Opus 5.5 subagent with a
+  per-call `model: opus`. Haiku cost $0.0048 for 500 output tokens; the Opus subagent cost $0.0932 for 31.
+  Almost all of that is the fixed cost of starting a subagent, whose system prompt and tools are written to the
+  cache. **So every escalation costs about nine cents before any work.** Trivial tasks should not go up, and a task
+  that does should go up whole rather than piece by piece.
+- The Agent SDK takes `model` and `fallbackModel` per query, and `setModel` (TypeScript) or `set_model` (Python)
+  switches the model mid-session. An always-on orchestrator can therefore change its own rung without spawning
+  anything.
 
 **What it does not provide:**
 - **Escalation by difficulty.** `opusplan` splits by plan mode only, and `fallbackModel` is for outages.
-- **A Haiku-main, Opus-subagent example.** The docs imply it works through the resolution order but show none.
-  Test it once.
+- **Model choice inside hooks.** No hook can choose or switch the model; only the model's own subagent call can.
 - **Cheap long sessions.** Haiku 5.5 costs more per token above 100K prompt tokens, so a watcher that stays open
   accumulates cost. Prefer short, periodic sessions that start from a briefing, as the kernel's milestone 6 plans.
 
@@ -160,8 +167,16 @@ are stronger. So the triggers, from cheapest to most work:
 1. **Instructions in the orchestrator's prompt:** a short rubric of what goes to rung 3. This is a starting point,
    not something to rely on.
 2. **Outcome triggers:** a test failing twice, the same tool error twice, the judge refusing a change, or a task
-   over its budget. Counted by hooks, and the orchestrator then hands the task up with a reason. Whether a hook can
-   add that nudge to the context is still to check in the hooks documentation.
+   over its budget. The orchestrator then hands the task up with a reason. Hooks can do the counting, but the model
+   still makes the hand-off:
+   - **Tool failures:** `PostToolUseFailure` fires after each failed tool call, with `tool_name`, `tool_input`,
+     `error` and `is_interrupt`. It keeps its count in a small state file of its own, since hooks get no counter.
+     It can add `hookSpecificOutput.additionalContext`, such as "this has failed twice; hand it to an Opus
+     subagent".
+   - **Finishing too early:** a `Stop` or `SubagentStop` hook can return `decision: "block"` with a `reason`, to
+     keep a session from finishing over a failing check.
+   - **Cost:** escalation pays only when the work saved exceeds the overhead above, so the overhead is part of the
+     cell's measure.
 3. **A measured gate:** E-04's best observer, once E-04 has picked one, applied to whether a task leaves rung 2.
 
 **The routing policy is a Morphogen cell.**
