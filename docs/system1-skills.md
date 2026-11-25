@@ -128,6 +128,19 @@ directories and one manifest that any harness may ignore. What to propose upstre
 4. **The observer as the tuned parameter.** Fix the policies, and let an optimiser choose among observer fillers
    and thresholds (Morphogen's `tune`). Is the best observer different per task? If so, the interface earns its
    keep.
+5. **When to think: a setting chosen per input.** The owner (2026-11-24): the local `slow` model (Inkling 2 Mini)
+   "performed much better in thinking mode on (vs off) in reasoning-heavy benchmarks, so finding a way to classify
+   when an input should be processed with thinking mode could involve a nearest-neighbor search and benchmarks
+   would give us some reason to trust the labeling". One model, one switch, so the comparison is clean (the same
+   model on both sides). **Labels made locally:** run the model over public benchmark questions with known answers
+   (reasoning, maths, law, plain lookups as the contrast), each with thinking on and off, through the gateway.
+   Each question gets whether thinking changed the answer and what it cost (tokens, seconds). No published
+   per-question results are needed. **Observers compared:** always off, always on, nearest neighbours on the
+   questions' embeddings, a small classifier on those embeddings, and the `fast` model asked for the probability
+   that the input needs reasoning. **Measure:** accuracy against tokens and seconds on held-out questions, then on
+   real inputs from the record, where benchmark questions may sit far from the work. The threshold and `k` are a
+   cell for Morphogen to tune. The same set-up extends to choosing a model, not just a setting, where a router at
+   the gateway would use it (S-178 to S-183's ladder).
 
 **What would falsify it:**
 
