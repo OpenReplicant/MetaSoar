@@ -63,6 +63,18 @@ configurations, open models served by vLLM on H100s.
   Short or Long as its first token kept MATH500 accuracy (0.782 against 0.796) at 41% fewer tokens. It needs training,
   so it is a later option, not a baseline.
 
+**Size is the wrong condition to compare on.** The owner notes that LFM3 1.7B beats 12B and 14B models on general
+benchmarks, and that Inkling 2 Mini is likewise strong for its size; both are about the best that runs on low-end
+consumer hardware. So the transfer question is capability and tuning, not parameter count: a 14B model of an older
+generation falling below Jev says little about LFM3. The fair comparators are the decision models near 4B (SII-Decision-4B,
+OpenJev-4B v5, Intern-Decision-4B, Kev-4B), most of which are a general model plus fine-tuning or self-distillation.
+What the papers do say holds at any size: an untuned readout needs work before its probabilities can be trusted. Our
+own probe showed why. Asked a multiple-choice question with `Answer:` prefilled, LFM3's most likely first token was
+" Let" (0.37), with only about a third of its probability on the option letters, so the model wanted to reason first.
+Prompt engineering (template, labels, prefill, examples), renormalising over the option tokens, a temperature per task
+and, further out, fine-tuning on its own post-reasoning answers are all changes an optimiser can search and a judge can
+score: Morphogen's job (`docs/on-substrate.md`).
+
 **Quantisation.** Mixed and thin: one study found 4-bit GPTQ lowered confidence on correct answers most where the
 model was already unsure; another found the effect on calibration generally minor; a clinical study saw logit-based
 calibration error rise from 0.15 to 0.26 at 4 bits. None tested llama.cpp's K-quants. Our 1.7B is Q6_K and Inkling
@@ -73,15 +85,17 @@ Q4_K: measure, do not assume.
 | Claim we rely on | Evidence | Status |
 | --- | --- | --- |
 | An LLM's first-token readout gives typed decisions | JEVal Finding 11; the gates paper | supported |
-| A 1.7B read that way is good enough | none published under 4B; 4B already far below Jev uncalibrated | **unsupported: measure** |
+| LFM3 1.7B read that way is good enough | none published for it; untuned readers of every size need debiasing and calibration; tuned 4B decision models are the comparators | **open: measure, then tune** |
 | Debiasing and one temperature per task make it usable | the gates paper (temperature), PriDe and AnyJev (order) | supported for larger models |
 | Asking a model "should this be processed with thinking?" works | DART's MC-Binary: fine on maths, collapsed on code | **weak** |
 | The answering model's own agreement or confidence predicts when thinking helps | DART (0.6B to 32B), Nguyen (7 to 8B) | supported |
 | Embedding classifiers are strong once labels exist | the gates paper (logistic regression on BGE-small) | supported, but brittle out of distribution (Nguyen) |
 | Readout replaces thinking on reasoning-heavy questions | JEVal: a quarter of the gain or less | **no**: this is why when-to-think matters |
 
-So we are not early on the interface, which every result fits. We would be early to name the 1.7B the backend, and to
-make E-04's main observer a typed question about thinking, which is the observer with the weakest evidence.
+So we are not early on the interface, which every result fits. We would be early to name the 1.7B the backend before
+it is measured and tuned, and to make E-04's main observer a typed question about thinking, which is the observer
+with the weakest evidence. E-04a is therefore a Morphogen cell from the start, with the readout's prompt and settings
+as its `change`, not a one-off measurement.
 
 ## Proposed order
 
