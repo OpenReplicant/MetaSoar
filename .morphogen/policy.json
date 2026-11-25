@@ -13,7 +13,8 @@
   "trials/**",
   "docs/**",
   "README.md",
-  "DECISIONS.md"
+  "DECISIONS.md",
+  "catalog-info.yaml"
  ],
  "case_sets": {
   "babyai-heldout": {

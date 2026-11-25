@@ -1,0 +1,63 @@
+# MetaSoar's cells for Morphogen's kit (the `morphogen` package on Morphogen's main, schemas/morphogen-spec.v1.json):
+# the same scope and case sets as .morphogen/policy.json, which the GitHub judge (judge.yml@b921c9b, rebuild 8) still
+# reads, so both stay until a GitHub judge reads this catalog.
+#
+# One cell per held-out case set, both over the agent (its rules, its perception, the atlas arm). Default deny: a
+# candidate may change only what `change` names; this file, .morphogen/, .github/, metasoar/, deploy/, trials/,
+# docs/ and everything else are refused, which is what policy.json's `protected` list says. The held-out cases are
+# never in the repository: the operator names them per cell in the uncommitted morphogen.local.yaml
+#   cells:
+#     babyai-heldout: {inputs: /outside/babyai/all, private: /outside/babyai/heldout, search: /outside/babyai/search}
+#     arc3-heldout:   {inputs: /outside/arc3/all,   private: /outside/arc3/heldout,   search: /outside/arc3/search}
+# each a directory holding a cases.jsonl in the format make_cases.py and make_arc_cases.py write. `inputs` is what
+# every run plays (the held-out cases and the search cases together); `private` and `search` are which of them a
+# verdict and a probe score.
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: metasoar
+  description: MetaSoar, the research layer for cognitive architecture; the agent is judged on held-out episodes
+spec:
+  owner: group:default/openreplicant
+  lifecycle: experimental
+  morphogen:
+    sandbox_image: ghcr.io/openreplicant/metasoar-sandbox@sha256:846875ecea32834ee9d44635128d382502086362341cf91c559a1b195ab1033d
+    defaults:
+      change: ["agent/**/*.soar", "agent/perception/**/*.py", "atlas/**"]
+      run: python .morphogen/bench.py
+      score: python .morphogen/score.py
+      requires: [network_isolated, read_only_tree, resource_limits]   # policy.json's `network: []`, the sandbox
+      rounds: {warmup: 0, repeats: 8, max_repeats: 12}   # a round plays every case on each side
+      timeout: 3600   # a run: every case, at most 60 s each (bench.py), as the GitHub judge's case-timeout
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: babyai-heldout
+  description: The agent on 60 held-out BabyAI episodes, 12 seeds for each of 5 level families (M-05, M-08)
+spec:
+  type: service
+  lifecycle: experimental
+  owner: group:default/openreplicant
+  system: metasoar
+  morphogen:
+    description: Succeed on more BabyAI episodes (seeds never seen) without being much slower.
+    better:
+      success: {higher: true, min: 0.0, gain: absolute, aggregate: mean}
+      wall_seconds: {lower: true, max_regression: 60, gain: absolute}   # policy.json: at most 1 s worse a case
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: arc3-heldout
+  description: The agent on the 16 ARC-AGI-3 games held out by kind, seeds 0 to 2 (M-09)
+spec:
+  type: service
+  lifecycle: experimental
+  owner: group:default/openreplicant
+  system: metasoar
+  morphogen:
+    description: Complete more levels of ARC-AGI-3 games never seen (or played) without being much slower.
+    better:
+      levels: {higher: true, min: 0.0, gain: absolute, aggregate: mean}
+      wall_seconds: {lower: true, max_regression: 240, gain: absolute}   # policy.json: at most 5 s worse a case
