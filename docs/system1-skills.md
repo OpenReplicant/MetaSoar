@@ -3,7 +3,8 @@
 A research spec, proposed 2026-11-24. Its decision is M-19. It continues impasse-driven compilation (M-17, on
 branch `claude/exciting-wozniak-0sof8t`, not yet on `main`) and places it where Substrate's S-209 (f) put it.
 Refined 2026-11-25 by M-21: four kinds of handler and a runner, a namespaced blackboard, scores calibrated to
-precision, a shadow stage, and a lockfile the judge writes. See "Handlers and the runner (M-21)".
+precision, a shadow stage, and a lockfile the judge writes. See "Handlers and the runner (M-21)". Matching and
+learning as case-based reasoning, typed questions, typed impasses, compilers and templates: M-22, 2026-11-25.
 
 ## The idea in one paragraph
 
@@ -184,6 +185,125 @@ and the decision over the whole set. In an OpenEnv environment the rubric is the
 `TrajectoryRubric` covers labels that only arrive at the end of an episode. Morphogen's scorer could take a rubric
 as it is. The two names are kept apart.
 
+## Matching and learning: case-based reasoning (M-22)
+
+M-21 says what the parts are. M-22 says how matching and learning work in them. The frame is case-based reasoning
+(Aamodt and Plaza's cycle): the case base is the knowledge, and a compiled policy is a summary of a cluster of
+cases.
+
+| The cycle | Here | What matters |
+| --- | --- | --- |
+| **Retrieve** | proposers | similarity that means "the same response would work", not "looks alike" |
+| **Reuse** | appliers | a case rarely applies verbatim; a template's slots are the adaptation |
+| **Revise** | outcomes, shadow, audit | whether what was reused worked |
+| **Retain** | `cases/`, compilers | what is kept, and when a cluster becomes a policy |
+
+Embedding similarity is similarity of surface. Two error messages can sit side by side and need opposite
+responses. So tuning observers is learning the similarity from outcomes, and most of the work is there.
+
+### A cascade, by cost
+
+The fillers are not rivals; each is good at one part, and they run cheapest first, each narrowing what the next
+sees:
+
+| Stage | Fillers | Good at | Bad at |
+| --- | --- | --- | --- |
+| 1. Constraints | queries and triggers over the blackboard (Cypher; a Rete, Soar's own matcher) | exact joins, negation, compositions | anything fuzzy; conditions must be written |
+| 2. Retrieve | nearest cases on embeddings | unstructured state, cheap, no training | conjunction and negation, which embeddings blur |
+| 3. Judge | typed questions (below); a tabular model (TabICL, TabPFN) over features | fuzzy judgments; interactions among features with few cases | a tabular model sees only features elaborators made |
+| 4. Calibrate | the runner (M-21) | one currency across all of them | — |
+
+At stage 3 the retrieved cases, with their outcomes, can go into the question's state: "given these past cases, does
+policy X apply here?" Retrieval stays ours; the judgment whether a past case transfers is the model's.
+
+### Typed questions: one builtin, backends swappable
+
+A **typed question** asks a model about the state and accepts only answers of a declared type: a boolean, an enum,
+a score in a range. TypeSafe's Jev (2026-09-15) made this a product, a "System One model". The open models cloned
+it at once (Hugging Face's decision models). And any local model does it by reading the probabilities of the
+allowed answers' tokens in its inference engine. The owner (2026-11-25): a 1.7B model read this way "outperformed
+the jev-clones on the few questions we tested". So the builtin is the question, not a vendor:
+
+```yaml
+elaborators:
+  needs-reasoning:
+    builtin: ask
+    backend: local-1.7b             # | jev | a Hugging Face decision model
+    reads: [core/prompt]
+    questions:
+      multi_step: {type: bool}
+      domain: {type: enum, of: [math, law, lookup, other]}
+    egress: none                    # none | hosted: the state leaves the machine
+```
+
+A typed question serves both kinds: as an elaborator its answers are features; as a proposer it asks "does policy A
+apply?" for each candidate, and "does this break constraint K?", in one pass. How a local model is read, and what
+is known about doing it well, is `docs/typed-questions.md`. The contract gains one field, `egress`, beside `cost`:
+a hosted backend sends the state off the machine, which the record and the gates must know. A backend also declares its
+readout level (`raw`, `debiased`, `calibrated`), recorded with every case; and a matcher is measured by its coverage
+at fixed risk, the share of states it may take while its errors stay under a bound. A typed question over untrusted
+state (a tool's output, a page, a message) can be steered by one adversarial line, so it may drive `inject` and
+`route`, but a policy that acts needs a deterministic condition as well.
+
+### Goals and constraints
+
+- **Goals are state.** The current goal or task is in `core/goal`, and similarity includes it. The same error under
+  another goal is another case. Without it, a response right for the situation is reused where it is wrong for
+  the goal.
+- **Constraints are stage 1, and are not learned statistically where an action is irreversible.** They are
+  queries that `reject` or `veto`, written or reviewed explicitly, and they win over any proposal.
+- **Proposals compete among themselves only,** by `better` and `best`; what is left over is an impasse.
+
+### Predictions
+
+Every policy declares what it expects (`expects:`, a typed outcome), and every case keeps four things: the state,
+what was done, what was expected, what happened. Three uses:
+
+- **Surprise is a label at once.** Expected against actual arrives before slow outcomes do. It is predictive
+  processing's signal, already in M-17's lineage.
+- **A check before acting.** An expected effect that breaks a constraint is vetoed before the policy acts.
+- **The case base predicts already.** The outcomes of a state's nearest cases are a distribution over what will
+  happen. A learned world model (H-JEPA, M-18) can take that place later behind the same field.
+
+### Typed impasses: each teaches something different
+
+| Impasse | When | System 2 | What it teaches |
+| --- | --- | --- | --- |
+| **no-match** | nothing proposed | handles the state | a new policy, from a cluster of these |
+| **tie** | proposals too close to choose | chooses | preferences: pairs for ranking |
+| **conflict** | a proposal against a goal or a constraint | resolves it, told what conflicts | a constraint refined, or a goal condition the policy lacked |
+| **surprise** | after acting, the expected outcome did not happen | recovers, the policy flagged | a missing condition: near-miss mining starts here |
+
+The type of impasse routes learning, not only the call to the model.
+
+### Three compilers
+
+| Compiler | From | Finds | Makes |
+| --- | --- | --- | --- |
+| **from the trace** | System 2's trace on a case | the facts the model actually checked | a policy's conditions (Soar's chunking: conditions are what the result depended on) |
+| **near-miss** | close cases, opposite outcomes | what differs | a feature: an elaborator, often a typed question rather than a script |
+| **anti-unification** | different cases, same shape or outcome | what is shared (Plotkin's least general generalisation) | a template: an applier with typed slots |
+
+The trace is better than the whole state as the source of conditions; the whole state is what overfits. Near-miss
+and anti-unification are duals: one discriminates, one generalises.
+
+### Templates: the `fill` applier
+
+A template is an applier whose slots are handlers: a fact slot filled by a deterministic process (a lookup, a sum,
+a query); a choice slot by a typed question; a free slot by a small model writing a bounded span, only where
+nothing else can. A proposer chooses the template, and a slot may hold another template. Facts in deterministic
+slots cannot be made up, and every move can be read. The catalog of rhetorical patterns built this way is its own
+research line: `docs/pattern-catalog.md` (M-23).
+
+```yaml
+policies:
+  explain-lock-retry:
+    do: {fill: templates/lock_retry.md, slots: {table: {query: "err.table"}, waited: {run: scripts/waited.sh},
+         tone: {ask: {type: enum, of: [brief, detailed]}}}}
+    effect: read-only
+    expects: {user_follow_up: {type: bool, value: false}}
+```
+
 ## Where it fires
 
 Harness-agnostic. Wherever a runner can see the state before the model acts:
@@ -264,7 +384,15 @@ directories and one manifest that any harness may ignore. What to propose upstre
    that the input needs reasoning. **Measure:** accuracy against tokens and seconds on held-out questions, then on
    real inputs from the record, where benchmark questions may sit far from the work. The threshold and `k` are a
    cell for Morphogen to tune. The same set-up extends to choosing a model, not just a setting, where a router at
-   the gateway would use it (S-178 to S-183's ladder).
+   the gateway would use it (S-178 to S-183's ladder). **Added under M-22:** the same typed question ("does this
+   input need reasoning?") through each backend: the local 1.7B model read by its probabilities, a Jev clone, and
+   Jev itself if a proprietary point of reference is wanted; each with no examples and with the nearest cases in
+   its state. Measured for accuracy and calibration separately, so a win says which of the two it was.
+6. **The near-miss compiler, on experiment 5's data (M-22).** Baseline: nearest neighbours on embeddings. Then mine
+   pairs of questions close together where thinking helped one and not the other; an agent writes a typed question
+   for what differs; a tabular model runs over the new features. Judged on held-out questions. If it beats plain
+   nearest neighbours, an LLM wrote the matching itself, not instructions: the owner's claim at its strongest. The
+   labels are experiment 5's, so it costs little more.
 
 **What would falsify it:**
 
@@ -275,6 +403,8 @@ directories and one manifest that any harness may ignore. What to propose upstre
   standing warning here: a rule the agent did not find for itself is one more thing for held-out cases to break.
 - Calibration that does not hold: if a proposer's precision in shadow is far from its precision once active, the
   runner's one currency (M-21) is wrong, and so is every threshold built on it.
+- Retrieval that never transfers: if the nearest cases' outcomes predict a new case's outcome no better than the
+  base rate, the case base is not knowledge (M-22), and compiling from it is fitting noise.
 
 ## Related
 
