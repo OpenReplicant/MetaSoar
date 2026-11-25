@@ -62,6 +62,6 @@ short of examples to generalise from and of a way to fill the hard slots. A lang
 **What would falsify it:**
 
 - Text that is correct but stilted or repetitive, so outcomes fall even as errors do.
-- Patterns that fit a situation's surface and miss its intent (the tie and conflict impasses of M-22 should catch
+- Patterns that fit a situation's surface and miss its intent (M-22's tie and blocked impasses should catch
   these; if they do not, the `when` conditions are too thin).
 - Coverage too low to pay for the catalog: if most situations still go to free writing, nothing was compiled.

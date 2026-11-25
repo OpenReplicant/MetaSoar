@@ -5,6 +5,7 @@ branch `claude/exciting-wozniak-0sof8t`, not yet on `main`) and places it where 
 Refined 2026-11-25 by M-21: four kinds of handler and a runner, a namespaced blackboard, scores calibrated to
 precision, a shadow stage, and a lockfile the judge writes. See "Handlers and the runner (M-21)". Matching and
 learning as case-based reasoning, typed questions, typed impasses, compilers and templates: M-22, 2026-11-25.
+Its relation to Soar, and two impasses renamed or added: M-24. The experiments are registered in `docs/experiments.md`.
 
 ## The idea in one paragraph
 
@@ -122,7 +123,8 @@ Handlers never arbitrate, calibrate, gate or decide an impasse. The runner does,
    record. A regex's 1.0, a distance and a model's stated probability are not comparable; estimated precision is.
    Thresholds, side-effect classes and arbitration all work in it.
 4. **Decide:** among proposals over their thresholds, by preferences as Soar decides among operators (acceptable,
-   reject, better, best). A tie or a conflict is an impasse: System 2 takes the state and the case is recorded.
+   reject, better, best). A tie, a conflict of preferences, or a proposal blocked by a constraint is an impasse
+   (M-22 types them): System 2 takes the state and the case is recorded.
 5. **Apply:** through the gate the policy's side-effect class requires, unless the case is drawn for audit.
 
 ### The blackboard: shared, namespaced, reads declared
@@ -267,12 +269,18 @@ what was done, what was expected, what happened. Three uses:
 
 ### Typed impasses: each teaches something different
 
-| Impasse | When | System 2 | What it teaches |
-| --- | --- | --- | --- |
-| **no-match** | nothing proposed | handles the state | a new policy, from a cluster of these |
-| **tie** | proposals too close to choose | chooses | preferences: pairs for ranking |
-| **conflict** | a proposal against a goal or a constraint | resolves it, told what conflicts | a constraint refined, or a goal condition the policy lacked |
-| **surprise** | after acting, the expected outcome did not happen | recovers, the policy flagged | a missing condition: near-miss mining starts here |
+| Impasse | Soar's name | When | System 2 | What it teaches |
+| --- | --- | --- | --- | --- |
+| **no-match** | state no-change | nothing proposed | handles the state | a new policy, from a cluster of these |
+| **tie** | tie | proposals too close to choose | chooses | preferences: pairs for ranking |
+| **conflict** | conflict | proposals whose preferences contradict (A better than B, B better than A) | chooses, told which preferences clash | which preference was wrong |
+| **blocked** | none (Soar's `prohibit` removes a candidate silently) | a confident proposal against a goal or a constraint | resolves it, told what blocks it | a constraint refined, or a goal condition the policy lacked |
+| **apply-failure** | operator no-change | a policy was chosen and its applier failed or did not finish (a script's error, a slot nothing could fill) | completes the action | the applier repaired, or the policy retired |
+| **surprise** | none (from predictive processing) | after acting, the expected outcome did not happen | recovers, the policy flagged | a missing condition: near-miss mining starts here |
+
+Names follow Soar where the meaning is Soar's (M-24). `blocked` and `surprise` are this project's: Soar would let a
+`prohibit` win without an impasse, and has no impasse for a failed prediction. They are impasses here because each
+is something to learn from.
 
 The type of impasse routes learning, not only the call to the model.
 
@@ -303,6 +311,45 @@ policies:
     effect: read-only
     expects: {user_follow_up: {type: bool, value: false}}
 ```
+
+## Relation to Soar (M-24)
+
+MetaSoar is Soar-derived, not Soar orthodox: Soar 9.6.5, unchanged, is the baseline and the research engine, and
+every departure is listed here. Soar's terms are used in Soar's sense, or renamed. The wider bar is the Common
+Model of Cognition (Laird, Lebiere and Rosenbloom, 2017), the consensus of ACT-R, Soar and Sigma, which says what
+the modules are and not how each works inside.
+
+| Soar 9.6 | Here | |
+| --- | --- | --- |
+| The decision cycle: input, elaboration, proposal, decision, application, output | the runner's order (M-21), with calibration added before decision | aligned |
+| Preferences: acceptable, reject, better and worse, best and worst, indifferent, require and prohibit | `better` and `best` among proposals; constraints are `require` and `prohibit` | aligned |
+| Numeric preferences tuned by Soar-RL from reward | scores calibrated to measured precision from outcomes | same role; Soar learns an expected value, this a precision |
+| Impasses: tie, conflict, constraint-failure, state no-change, operator no-change | the six of M-22, each with its Soar name where there is one | aligned, with two additions (`blocked`, `surprise`) |
+| Episodic memory: snapshots of working memory, retrieved by partial match on a cue | `cases/`, retrieved by nearest neighbours | aligned: the case base is episodic memory |
+| Semantic memory | `core/` features; the kernel's claims | aligned in spirit |
+| i-support (an elaboration retracts when its conditions stop holding) and o-support (an operator's effects persist) | features are recomputed for each state; cases and effects persist | aligned |
+| One working memory, one agent | a namespaced blackboard, skills by many authors, a lockfile | new |
+| Productions in a Rete: all knowledge in one form | heterogeneous handlers; only the constraints match as Soar does | **departure 1** |
+| An impasse resolved in a substate by the same architecture, recursively | an impasse sent to System 2, a language model | **departure 2** |
+| Chunking: online, immediate, sound, deduced from the substate's trace (explanation-based in 9.6) | compilers: offline, mostly inductive, judged on held-out cases | **departure 3** |
+
+**Departure 1:** knowledge is no longer uniform. Soar's one matcher, one learning mechanism and one decision
+procedure work because everything is a production. Heterogeneous handlers lose that, and calibration (M-21) is what
+puts them back in one currency. **Departure 2** is the thesis: System 1 and System 2 are different kinds of system.
+What is lost is Soar's recursion: System 2 does not open substates that System 1 could help with, unless the runner
+is Soar (below). **Departure 3** follows from 2: a language model's trace is not a proof, so nothing compiled from it
+is sound, and so everything is judged. The compiler from the trace is the one closest to chunking; near-miss and
+anti-unification are learning from episodes, not chunking.
+
+**Metacognition.** Laird, Lebiere, Rosenbloom and Stocco (2025) distinguish two designs: hierarchical, where modules
+on top of cognition monitor it and change it, and unified, where cognition and metacognition differ only in what
+they reason about, the design they propose. MetaSoar's watcher and improver (M-20) are the hierarchical kind. The
+comparison with the unified design is an ablation (`docs/experiments.md`, A-06).
+
+**Two runners.** The standalone runner is for the standard: no Soar needed to adopt System 1 skills. The research
+runner is on Soar 9.6.5: elaborators and typed questions write to the input link, policies are Soar operators with
+preferences, impasses are Soar's own, System 2 is called from a substate, and chunking runs beside the inductive
+compilers. Which is better is an experiment (A-05), not a choice made here.
 
 ## Where it fires
 
