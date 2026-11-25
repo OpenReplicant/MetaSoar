@@ -1,7 +1,7 @@
 # System 1 skills: learned responses, triggers and observers in an Agent Skill folder (M-19)
 
-A research spec, proposed 2026-11-24. Its decision is M-19. It continues impasse-driven compilation (M-17, on
-branch `claude/exciting-wozniak-0sof8t`, not yet on `main`) and places it where Substrate's S-209 (f) put it.
+A research spec, proposed 2026-11-24. Its decision is M-19. It continues impasse-driven compilation (M-17,
+`docs/cognitive-model.md`) and places it where Substrate's S-209 (f) put it.
 Refined 2026-11-25 by M-21: four kinds of handler and a runner, a namespaced blackboard, scores calibrated to
 precision, a shadow stage, and a lockfile the judge writes. See "Handlers and the runner (M-21)". Matching and
 learning as case-based reasoning, typed questions, typed impasses, compilers and templates: M-22, 2026-11-25.
@@ -455,8 +455,8 @@ directories and one manifest that any harness may ignore. What to propose upstre
 
 ## Related
 
-- M-17 (impasse-driven compilation) and M-18 (H-JEPA as a part of the cognitive model) are on branch
-  `claude/exciting-wozniak-0sof8t`, not yet on `main`.
+- M-17 (impasse-driven compilation) and M-18 (H-JEPA as a part of the cognitive model): `docs/cognitive-model.md`.
+- M-21 to M-24 refine this spec; `docs/typed-questions.md`, `docs/pattern-catalog.md`, `docs/experiments.md`.
 - Substrate S-209 (f): System 1 research is MetaSoar's, shipped as a skill-folder convention.
 - Substrate S-178 to S-183: the multi-response ladder. That is the same idea at the model endpoint, a design input.
 - M-13, M-14: why learned rules must be judged on held-out cases.
