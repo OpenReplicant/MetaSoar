@@ -11,6 +11,17 @@ Substrate is the default distribution the agents can run on. A new line of work 
 questions), the pattern catalog, the relation to Soar, and every experiment registered in `docs/experiments.md`.
 What is next, on the owner's PC: `docs/handoff-2026-11-25.md`.
 
+**Since then (2026-11-25, later, on the owner's PC):**
+- **Models:** they run on llama.cpp (Substrate's pinned image), and both return top log-probabilities.
+- **Thinking switches:** Inkling's `reasoning_effort` is a soft level, and LFM3 reasons in its answer when
+  `enable_thinking` is off.
+- **Research before choosing a decision backend:** `docs/decision-backends.md`. It proposes E-04a first: our
+  models' readout against Jev's own predictions on JevBench (`trials/decision-readout/`).
+- **Building on Substrate and Morphogen:** `docs/on-substrate.md`, with MetaSoar's skills as Morphogen cells and
+  observers as kernel encoders.
+- **The four repositories' docs:** `docs/docs-unification.md`, with MetaSoar as the experimental branch.
+- **In Morphogen:** the research-loop concept note is Morphogen #105.
+
 ## State
 
 - `main`: Soar 9.6.5 unchanged, the adapter (`metasoar/`), the hook, and Morphogen as the judge
