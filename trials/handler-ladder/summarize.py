@@ -97,8 +97,9 @@ def main():
     ap.add_argument("--data", default=smoke.DATA)
     ap.add_argument("--out", default=os.path.join(HERE, "results"))
     ap.add_argument("--chunk-size", type=int, default=100)
+    ap.add_argument("--n", type=int, default=300, help="the stream's length (E-17b: 450)")
     a = ap.parse_args()
-    print(summarize(a.out, a.data, a.chunk_size, a.last))
+    print(summarize(a.out, a.data, a.chunk_size, a.last, a.n))
 
 
 if __name__ == "__main__":
