@@ -119,7 +119,8 @@ learned model trained on cases where both outcomes are known; every escalation i
 data comes free with use, and one mechanism serves every layer. E-04b sharpened what it models: not when the cheap
 path fails (a calibrated first stage already knows that) but what escalating gains, which needs the dear path's
 record and information the cheap path lacks, such as the kind of question. Ranked that way, the cascade beat
-Inkling alone (0.828 at 63% escalated, against 0.810).
+Inkling alone (0.828 at 63% escalated, against 0.810). E-04c added that, with a few hundred cases, the gate is best kept simple: neither a tabular
+foundation model nor an embedding of the question beat the second stage's record by question type.
 
 ### The skill ladder (chunking)
 What the slow path solves is compiled, as Soar compiles an impasse's result into a rule:

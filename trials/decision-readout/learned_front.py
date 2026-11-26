@@ -98,7 +98,8 @@ def auroc(scores, labels):
     return (rank_sum - pos * (pos + 1) / 2) / (pos * neg)
 
 
-def main():
+def data():
+    """What the fronts see: d1-2B's and Inkling's reads, its error labels, scaled confidence and features."""
     raw = reads(os.path.join(HERE, "results", "d1-2b.jsonl"))
     d1 = load_ours(os.path.join(HERE, "results", "d1-2b.jsonl"))
     ink = load_ours(os.path.join(HERE, "results", "inkling.jsonl"))
@@ -123,6 +124,14 @@ def main():
 
     fit = [c for c in ids if half(d1[c]["family"]) == "fit"]
     ev = [c for c in ids if half(d1[c]["family"]) == "eval"]
+    return {"d1": d1, "ink": ink, "ids": ids, "slices": slices, "wrong": wrong, "conf": conf, "feats": feats,
+            "fit": fit, "ev": ev}
+
+
+def main():
+    D = data()
+    d1, ink, ids, slices, wrong, conf, feats, fit, ev = (D[k] for k in
+                                                          ("d1", "ink", "ids", "slices", "wrong", "conf", "feats", "fit", "ev"))
     nnum = len(feats[ids[0]])
     mu = [sum(feats[c][j] for c in fit) / len(fit) for j in range(nnum)]
     sd = [math.sqrt(sum((feats[c][j] - mu[j]) ** 2 for c in fit) / len(fit)) or 1.0 for j in range(nnum)]

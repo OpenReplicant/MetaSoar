@@ -2,7 +2,8 @@
 # Start one llama.cpp server for E-04a, on localhost only, with Substrate's pinned image and model files (S-169).
 #   serve.sh fast   LFM3 1.7B Q6_K wholly on the GPU, :8082
 #   serve.sh slow   Inkling 2 Mini Q4_K, attention on the GPU and the experts of loop layers 6-12 on the GPU, :8081
-#   serve.sh stop   stop both
+#   serve.sh embed  Qwen3-Embedding-0.6B Q8_0 (Apache-2.0), last-token pooling, :8084 (E-04c)
+#   serve.sh stop   stop all
 set -eu
 IMG=ghcr.io/ggml-org/llama.cpp:server-cuda12-b12627
 L=/usr/lib/x86_64-linux-gnu
@@ -30,6 +31,11 @@ d1)
   docker run -d --name e04a-d1 $SAFE $GPU -v /home/pete/.lmstudio/models/LiquidAI:/models:ro -p 127.0.0.1:8083:8080 \
     --entrypoint /app/llama-server $IMG -m "/models/$2" --host 0.0.0.0 --port 8080 --alias d1 \
     -ngl 999 -t 2 -c 16384 -b 8192 -ub 8192 ;;
+embed)
+  # Qwen's official GGUF, revision 370f27d; Qwen3-Embedding pools the last token.
+  docker run -d --name e04a-embed $SAFE $GPU -v /home/pete/.lmstudio/models/Qwen/Qwen3-Embedding-0.6B-GGUF:/models:ro \
+    -p 127.0.0.1:8084:8080 --entrypoint /app/llama-server $IMG -m /models/Qwen3-Embedding-0.6B-Q8_0.gguf \
+    --host 0.0.0.0 --port 8080 --alias embed --embedding --pooling last -ngl 999 -t 2 -c 8192 -b 8192 -ub 8192 ;;
 stop)
-  docker rm -f e04a-fast e04a-slow e04a-d1 2>/dev/null || true ;;
+  docker rm -f e04a-fast e04a-slow e04a-d1 e04a-embed 2>/dev/null || true ;;
 esac
