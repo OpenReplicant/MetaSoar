@@ -46,6 +46,7 @@ on localhost only.
 ```sh
 ./run.sh > results/run.log 2>&1
 python3 -I score.py results/lfm3.jsonl results/inkling.jsonl   # writes results/summary.md
+./run_d1.sh > results/run-d1.log 2>&1                           # d1 models, then score them the same way
 ```
 
 ## Results so far (2026-11-25)
@@ -79,4 +80,35 @@ slices, on the `eval` half (3,412 cases):
 - **Fine-tuning:** self-distillation, as SII-Decision and Tacit do, if the template is not enough.
 - **Speed:** 108 ms per read (median) on the GTX 1070.
 
-**Inkling 2 Mini:** running, on 100 families per slice.
+**Inkling 2 Mini, 100 families per slice** (1,400 cases, 2,800 reads, no errors; `results/summary-inkling.md`).
+Pooled on the `eval` half (779 cases):
+
+| System | Accuracy [95% CI] | Brier | Calibration error | Coverage at 5% risk (realised risk) |
+| --- | --- | --- | --- | --- |
+| Inkling, raw | 0.787 [0.752, 0.820] | 0.343 | 0.129 | 0.43 (0.054) |
+| Inkling, debiased | 0.810 [0.775, 0.843] | 0.302 | 0.091 | 0.56 (0.073) |
+| Inkling, debiased and scaled | 0.810 [0.775, 0.843] | 0.283 | 0.051 | 0.51 (0.043) |
+| Jev 1.13 | 0.843 [0.813, 0.873] | 0.236 | 0.032 | 0.64 (0.058) |
+| djev 0.1 | 0.661 [0.627, 0.703] | 0.506 | 0.205 | 0.18 (0.057) |
+| Laya 421M | 0.452 [0.412, 0.492] | 0.664 | 0.151 | 0.06 (0.062) |
+
+- **E-04a's falsifier is not met for Inkling.** It is 3.3 points below Jev (paired, families resampled: 95% interval
+  [-6.5, -0.3] points), so the gap is real but small. Its coverage at 5% risk is 0.51 against Jev's 0.64.
+- **Case by case:** both right on 583 cases, only Inkling on 48, only Jev on 74.
+- **Inkling is ahead on:**
+  - ATBench: 0.97 against 0.92.
+  - Prompt injections: 0.90 against 0.75.
+  - PubMedQA: 0.75 against 0.67.
+  - ScienceQA: 0.98 against 0.95.
+- **Inkling is level on:** jailbreak (0.98 each), MedQA (0.84 against 0.85) and MedMCQA (0.80 against 0.82).
+- **Inkling is behind on:** MMLU-Pro (0.55 against 0.78) and the Aegis slices (0.75 against 0.89, and 0.67 against 0.80).
+- **Order effects are much smaller than LFM3's:** a flip rate of 0.15 against 0.33.
+- **Fits the published pattern.** Inkling is a mixture of experts with about 26B parameters in all, the size at
+  which the decision-gate study found likelihood readouts matching Jev (Gemma-4-31B, Qwen3.6-27B). LFM3 at 1.7B does
+  not reach it untuned.
+- **Cost of the result:** speed. Inkling takes 2.3 s per read (median) with its experts split between the GPU and RAM,
+  and 25 s on ATBench's long trajectories. LFM3 takes 0.11 s.
+- **Caveat:** a sample of 100 families per slice, half of them held out. Every slice is in it.
+
+**Liquid's open d1 models** (d1-omni-600M, d1-2B, d1-3B, from their own GGUFs on llama.cpp's `/v1/systemone`,
+`readout_d1.py`, `run_d1.sh`): running.

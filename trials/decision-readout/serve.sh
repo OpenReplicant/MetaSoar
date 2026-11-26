@@ -23,6 +23,13 @@ slow)
     --entrypoint /app/llama-server $IMG -m /models/Inkling-2-Mini-Uncensored-AD-Q4_K.gguf --host 0.0.0.0 --port 8080 \
     --alias slow --jinja -ngl 999 -ot 'blk\.([0-5]|1[3-9]|2[0-3])\.ffn_.*_exps.*=CPU' --no-op-offload -t 6 \
     -c 16384 -b 512 -ub 128 -ctk q4_0 -ctv q4_0 -fa on ;;
+d1)
+  # Liquid's open d1 decision models (LFM Open License v1.0), served on llama.cpp's native /v1/systemone endpoint
+  # (b11960 or later). A question is read in one batch, so -b and -ub must hold the whole state.
+  #   serve.sh d1 d1-2B-GGUF/d1-2B-Q8_0.gguf
+  docker run -d --name e04a-d1 $SAFE $GPU -v /home/pete/.lmstudio/models/LiquidAI:/models:ro -p 127.0.0.1:8083:8080 \
+    --entrypoint /app/llama-server $IMG -m "/models/$2" --host 0.0.0.0 --port 8080 --alias d1 \
+    -ngl 999 -t 2 -c 16384 -b 8192 -ub 8192 ;;
 stop)
-  docker rm -f e04a-fast e04a-slow 2>/dev/null || true ;;
+  docker rm -f e04a-fast e04a-slow e04a-d1 2>/dev/null || true ;;
 esac

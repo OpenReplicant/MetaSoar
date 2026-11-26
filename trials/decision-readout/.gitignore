@@ -1,1 +1,2 @@
-results/run.log
+results/run*.log
+results/summary.md
