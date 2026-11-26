@@ -72,6 +72,58 @@ No fine-tuning comes first: every rung is memory, prompts or code on the local m
 - **Next, if E-17 holds:** workflows as a rung; demotion and audits (E-07); unknown intents; a task family that is
   not templated (agent tool use from a recorded log, E-01).
 
+## Several objectives, not one score (MORL)
+
+The ladder already trades several things. **Accuracy**, **model calls**, **seconds** and **coverage** are separate
+quantities. The rung choice ("agreement of 95% or more, then the cheapest") and E-04's cut-offs ("within 1 point",
+"expected gain > 0") collapse them by hand. Multi-objective reinforcement learning and planning (Hayes et al. 2022,
+*A practical guide to multi-objective reinforcement learning and planning*) gives the principles for doing that
+openly. Its learning algorithms (Pareto Q-learning, preference-conditioned networks) need training budgets and a
+learned value function, so they wait for the game work.
+1. **Outcomes are vectors.** Every case records its accuracy, calls, tokens and seconds, and every policy its
+   agreement and cost (E-17 already does).
+2. **A Pareto set per intent, not one winner.** A handler that is free and 93% right and a template that costs
+   0.4 s and is 98% right are both kept, since neither dominates the other.
+3. **The trade-off is a preference, set by whoever the system acts for.** The decision step picks from the Pareto
+   set by it, as a preference among proposals (Soar's kind of preference). Batch work leans to cost and an
+   irreversible action leans to accuracy, so one preference does not fit every context.
+4. **Constraints are not weights.** A floor such as "precision of 99% or more for an irreversible action" is never
+   traded for speed (the constrained form). Custody and side-effect classes are constraints of this kind.
+5. **Judgment by dominance.** Morphogen lets a change in when it is no worse on any measure and better on one. Any
+   other change it reports as a trade-off for the owner.
+
+## Other concepts for the synthesis
+
+**Rational metareasoning** (Russell and Wefald) is the frame: compute more only when the expected value of the
+computation exceeds its cost. It is the one principle under the gate (E-04's expected gain), the choice of rung,
+the audit rate and the MORL trade-offs.
+
+| Concept | Where it fits | What it fixes | When |
+| --- | --- | --- | --- |
+| **Confidence bounds for promotion** (Wilson, Clopper-Pearson; conformal risk control) | the promotion rule | 3 agreements of 3 has a 95% lower bound of 0.44, so "95% or more" is not tested | now |
+| **Open-set recognition** for intents | the intent elaborator | an unfamiliar question is forced onto a known intent and its handler | now |
+| **DAgger** (Ross et al. 2011) | fallback and correction | names and grounds the loop: the cheap policy acts, the expert labels its mistakes, the labels train it | framing |
+| **Drift detection, anytime-valid monitoring** (e-values, as in POPPER; ADWIN, Page-Hinkley) | demotion | a principled trigger for demoting a policy, without the false alarms that peeking brings | next |
+| **Counterexample-guided synthesis, property-based testing** | writing handlers | handlers tested beyond the 3 cases they were written from, on generated inputs | when handlers are the bottleneck |
+| **Library learning** (DreamCoder, Stitch, LILO) | across handlers | shared code across intents (parsing, column finding), and transfer between them | when handlers are the bottleneck |
+| **Explanation-based learning** (chunking's ancestor) | templates | generalising from one example with a domain theory, for rare intents | later |
+| **Options** (Sutton, Precup and Singh 1999) | handlers in games | a handler as an option (when it starts, its policy, when it ends): temporal abstraction and credit over time | the game version |
+| **World models as programs** (WorldCoder, AutumnSynth; `docs/atlas.md`) | the top rung on ARC-AGI-3 | the game's rules recur there, not situations | the game version |
+| **Shields** (safe reinforcement learning) | applying a handler | a monitor that blocks an action that would break a constraint | the game version |
+
+## What E-17's first chunk showed (2026-11-26)
+
+On 100 cases, templates and handlers answered 24%, and all 24 were right against gold. Accuracy was 99%, with 1
+fallback. Inkling made 1.05 calls a case: writing handlers (45 to 120 s each) and shadow labels cost more than
+the 24 answers saved. That is expected while most intents are new. The design is not changed mid-stream. Three
+findings for the next version:
+- **Intents fragment:** 35 in 100 cases, 17 of them seen once, some near-duplicates (`find_maximum_count`,
+  `compute_max_count`). An exact key splits them. Open-set recognition and merging near-duplicate keys (nearest
+  key by embedding, confirmed by a typed question) are the fixes to try.
+- **Promotion evidence is thin:** every promotion was on 3 of 3, with a lower bound of 0.44. The answers were right
+  against gold, but the rule did not show it. Promotion by a lower bound needs more cases per intent.
+- **Handler writing is the large cost.** A library of shared functions, so each handler is short, would cut it.
+
 ## The research process uses the same discipline
 
 The experiments here are registered before they run (M-24). The field now argues for the same discipline. POPPER (Huang et
