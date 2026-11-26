@@ -50,6 +50,7 @@ echo '{"env": "BabyAI-GoToLocal-v0", "seed": 7}' | podman run --rm -i -v "$PWD:/
 | The adapter: any Gymnasium environment onto Soar's I/O | `metasoar/adapter.py` |
 | One episode, a case in and a result out (Morphogen's module) | `metasoar/play.py` |
 | The agent: its rules, the only thing a judged change may touch | `agent/` |
-| Morphogen: the policy, the scorer, the case generator | `.morphogen/`, `.github/workflows/` |
+| Morphogen: the policy, the scorer, the case generator (the GitHub judge) | `.morphogen/`, `.github/workflows/` |
+| Morphogen's kit: the cells, one per held-out case set, with their workload and scorer | `catalog-info.yaml`, `.morphogen/bench.py`, `.morphogen/score.py` |
 
 MetaSoar is under the Apache License 2.0 (`LICENSE`). What it fetches at setup keeps its own licence: Soar (BSD, its `LICENSE.md`), Minigrid (Apache-2.0), Gymnasium (MIT), the ARC-AGI-3 toolkit, engine and games (MIT).
