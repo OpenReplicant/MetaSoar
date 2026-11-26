@@ -110,6 +110,14 @@ simulator is unsure), that is an impasse, and it opens a sub-environment to reso
 
 Every slow-path call has a cost, and exploration has a budget.
 
+### Escalation gates are learned (2026-11-26)
+Every boundary between a cheap path and a dear one asks the same question: is the cheap path enough here? A local
+decision model before a larger one, System 1 before System 2, Haiku before Opus (E-16), the agent's rules before the
+hook. A first stage's own confidence is one answer to it, and a weak one: in E-04a's cascade, d1-2B's confidence
+gives 0.769 at 38% escalated, while escalating exactly where d1-2B is wrong would give 0.865 at 37%. So a gate is a
+learned model of when the cheap path fails, trained on cases where both outcomes are known. Every escalation is
+such a case, so the training data comes free with use. One mechanism serves every layer (E-04b).
+
 ### The skill ladder (chunking)
 What the slow path solves is compiled, as Soar compiles an impasse's result into a rule:
 1. **improvised**: written at an impasse, run in the sandbox;
