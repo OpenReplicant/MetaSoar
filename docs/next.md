@@ -7,6 +7,10 @@ harness with Morphogen's kit, experiments move onto OpenEnv, the knowledge kerne
 Substrate is the default distribution the agents can run on. A new line of work is open: System 1 skills
 (`docs/system1-skills.md`), whose experiments 1 and 2 are the smallest next steps. The list below is unchanged.
 
+**Since then (2026-11-25, M-21 to M-24):** System 1 skills refined (handlers and the runner, case-based matching, typed
+questions), the pattern catalog, the relation to Soar, and every experiment registered in `docs/experiments.md`.
+What is next, on the owner's PC: `docs/handoff-2026-11-25.md`.
+
 ## State
 
 - `main`: Soar 9.6.5 unchanged, the adapter (`metasoar/`), the hook, and Morphogen as the judge

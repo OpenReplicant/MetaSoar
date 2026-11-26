@@ -15,6 +15,11 @@ adapter, does it get better over episodes, and does what it learned make the nex
 with vanilla Soar and a vanilla LLM agent. The design is [`docs/spec.md`](docs/spec.md); the reasons are in
 [`DECISIONS.md`](DECISIONS.md).
 
+**Soar-derived, not Soar orthodox (M-24).** Soar 9.6.5, unchanged, is the baseline and the research engine; where
+the design departs from Soar is listed in [`docs/system1-skills.md`](docs/system1-skills.md) ("Relation to Soar"),
+and the wider bar is the Common Model of Cognition. The experiments, parts and the whole, are registered in
+[`docs/experiments.md`](docs/experiments.md).
+
 ## Where MetaSoar sits (M-20)
 
 | Project | Is | For MetaSoar |
