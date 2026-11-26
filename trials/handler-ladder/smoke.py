@@ -57,7 +57,7 @@ def correct(pred, p):
     if p["ans_type"] in ("integer_number", "decimal_number"):
         a, b = number(pred), number(gold)
         return a is not None and b is not None and abs(a - b) < 1e-6 * max(1, abs(b)) + 1e-9
-    return pred.strip().strip(".").lower() == gold.lower()
+    return pred.strip().strip(".").lower() == gold.strip().strip(".").lower()  # '12:35 P.M.' both sides
 
 
 def extract(text):

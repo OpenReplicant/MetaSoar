@@ -2699,11 +2699,2711 @@
     "handler": null,
     "template": null
    }
+  },
+  {
+   "id": "4287",
+   "chunk": 2,
+   "intent": "compute_function_property",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "nonlinear",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 71,
+    "completion_tokens": 180,
+    "seconds": 14.358
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 300,
+    "completion_tokens": 47,
+    "seconds": 1.064
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "12419",
+   "chunk": 2,
+   "intent": "find_start_time",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "5:25 P.M.",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 2,
+    "prompt_tokens": 885,
+    "completion_tokens": 3167,
+    "seconds": 264.2
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 648,
+    "completion_tokens": 489,
+    "seconds": 7.756
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "30841",
+   "chunk": 2,
+   "intent": "find_maximum_count",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "Truman High",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 108,
+    "completion_tokens": 110,
+    "seconds": 9.799
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 527,
+    "completion_tokens": 151,
+    "seconds": 2.714
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "11437",
+   "chunk": 2,
+   "intent": "compute_rate_of_change",
+   "new_intent": false,
+   "rung": "handler",
+   "answer": "8 Per-student budget per unit",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 335,
+    "completion_tokens": 7,
+    "seconds": 0.378
+   },
+   "policies": {
+    "handler": 2,
+    "template": 1
+   }
+  },
+  {
+   "id": "15135",
+   "chunk": 2,
+   "intent": "count_buildings_at_least",
+   "new_intent": true,
+   "rung": "large",
+   "answer": "12",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 143,
+    "completion_tokens": 363,
+    "seconds": 29.332
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 310,
+    "completion_tokens": 60,
+    "seconds": 1.121
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "27112",
+   "chunk": 2,
+   "intent": "find_start_time",
+   "new_intent": false,
+   "rung": "template",
+   "answer": "12:35 P.M.",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 580,
+    "completion_tokens": 98,
+    "seconds": 1.844
+   },
+   "policies": {
+    "handler": null,
+    "template": 1
+   }
+  },
+  {
+   "id": "18261",
+   "chunk": 2,
+   "intent": "compute_difference_between_counts",
+   "new_intent": false,
+   "rung": "template",
+   "answer": "shortage",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": true,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 140,
+    "completion_tokens": 204,
+    "seconds": 17.588
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 618,
+    "completion_tokens": 187,
+    "seconds": 3.09
+   },
+   "policies": {
+    "handler": null,
+    "template": 1
+   }
+  },
+  {
+   "id": "22839",
+   "chunk": 2,
+   "intent": "count_flocks_exact_value",
+   "new_intent": true,
+   "rung": "large",
+   "answer": "2",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 112,
+    "completion_tokens": 198,
+    "seconds": 16.415
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 320,
+    "completion_tokens": 60,
+    "seconds": 1.179
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "32595",
+   "chunk": 2,
+   "intent": "count_racks_at_least",
+   "new_intent": true,
+   "rung": "large",
+   "answer": "9",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 123,
+    "completion_tokens": 329,
+    "seconds": 26.221
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 335,
+    "completion_tokens": 60,
+    "seconds": 1.2
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "31085",
+   "chunk": 2,
+   "intent": "compute_difference_between_counts",
+   "new_intent": false,
+   "rung": "template",
+   "answer": "60",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": true,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 91,
+    "completion_tokens": 118,
+    "seconds": 10.17
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 582,
+    "completion_tokens": 108,
+    "seconds": 2.091
+   },
+   "policies": {
+    "handler": null,
+    "template": 1
+   }
+  },
+  {
+   "id": "4751",
+   "chunk": 2,
+   "intent": "compute_total_cost",
+   "new_intent": false,
+   "rung": "template",
+   "answer": "6.60",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 923,
+    "completion_tokens": 193,
+    "seconds": 3.842
+   },
+   "policies": {
+    "handler": null,
+    "template": 2
+   }
+  },
+  {
+   "id": "13606",
+   "chunk": 2,
+   "intent": "compute_mode",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "4",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 104,
+    "completion_tokens": 193,
+    "seconds": 15.94
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 535,
+    "completion_tokens": 224,
+    "seconds": 3.61
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "27949",
+   "chunk": 2,
+   "intent": "compute_probability",
+   "new_intent": true,
+   "rung": "large",
+   "answer": "2/15",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 145,
+    "completion_tokens": 231,
+    "seconds": 19.722
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 376,
+    "completion_tokens": 60,
+    "seconds": 1.17
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "6280",
+   "chunk": 2,
+   "intent": "compute_total_money_raised",
+   "new_intent": true,
+   "rung": "large",
+   "answer": "$13",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 112,
+    "completion_tokens": 147,
+    "seconds": 12.599
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 337,
+    "completion_tokens": 60,
+    "seconds": 1.144
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "29268",
+   "chunk": 2,
+   "intent": "compute_total_cost",
+   "new_intent": false,
+   "rung": "template",
+   "answer": "26",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 945,
+    "completion_tokens": 249,
+    "seconds": 4.848
+   },
+   "policies": {
+    "handler": null,
+    "template": 2
+   }
+  },
+  {
+   "id": "8683",
+   "chunk": 2,
+   "intent": "count_people_interviewed_no",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "27",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 2,
+    "prompt_tokens": 613,
+    "completion_tokens": 998,
+    "seconds": 85.498
+   },
+   "small": {
+    "calls": 4,
+    "prompt_tokens": 1094,
+    "completion_tokens": 762,
+    "seconds": 11.723
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "14054",
+   "chunk": 2,
+   "intent": "compute_rate_of_change",
+   "new_intent": false,
+   "rung": "handler",
+   "answer": "-7 minutes per month",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 360,
+    "completion_tokens": 7,
+    "seconds": 0.426
+   },
+   "policies": {
+    "handler": 2,
+    "template": 1
+   }
+  },
+  {
+   "id": "8231",
+   "chunk": 2,
+   "intent": "compute_total_cost",
+   "new_intent": false,
+   "rung": "template",
+   "answer": "6.00",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 912,
+    "completion_tokens": 192,
+    "seconds": 3.898
+   },
+   "policies": {
+    "handler": null,
+    "template": 2
+   }
+  },
+  {
+   "id": "21385",
+   "chunk": 2,
+   "intent": "compute_range_of_values",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "21",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 103,
+    "completion_tokens": 148,
+    "seconds": 12.573
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 532,
+    "completion_tokens": 171,
+    "seconds": 2.816
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "34097",
+   "chunk": 2,
+   "intent": "compute_difference_between_costs",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "16.19",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 105,
+    "completion_tokens": 194,
+    "seconds": 15.955
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 336,
+    "completion_tokens": 9,
+    "seconds": 0.413
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "6019",
+   "chunk": 2,
+   "intent": "compute_max_count",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "74",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 2,
+    "prompt_tokens": 646,
+    "completion_tokens": 382,
+    "seconds": 39.713
+   },
+   "small": {
+    "calls": 4,
+    "prompt_tokens": 845,
+    "completion_tokens": 1489,
+    "seconds": 22.365
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "584",
+   "chunk": 2,
+   "intent": "compute_rate_of_change",
+   "new_intent": false,
+   "rung": "handler",
+   "answer": "4 Students /year",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 363,
+    "completion_tokens": 57,
+    "seconds": 1.257
+   },
+   "policies": {
+    "handler": 2,
+    "template": 1
+   }
+  },
+  {
+   "id": "38057",
+   "chunk": 2,
+   "intent": "compute_total_money_raised",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "$23,520.00",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 135,
+    "completion_tokens": 313,
+    "seconds": 25.603
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 348,
+    "completion_tokens": 10,
+    "seconds": 0.49
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "23262",
+   "chunk": 2,
+   "intent": "compute_fraction_of_total",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "false",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 2,
+    "prompt_tokens": 758,
+    "completion_tokens": 1522,
+    "seconds": 127.707
+   },
+   "small": {
+    "calls": 4,
+    "prompt_tokens": 1284,
+    "completion_tokens": 1486,
+    "seconds": 23.609
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "24570",
+   "chunk": 2,
+   "intent": "compute_median",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "4",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 99,
+    "completion_tokens": 120,
+    "seconds": 10.503
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 346,
+    "completion_tokens": 6,
+    "seconds": 0.494
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "16053",
+   "chunk": 2,
+   "intent": "compute_remaining_money",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "yes",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 127,
+    "completion_tokens": 114,
+    "seconds": 10.705
+   },
+   "small": {
+    "calls": 6,
+    "prompt_tokens": 1850,
+    "completion_tokens": 557,
+    "seconds": 9.491
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "32897",
+   "chunk": 2,
+   "intent": "compute_probability",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "1/3",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 149,
+    "completion_tokens": 207,
+    "seconds": 18.021
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 395,
+    "completion_tokens": 45,
+    "seconds": 1.037
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "16146",
+   "chunk": 2,
+   "intent": "count_ponds_at_least",
+   "new_intent": true,
+   "rung": "large",
+   "answer": "5",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 143,
+    "completion_tokens": 295,
+    "seconds": 24.368
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 351,
+    "completion_tokens": 60,
+    "seconds": 1.206
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "1318",
+   "chunk": 2,
+   "intent": "find_maximum_count",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "March",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 106,
+    "completion_tokens": 93,
+    "seconds": 8.577
+   },
+   "small": {
+    "calls": 7,
+    "prompt_tokens": 3163,
+    "completion_tokens": 3148,
+    "seconds": 52.512
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "3111",
+   "chunk": 2,
+   "intent": "compute_remaining_money",
+   "new_intent": false,
+   "rung": "template",
+   "answer": "yes",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": true,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 144,
+    "completion_tokens": 159,
+    "seconds": 14.402
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 731,
+    "completion_tokens": 165,
+    "seconds": 3.109
+   },
+   "policies": {
+    "handler": null,
+    "template": 2
+   }
+  },
+  {
+   "id": "16080",
+   "chunk": 2,
+   "intent": "compute_mode",
+   "new_intent": false,
+   "rung": "template",
+   "answer": "6",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": true,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 97,
+    "completion_tokens": 157,
+    "seconds": 13.185
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 555,
+    "completion_tokens": 167,
+    "seconds": 2.927
+   },
+   "policies": {
+    "handler": null,
+    "template": 1
+   }
+  },
+  {
+   "id": "32733",
+   "chunk": 2,
+   "intent": "compute_difference_between_costs",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "316",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 2,
+    "prompt_tokens": 590,
+    "completion_tokens": 489,
+    "seconds": 47.314
+   },
+   "small": {
+    "calls": 4,
+    "prompt_tokens": 1138,
+    "completion_tokens": 496,
+    "seconds": 7.654
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "32812",
+   "chunk": 2,
+   "intent": "compute_remaining_money",
+   "new_intent": false,
+   "rung": "template",
+   "answer": "4940",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": true,
+   "large": {
+    "calls": 2,
+    "prompt_tokens": 1687,
+    "completion_tokens": 1077,
+    "seconds": 107.551
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 682,
+    "completion_tokens": 65,
+    "seconds": 1.652
+   },
+   "policies": {
+    "handler": null,
+    "template": 2
+   }
+  },
+  {
+   "id": "14041",
+   "chunk": 2,
+   "intent": "compute_probability",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "1/6",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 2,
+    "prompt_tokens": 769,
+    "completion_tokens": 1644,
+    "seconds": 140.777
+   },
+   "small": {
+    "calls": 4,
+    "prompt_tokens": 1038,
+    "completion_tokens": 1579,
+    "seconds": 24.646
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "3936",
+   "chunk": 2,
+   "intent": "compute_remaining_money",
+   "new_intent": false,
+   "rung": "template",
+   "answer": "8696.00",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": true,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 154,
+    "completion_tokens": 181,
+    "seconds": 16.819
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 753,
+    "completion_tokens": 183,
+    "seconds": 3.615
+   },
+   "policies": {
+    "handler": null,
+    "template": 2
+   }
+  },
+  {
+   "id": "16005",
+   "chunk": 2,
+   "intent": "compute_difference_between_counts",
+   "new_intent": false,
+   "rung": "template",
+   "answer": "4",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 682,
+    "completion_tokens": 190,
+    "seconds": 3.478
+   },
+   "policies": {
+    "handler": null,
+    "template": 1
+   }
+  },
+  {
+   "id": "25579",
+   "chunk": 2,
+   "intent": "compute_difference_between_counts",
+   "new_intent": false,
+   "rung": "template",
+   "answer": "7",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 644,
+    "completion_tokens": 127,
+    "seconds": 2.646
+   },
+   "policies": {
+    "handler": null,
+    "template": 1
+   }
+  },
+  {
+   "id": "12904",
+   "chunk": 2,
+   "intent": "compute_minimum_count",
+   "new_intent": true,
+   "rung": "large",
+   "answer": "18",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 142,
+    "completion_tokens": 205,
+    "seconds": 18.635
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 353,
+    "completion_tokens": 60,
+    "seconds": 1.218
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "21983",
+   "chunk": 2,
+   "intent": "compute_remaining_money",
+   "new_intent": false,
+   "rung": "template",
+   "answer": "no",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": true,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 122,
+    "completion_tokens": 163,
+    "seconds": 14.973
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 717,
+    "completion_tokens": 159,
+    "seconds": 3.105
+   },
+   "policies": {
+    "handler": null,
+    "template": 2
+   }
+  },
+  {
+   "id": "23778",
+   "chunk": 2,
+   "intent": "compute_median",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "7",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 2,
+    "prompt_tokens": 547,
+    "completion_tokens": 624,
+    "seconds": 57.888
+   },
+   "small": {
+    "calls": 4,
+    "prompt_tokens": 744,
+    "completion_tokens": 208,
+    "seconds": 3.376
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "18364",
+   "chunk": 2,
+   "intent": "compute_difference_between_counts",
+   "new_intent": false,
+   "rung": "template",
+   "answer": "30",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 645,
+    "completion_tokens": 242,
+    "seconds": 4.26
+   },
+   "policies": {
+    "handler": null,
+    "template": 1
+   }
+  },
+  {
+   "id": "5584",
+   "chunk": 2,
+   "intent": "compute_probability",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "3/10",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 161,
+    "completion_tokens": 801,
+    "seconds": 65.532
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 727,
+    "completion_tokens": 760,
+    "seconds": 12.265
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "13383",
+   "chunk": 2,
+   "intent": "compute_difference_between_costs",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "$517.00",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 100,
+    "completion_tokens": 183,
+    "seconds": 15.569
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 720,
+    "completion_tokens": 709,
+    "seconds": 11.691
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "15350",
+   "chunk": 2,
+   "intent": "count_students_below_threshold",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "14",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 2,
+    "prompt_tokens": 628,
+    "completion_tokens": 999,
+    "seconds": 89.135
+   },
+   "small": {
+    "calls": 4,
+    "prompt_tokens": 990,
+    "completion_tokens": 1065,
+    "seconds": 16.905
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "30154",
+   "chunk": 2,
+   "intent": "compute_rate_of_change",
+   "new_intent": false,
+   "rung": "handler",
+   "answer": "3 Students per unit",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 374,
+    "completion_tokens": 7,
+    "seconds": 0.446
+   },
+   "policies": {
+    "handler": 2,
+    "template": 1
+   }
+  },
+  {
+   "id": "24653",
+   "chunk": 2,
+   "intent": "compute_total_cost",
+   "new_intent": false,
+   "rung": "template",
+   "answer": "4",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 926,
+    "completion_tokens": 126,
+    "seconds": 2.976
+   },
+   "policies": {
+    "handler": null,
+    "template": 2
+   }
+  },
+  {
+   "id": "28120",
+   "chunk": 2,
+   "intent": "compute_mode",
+   "new_intent": false,
+   "rung": "template",
+   "answer": "12",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": true,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 99,
+    "completion_tokens": 165,
+    "seconds": 14.641
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 558,
+    "completion_tokens": 205,
+    "seconds": 3.634
+   },
+   "policies": {
+    "handler": null,
+    "template": 1
+   }
+  },
+  {
+   "id": "32431",
+   "chunk": 2,
+   "intent": "compute_median",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "60",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 103,
+    "completion_tokens": 132,
+    "seconds": 11.944
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 521,
+    "completion_tokens": 173,
+    "seconds": 2.842
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "3943",
+   "chunk": 2,
+   "intent": "compute_total_cost",
+   "new_intent": false,
+   "rung": "template",
+   "answer": "8.04",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 930,
+    "completion_tokens": 285,
+    "seconds": 5.422
+   },
+   "policies": {
+    "handler": null,
+    "template": 2
+   }
+  },
+  {
+   "id": "333",
+   "chunk": 2,
+   "intent": "compute_mean",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "94",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 2,
+    "prompt_tokens": 590,
+    "completion_tokens": 896,
+    "seconds": 79.696
+   },
+   "small": {
+    "calls": 4,
+    "prompt_tokens": 920,
+    "completion_tokens": 1516,
+    "seconds": 23.395
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "5181",
+   "chunk": 2,
+   "intent": "count_people_interviewed_no",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "46",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 99,
+    "completion_tokens": 144,
+    "seconds": 12.841
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 689,
+    "completion_tokens": 176,
+    "seconds": 3.321
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "3488",
+   "chunk": 2,
+   "intent": "compute_range_of_values",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "29",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 111,
+    "completion_tokens": 146,
+    "seconds": 12.899
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 559,
+    "completion_tokens": 243,
+    "seconds": 3.963
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "21820",
+   "chunk": 2,
+   "intent": "count_clubs_exact_value",
+   "new_intent": true,
+   "rung": "large",
+   "answer": "0",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 148,
+    "completion_tokens": 250,
+    "seconds": 21.861
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 356,
+    "completion_tokens": 60,
+    "seconds": 1.242
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "11712",
+   "chunk": 2,
+   "intent": "compute_mode",
+   "new_intent": false,
+   "rung": "handler",
+   "answer": "7",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 362,
+    "completion_tokens": 15,
+    "seconds": 0.546
+   },
+   "policies": {
+    "handler": 1,
+    "template": 1
+   }
+  },
+  {
+   "id": "20898",
+   "chunk": 2,
+   "intent": "compute_total_cost",
+   "new_intent": false,
+   "rung": "template",
+   "answer": "1.60",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 947,
+    "completion_tokens": 155,
+    "seconds": 3.39
+   },
+   "policies": {
+    "handler": null,
+    "template": 2
+   }
+  },
+  {
+   "id": "32529",
+   "chunk": 2,
+   "intent": "compute_difference_between_costs",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "Golden Gate",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 124,
+    "completion_tokens": 132,
+    "seconds": 12.142
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 756,
+    "completion_tokens": 79,
+    "seconds": 1.843
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "9999",
+   "chunk": 2,
+   "intent": "find_minimum_count",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "Colette",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 95,
+    "completion_tokens": 113,
+    "seconds": 10.24
+   },
+   "small": {
+    "calls": 6,
+    "prompt_tokens": 2573,
+    "completion_tokens": 933,
+    "seconds": 15.587
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "24231",
+   "chunk": 2,
+   "intent": "compute_mode",
+   "new_intent": false,
+   "rung": "handler",
+   "answer": "60",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 365,
+    "completion_tokens": 15,
+    "seconds": 0.593
+   },
+   "policies": {
+    "handler": 1,
+    "template": 1
+   }
+  },
+  {
+   "id": "5485",
+   "chunk": 2,
+   "intent": "compute_mean",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "6",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 105,
+    "completion_tokens": 175,
+    "seconds": 15.216
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 601,
+    "completion_tokens": 354,
+    "seconds": 5.643
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "8608",
+   "chunk": 2,
+   "intent": "count_stickers_in_collection",
+   "new_intent": true,
+   "rung": "large",
+   "answer": "Robert",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 97,
+    "completion_tokens": 119,
+    "seconds": 10.836
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 360,
+    "completion_tokens": 60,
+    "seconds": 1.258
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "30207",
+   "chunk": 2,
+   "intent": "compute_remaining_money",
+   "new_intent": false,
+   "rung": "template",
+   "answer": "913",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": true,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 91,
+    "completion_tokens": 257,
+    "seconds": 21.399
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 704,
+    "completion_tokens": 65,
+    "seconds": 1.666
+   },
+   "policies": {
+    "handler": null,
+    "template": 2
+   }
+  },
+  {
+   "id": "13495",
+   "chunk": 2,
+   "intent": "count_people_interviewed_no",
+   "new_intent": false,
+   "rung": "template",
+   "answer": "17",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": true,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 110,
+    "completion_tokens": 144,
+    "seconds": 12.83
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 723,
+    "completion_tokens": 259,
+    "seconds": 4.302
+   },
+   "policies": {
+    "handler": null,
+    "template": 1
+   }
+  },
+  {
+   "id": "7017",
+   "chunk": 2,
+   "intent": "compute_rate_of_change",
+   "new_intent": false,
+   "rung": "handler",
+   "answer": "3 minutes /year",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 383,
+    "completion_tokens": 7,
+    "seconds": 0.45
+   },
+   "policies": {
+    "handler": 2,
+    "template": 1
+   }
+  },
+  {
+   "id": "22714",
+   "chunk": 2,
+   "intent": "find_start_time_no",
+   "new_intent": true,
+   "rung": "large",
+   "answer": "Thursday",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 97,
+    "completion_tokens": 92,
+    "seconds": 8.613
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 369,
+    "completion_tokens": 60,
+    "seconds": 1.248
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "29430",
+   "chunk": 2,
+   "intent": "compute_rate_of_change",
+   "new_intent": false,
+   "rung": "handler",
+   "answer": "-6 Minutes per day",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 384,
+    "completion_tokens": 7,
+    "seconds": 0.446
+   },
+   "policies": {
+    "handler": 2,
+    "template": 1
+   }
+  },
+  {
+   "id": "5182",
+   "chunk": 2,
+   "intent": "find_minimum_count",
+   "new_intent": false,
+   "rung": "template",
+   "answer": "Edward",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": true,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 95,
+    "completion_tokens": 105,
+    "seconds": 9.598
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 984,
+    "completion_tokens": 99,
+    "seconds": 2.258
+   },
+   "policies": {
+    "handler": null,
+    "template": 2
+   }
+  },
+  {
+   "id": "32732",
+   "chunk": 2,
+   "intent": "compute_total_cost",
+   "new_intent": false,
+   "rung": "template",
+   "answer": "70.00",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 1014,
+    "completion_tokens": 313,
+    "seconds": 6.204
+   },
+   "policies": {
+    "handler": null,
+    "template": 2
+   }
+  },
+  {
+   "id": "22907",
+   "chunk": 2,
+   "intent": "compute_time_duration",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "2 hours and 45 minutes",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 438,
+    "completion_tokens": 541,
+    "seconds": 50.053
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 375,
+    "completion_tokens": 7,
+    "seconds": 0.515
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "19387",
+   "chunk": 2,
+   "intent": "compute_rate_of_change",
+   "new_intent": false,
+   "rung": "handler",
+   "answer": "-4 minutes per day",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 390,
+    "completion_tokens": 42,
+    "seconds": 1.13
+   },
+   "policies": {
+    "handler": 2,
+    "template": 1
+   }
+  },
+  {
+   "id": "12266",
+   "chunk": 2,
+   "intent": "compute_total_cost",
+   "new_intent": false,
+   "rung": "template",
+   "answer": "28",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 997,
+    "completion_tokens": 302,
+    "seconds": 6.182
+   },
+   "policies": {
+    "handler": null,
+    "template": 2
+   }
+  },
+  {
+   "id": "24590",
+   "chunk": 2,
+   "intent": "compute_total_cost",
+   "new_intent": false,
+   "rung": "template",
+   "answer": "2758",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 917,
+    "completion_tokens": 238,
+    "seconds": 4.734
+   },
+   "policies": {
+    "handler": null,
+    "template": 2
+   }
+  },
+  {
+   "id": "7945",
+   "chunk": 2,
+   "intent": "compute_mean",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "69",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 101,
+    "completion_tokens": 156,
+    "seconds": 13.692
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 608,
+    "completion_tokens": 113,
+    "seconds": 2.192
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "36795",
+   "chunk": 2,
+   "intent": "compute_remaining_money",
+   "new_intent": false,
+   "rung": "template",
+   "answer": "56,672",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 737,
+    "completion_tokens": 176,
+    "seconds": 3.34
+   },
+   "policies": {
+    "handler": null,
+    "template": 2
+   }
+  },
+  {
+   "id": "24688",
+   "chunk": 2,
+   "intent": "compute_difference_between_costs",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "$3",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 117,
+    "completion_tokens": 166,
+    "seconds": 14.621
+   },
+   "small": {
+    "calls": 7,
+    "prompt_tokens": 1844,
+    "completion_tokens": 550,
+    "seconds": 9.153
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "16277",
+   "chunk": 2,
+   "intent": "count_children_weighed_weight",
+   "new_intent": true,
+   "rung": "large",
+   "answer": "2",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 125,
+    "completion_tokens": 227,
+    "seconds": 19.679
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 387,
+    "completion_tokens": 22,
+    "seconds": 0.636
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "17274",
+   "chunk": 2,
+   "intent": "compute_remaining_money",
+   "new_intent": false,
+   "rung": "template",
+   "answer": "65.63",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 725,
+    "completion_tokens": 199,
+    "seconds": 3.663
+   },
+   "policies": {
+    "handler": null,
+    "template": 2
+   }
+  },
+  {
+   "id": "13889",
+   "chunk": 2,
+   "intent": "compute_difference_between_counts",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "3",
+   "fallback": true,
+   "fallback_from": "template",
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 146,
+    "completion_tokens": 265,
+    "seconds": 23.276
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 701,
+    "completion_tokens": 760,
+    "seconds": 12.809
+   },
+   "policies": {
+    "handler": null,
+    "template": 1
+   }
+  },
+  {
+   "id": "17683",
+   "chunk": 2,
+   "intent": "compute_rate_of_change",
+   "new_intent": false,
+   "rung": "handler",
+   "answer": "8 Vacation days per day",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 416,
+    "completion_tokens": 7,
+    "seconds": 0.569
+   },
+   "policies": {
+    "handler": 2,
+    "template": 1
+   }
+  },
+  {
+   "id": "19588",
+   "chunk": 2,
+   "intent": "compute_range_of_values",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "17",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 98,
+    "completion_tokens": 113,
+    "seconds": 10.868
+   },
+   "small": {
+    "calls": 6,
+    "prompt_tokens": 1430,
+    "completion_tokens": 546,
+    "seconds": 8.771
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "25550",
+   "chunk": 2,
+   "intent": "compute_range_of_values",
+   "new_intent": false,
+   "rung": "handler",
+   "answer": "5",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 386,
+    "completion_tokens": 43,
+    "seconds": 0.947
+   },
+   "policies": {
+    "handler": 1,
+    "template": 2
+   }
+  },
+  {
+   "id": "13196",
+   "chunk": 2,
+   "intent": "compute_mean",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "5",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 97,
+    "completion_tokens": 167,
+    "seconds": 14.889
+   },
+   "small": {
+    "calls": 7,
+    "prompt_tokens": 1656,
+    "completion_tokens": 1299,
+    "seconds": 20.149
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "6221",
+   "chunk": 2,
+   "intent": "compute_range_of_values",
+   "new_intent": false,
+   "rung": "handler",
+   "answer": "11",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 384,
+    "completion_tokens": 25,
+    "seconds": 0.671
+   },
+   "policies": {
+    "handler": 1,
+    "template": 2
+   }
+  },
+  {
+   "id": "37889",
+   "chunk": 2,
+   "intent": "count_exact_value",
+   "new_intent": true,
+   "rung": "large",
+   "answer": "3",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 115,
+    "completion_tokens": 193,
+    "seconds": 17.374
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 386,
+    "completion_tokens": 14,
+    "seconds": 0.516
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "28765",
+   "chunk": 2,
+   "intent": "compute_median",
+   "new_intent": false,
+   "rung": "template",
+   "answer": "85",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": true,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 97,
+    "completion_tokens": 117,
+    "seconds": 11.164
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 548,
+    "completion_tokens": 158,
+    "seconds": 2.667
+   },
+   "policies": {
+    "handler": null,
+    "template": 1
+   }
+  },
+  {
+   "id": "5205",
+   "chunk": 2,
+   "intent": "compute_total_count",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "50",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 2,
+    "prompt_tokens": 514,
+    "completion_tokens": 690,
+    "seconds": 71.638
+   },
+   "small": {
+    "calls": 4,
+    "prompt_tokens": 773,
+    "completion_tokens": 519,
+    "seconds": 7.987
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "27450",
+   "chunk": 2,
+   "intent": "compute_rate_of_change",
+   "new_intent": false,
+   "rung": "handler",
+   "answer": "6 Per-student budget per unit",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 416,
+    "completion_tokens": 7,
+    "seconds": 0.6
+   },
+   "policies": {
+    "handler": 2,
+    "template": 1
+   }
+  },
+  {
+   "id": "13114",
+   "chunk": 2,
+   "intent": "compute_fraction_of_total",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "21/62",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 109,
+    "completion_tokens": 214,
+    "seconds": 29.591
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 780,
+    "completion_tokens": 217,
+    "seconds": 3.899
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "5269",
+   "chunk": 2,
+   "intent": "compute_difference_between_costs",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "surplus",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 140,
+    "completion_tokens": 141,
+    "seconds": 22.396
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 662,
+    "completion_tokens": 112,
+    "seconds": 2.355
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "11204",
+   "chunk": 2,
+   "intent": "compute_difference_between_counts",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "5",
+   "fallback": true,
+   "fallback_from": "template",
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 132,
+    "completion_tokens": 297,
+    "seconds": 28.944
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 691,
+    "completion_tokens": 760,
+    "seconds": 12.305
+   },
+   "policies": {
+    "handler": null,
+    "template": 1
+   }
+  },
+  {
+   "id": "12655",
+   "chunk": 2,
+   "intent": "compute_mean",
+   "new_intent": false,
+   "rung": "handler",
+   "answer": "36",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 381,
+    "completion_tokens": 5,
+    "seconds": 0.499
+   },
+   "policies": {
+    "handler": 1,
+    "template": null
+   }
+  },
+  {
+   "id": "35979",
+   "chunk": 2,
+   "intent": "compute_total_count",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "40",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 83,
+    "completion_tokens": 118,
+    "seconds": 13.063
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 545,
+    "completion_tokens": 139,
+    "seconds": 2.639
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "31688",
+   "chunk": 2,
+   "intent": "compute_rate_of_change",
+   "new_intent": false,
+   "rung": "handler",
+   "answer": "8 Vacation days per day",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 421,
+    "completion_tokens": 7,
+    "seconds": 0.445
+   },
+   "policies": {
+    "handler": 2,
+    "template": 1
+   }
+  },
+  {
+   "id": "25979",
+   "chunk": 2,
+   "intent": "compute_total_pearls_but",
+   "new_intent": true,
+   "rung": "large",
+   "answer": "20 pearls",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 92,
+    "completion_tokens": 338,
+    "seconds": 29.686
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 384,
+    "completion_tokens": 60,
+    "seconds": 1.192
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "33024",
+   "chunk": 2,
+   "intent": "compute_function_property",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "linear",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 2,
+    "prompt_tokens": 435,
+    "completion_tokens": 522,
+    "seconds": 62.231
+   },
+   "small": {
+    "calls": 4,
+    "prompt_tokens": 894,
+    "completion_tokens": 427,
+    "seconds": 6.788
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "27149",
+   "chunk": 2,
+   "intent": "compute_minimum_count",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "13 points",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 154,
+    "completion_tokens": 334,
+    "seconds": 38.453
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 396,
+    "completion_tokens": 60,
+    "seconds": 1.384
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "12840",
+   "chunk": 2,
+   "intent": "count_exact_value",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "2",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 125,
+    "completion_tokens": 241,
+    "seconds": 21.704
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 399,
+    "completion_tokens": 7,
+    "seconds": 0.448
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "16192",
+   "chunk": 2,
+   "intent": "compute_remaining_money",
+   "new_intent": false,
+   "rung": "template",
+   "answer": "15",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 709,
+    "completion_tokens": 66,
+    "seconds": 1.661
+   },
+   "policies": {
+    "handler": null,
+    "template": 2
+   }
+  },
+  {
+   "id": "14520",
+   "chunk": 2,
+   "intent": "compute_mode",
+   "new_intent": false,
+   "rung": "handler",
+   "answer": "9",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "seconds": 0.0
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 396,
+    "completion_tokens": 15,
+    "seconds": 0.584
+   },
+   "policies": {
+    "handler": 1,
+    "template": 1
+   }
+  },
+  {
+   "id": "34357",
+   "chunk": 2,
+   "intent": "compute_difference_between_costs",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "543.00",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 2,
+    "prompt_tokens": 1406,
+    "completion_tokens": 1345,
+    "seconds": 147.082
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 386,
+    "completion_tokens": 9,
+    "seconds": 0.476
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "23672",
+   "chunk": 2,
+   "intent": "check_function_property",
+   "new_intent": false,
+   "rung": "template",
+   "answer": "no",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": true,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 74,
+    "completion_tokens": 132,
+    "seconds": 16.288
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 709,
+    "completion_tokens": 271,
+    "seconds": 5.01
+   },
+   "policies": {
+    "handler": null,
+    "template": 1
+   }
   }
  ],
  "intents": {
   "check_function_property": {
-   "n": 5,
+   "n": 6,
    "labelled": [
     {
      "id": "5509",
@@ -2729,6 +5429,11 @@
      "id": "20848",
      "answer": "no",
      "text": "Painting + bat = $1,914.00 + $6,338.00 = $8,252.00.  \nChloe has $7,949.00, which is less than $8,252.00.\n\nAnswer: no"
+    },
+    {
+     "id": "23672",
+     "answer": "no",
+     "text": "The input 0 is paired with both 5 and 9, so one input has two outputs.\n\nAnswer: no"
     }
    ],
    "candidates": {
@@ -2741,8 +5446,8 @@
       "15918",
       "15561"
      ],
-     "n": 2,
-     "agree": 1,
+     "n": 3,
+     "agree": 2,
      "failures": [
       {
        "id": "20848",
@@ -2775,7 +5480,7 @@
    }
   },
   "compute_rate_of_change": {
-   "n": 16,
+   "n": 26,
    "labelled": [
     {
      "id": "15761",
@@ -2905,17 +5610,65 @@
    }
   },
   "compute_median": {
-   "n": 1,
+   "n": 5,
    "labelled": [
     {
      "id": "21180",
      "answer": "67",
      "text": "Sorted: 57, 60, 67, 76, 86. The middle value is 67.\nAnswer: 67"
+    },
+    {
+     "id": "24570",
+     "answer": "4",
+     "text": "Order the numbers: 3, 4, 4, 5, 5. The middle value is 4.\nAnswer: 4"
+    },
+    {
+     "id": "23778",
+     "answer": "7",
+     "text": "Sort the numbers: 4, 5, 7, 9, 10. The middle value is 7.\nAnswer: 7"
+    },
+    {
+     "id": "32431",
+     "answer": "60",
+     "text": "Sorted: 57, 58, 59, 60, 65, 69, 71. The middle value is 60.\nAnswer: 60"
+    },
+    {
+     "id": "28765",
+     "answer": "85",
+     "text": "Sorted: 83, 85, 85, 86, 87. The middle value is 85.\nAnswer: 85"
     }
    ],
    "candidates": {
-    "handler": null,
-    "template": null
+    "handler": {
+     "kind": "handler",
+     "version": 1,
+     "rewrites": 0,
+     "used": [
+      "21180",
+      "24570",
+      "23778"
+     ],
+     "n": 2,
+     "agree": 2,
+     "failures": [],
+     "fallbacks": 0,
+     "status": "shadow",
+     "code": "def solve(table, question, choices):\n    import re\n    from statistics import median\n    q = question.lower()\n    cols = list(table.keys())\n    # find numeric column\n    num_col = None\n    for c in cols:\n        vals = table[c]\n        try:\n            [float(re.sub(r'[^0-9.\\-]', '', str(v))) for v in vals]\n            num_col = c\n            break\n        except Exception:\n            pass\n    if num_col is None:\n        return None\n    nums = []\n    for v in table[num_col]:\n        s = str(v).replace('$','').replace(',','').replace('%','')\n        s = re.sub(r'[^0-9.\\-]', '', s)\n        nums.append(float(s))\n    if 'median' in q:\n        ans = median(nums)\n    elif 'mean' in q or 'average' in q:\n        ans = sum(nums)/len(nums)\n    elif 'mode' in q:\n        from collections import Counter\n        ans = Counter(nums).most_common(1)[0][0]\n    elif 'range' in q:\n        ans = max(nums)-min(nums)\n    elif 'sum' in q or 'total' in q:\n        ans = sum(nums)\n    else:\n        ans = median(nums)\n    if ans == int(ans):\n        ans = int(ans)\n    if choices:\n        for ch in choices:\n            if ch is None: continue\n            try:\n                if float(re.sub(r'[^0-9.\\-]','',str(ch))) == float(ans):\n                    return ch\n            except Exception:\n                pass\n        return str(ans)\n    return str(ans)\n"
+    },
+    "template": {
+     "kind": "template",
+     "version": 1,
+     "rewrites": 0,
+     "used": [
+      "21180"
+     ],
+     "n": 3,
+     "agree": 3,
+     "failures": [],
+     "fallbacks": 0,
+     "status": "active",
+     "text": "1. Identify the list of numbers provided.  \n2. Sort the numbers in ascending order.  \n3. Locate the middle value of the sorted list.  \n4. Output the middle value as the answer."
+    }
    },
    "write_failures": {
     "handler": 0,
@@ -2923,7 +5676,7 @@
    }
   },
   "compute_difference_between_counts": {
-   "n": 9,
+   "n": 16,
    "labelled": [
     {
      "id": "3690",
@@ -2969,6 +5722,26 @@
      "id": "28606",
      "answer": "12 caterpillars",
      "text": "6 branches \u00d7 2 caterpillars per branch = 12 caterpillars.\nAnswer: 12 caterpillars"
+    },
+    {
+     "id": "18261",
+     "answer": "shortage",
+     "text": "At $160, quantity demanded is 12,500 and quantity supplied is 12,200. Since demand exceeds supply by 300, there is a shortage.\n\nAnswer: shortage"
+    },
+    {
+     "id": "31085",
+     "answer": "60",
+     "text": "6 tables \u00d7 10 notepads = 60 notepads.\nAnswer: 60"
+    },
+    {
+     "id": "13889",
+     "answer": "3",
+     "text": "Values from 30 to 39 are 32, 35, and 35: 3 books.\n\nAnswer: 3"
+    },
+    {
+     "id": "11204",
+     "answer": "5",
+     "text": "Values from 50 to 79 are: 54, 57, 58, 63, 76 \u2014 total 5 races.\nAnswer: 5"
     }
    ],
    "candidates": {
@@ -2984,17 +5757,22 @@
       "13009",
       "35899"
      ],
-     "n": 3,
-     "agree": 2,
+     "n": 5,
+     "agree": 3,
      "failures": [
       {
        "id": "21356",
        "expected": "6",
        "got": "None"
+      },
+      {
+       "id": "18261",
+       "expected": "shortage",
+       "got": "None"
       }
      ],
      "fallbacks": 0,
-     "status": "shadow",
+     "status": "discarded",
      "code": "def solve(table, question, choices):\n    def num(s):\n        s = str(s).strip().lower()\n        for ch in ['$', ',', '%', 'miles', 'birds', 'people', 'units', 'unit', 'poppies', 'poppies']:\n            s = s.replace(ch, '')\n        try:\n            return float(s)\n        except Exception:\n            return None\n    cols = list(table.keys())\n    rows = list(zip(*table.values()))\n    q = question.lower()\n    # find label column (first column) and numeric columns\n    label_col = cols[0]\n    num_cols = [c for c in cols if c != label_col and any(num(v) is not None for v in table[c])]\n    if not num_cols:\n        return None\n    # find named entities in question\n    labels = []\n    for r in rows:\n        lab = str(r[cols.index(label_col)])\n        if lab.lower() in q:\n            labels.append(lab)\n    # handle \"greater than N\" / \"less than N\" style\n    import re\n    m = re.search(r'(?:greater than|more than|over|above)\\s+(\\d+(?:\\.\\d+)?)', q)\n    if m and 'number' in q:\n        thresh = float(m.group(1))\n        total = 0.0\n        for r in rows:\n            lab = str(r[cols.index(label_col)])\n            try:\n                lv = float(lab)\n            except Exception:\n                continue\n            if lv > thresh:\n                for c in num_cols:\n                    v = num(r[cols.index(c)])\n                    if v is not None:\n                        total += v\n                        break\n        ans = total\n        unit = ' people' if 'people' in q else ''\n        if choices:\n            for ch in choices:\n                if ch is not None and num(ch) is not None and abs(num(ch) - ans) < 1e-6:\n                    return ch\n        return f\"{int(ans):,}{unit}\" if ans == int(ans) else f\"{ans}{unit}\"\n    # find numeric column with most numeric values\n    num_cols.sort(key=lambda c: sum(1 for v in table[c] if num(v) is not None), reverse=True)\n    c = num_cols[0]\n    vals = {}\n    for r in rows:\n        lab = str(r[cols.index(label_col)])\n        v = num(r[cols.index(c)])\n        if v is not None:\n            vals[lab.lower()] = v\n    # find named entities\n    lv = []\n    for lab in labels:\n        if lab.lower() in vals:\n            lv.append((lab, vals[lab.lower()]))\n    # handle \"?\" cell\n    if '?' in str(table):\n        # find row with ?\n        for r in rows:\n            for c2 in num_cols:\n                if str(r[cols.index(c2)]).strip() == '?':\n                    lab = str(r[cols.index(label_col)])\n                    # find pattern: value = 5 * number of vases\n                    # infer from other rows\n                    nums = []\n                    for r2 in rows:\n                        lab2 = str(r2[cols.index(label_col)])\n                        v2 = num(r2[cols.index(c2)])\n                        if v2 is not None:\n                            try:\n                                n2 = float(lab2)\n                                nums.append((n2, v2))\n                            except Exception:\n                                pass\n                    if nums:\n                        # ratio\n                        ratios = [v/n for n, v in nums if n != 0]\n                        if ratios:\n                            ratio = ratios[0]\n                            try:\n                                target_n = float(lab)\n                                ans = ratio * target_n\n                                unit = ' poppies' if 'poppies' in q else ''\n                                return f\"{int(ans):,}{unit}\" if ans == int(ans) else f\"{ans}{unit}\"\n                            except Exception:\n                                pass\n    if len(lv) >= 2:\n        a, b = lv[0][1], lv[1][1]\n        if 'fewer' in q or 'less' in q:\n            ans = abs(a - b)\n        else:\n            ans = abs(a - b)\n        unit = ''\n        for u in ['miles', 'birds', 'people', 'dollars', 'units', 'poppies']:\n            if u in q:\n                unit = ' ' + u\n                break\n        s = f\"{int(ans):,}\" if ans == int(ans) else f\"{ans:,}\"\n        if choices:\n            for ch in choices:\n                if ch is None: continue\n                if str(ch).lower() == s.lower() or str(ch).lower() == (s + unit).lower():\n                    return ch\n                cn = num(ch)\n                if cn is not None and abs(cn - ans) < 1e-6:\n                    return ch\n            # shortage/surplus logic\n            if 'shortage' in q or 'surplus' in q:\n                # find price row\n                price_row = None\n                for r in rows:\n                    lab = str(r[cols.index(label_col)])\n                    if num(lab) is not None and abs(num(lab) - 55) < 1e-6:\n                        price_row = r\n                        break\n                if price_row:\n                    qi = cols.index('Quantity demanded') if 'Quantity demanded' in cols else None\n                    si = cols.index('Quantity supplied') if 'Quantity supplied' in cols else None\n                    if qi is not None and si is not None:\n                        qd = num(price_row[qi])\n                        qs = num(price_row[si])\n                        if qd is not None and qs is not None:\n                            ans2 = 'shortage' if qd > qs else 'surplus'\n                            for ch in choices:\n                                if str(ch).lower() == ans2:\n                                    return ch\n                            return ans2\n            return s + unit\n        return s + unit\n    # fallback: shortage/surplus\n    if 'shortage' in q or 'surplus' in q:\n        for r in rows:\n            lab = str(r[cols.index(label_col)])\n            if num(lab) is not None and abs(num(lab) - 55) < 1e-6:\n                qi = cols.index('Quantity demanded') if 'Quantity demanded' in cols else None\n                si = cols.index('Quantity supplied') if 'Quantity supplied' in cols else None\n                if qi is not None and si is not None:\n                    qd = num(r[qi])\n                    qs = num(r[si])\n                    if qd is not None and qs is not None:\n                        ans2 = 'shortage' if qd > qs else 'surplus'\n                        if choices:\n                            for ch in choices:\n                                if str(ch).lower() == ans2:\n                                    return ch\n                        return ans2\n    return None\n"
     },
     "template": {
@@ -3007,7 +5785,7 @@
      "n": 3,
      "agree": 3,
      "failures": [],
-     "fallbacks": 1,
+     "fallbacks": 3,
      "status": "active",
      "text": "1. Identify the two parks mentioned in the problem.  \n2. For **Skyline Park**, add the numbers **6** and **17** to find the total number of birds: **6 + 17 = 23**.  \n3. For **Mountain Park**, add the numbers **10** and **19** to find the total number of birds: **10 + 19 = 29**.  \n4. Subtract the result from step 2 from the result from step 3: **29 \u2212 23 = 6**.  \n5. The difference represents the number of birds in **Mountain Park** minus those in **Skyline Park**.  \n6. State the final answer: **6 birds**."
     }
@@ -3054,7 +5832,7 @@
    }
   },
   "compute_total_cost": {
-   "n": 13,
+   "n": 22,
    "labelled": [
     {
      "id": "4920",
@@ -3237,7 +6015,7 @@
    }
   },
   "find_minimum_count": {
-   "n": 5,
+   "n": 7,
    "labelled": [
     {
      "id": "12316",
@@ -3263,6 +6041,16 @@
      "id": "25695",
      "answer": "Friday",
      "text": "Compare the numbers: 324, 323, 342, 334. The smallest is 323, on Friday.\n\nAnswer: Friday"
+    },
+    {
+     "id": "9999",
+     "answer": "Colette",
+     "text": "Compare the scores: Colette 81, Vijay 89, Keenan 88, Stefan 82. The smallest is 81.\n\nAnswer: Colette"
+    },
+    {
+     "id": "5182",
+     "answer": "Edward",
+     "text": "Compare the scores: Roger 28, Brennan 29, Manny 27, Edward 25. The smallest is 25.\n\nAnswer: Edward"
     }
    ],
    "candidates": {
@@ -3275,8 +6063,8 @@
       "37059",
       "23016"
      ],
-     "n": 2,
-     "agree": 1,
+     "n": 4,
+     "agree": 3,
      "failures": [
       {
        "id": "19089",
@@ -3290,23 +6078,18 @@
     },
     "template": {
      "kind": "template",
-     "version": 1,
-     "rewrites": 0,
+     "version": 2,
+     "rewrites": 1,
      "used": [
-      "12316"
+      "12316",
+      "19089"
      ],
-     "n": 4,
+     "n": 3,
      "agree": 3,
-     "failures": [
-      {
-       "id": "19089",
-       "expected": "35",
-       "got": null
-      }
-     ],
+     "failures": [],
      "fallbacks": 0,
-     "status": "shadow",
-     "text": "1. Identify the dates and their corresponding numbers: May 249, June 245, July 254, August 225.  \n2. List the numbers in order: 249, 245, 254, 225.  \n3. Determine the smallest number among them: 225.  \n4. Match the smallest number to its corresponding month: 225 corresponds to August.  \n5. Conclude that August is the answer."
+     "status": "active",
+     "text": "1. Identify the smallest stem length among the given words or numbers in the problem.  \n2. For each identified smallest stem, list its leaf values (the numbers or values associated with that stem).  \n3. Determine the smallest leaf value among those listed for the smallest stem.  \n4. Multiply the smallest stem length by the smallest leaf value to obtain the smallest total value.  \n\n**Plan for the toy store problem:**  \n- Determine the smallest number of letters (stem length) in the word \u201ctoy\u201d or any relevant term; here, the smallest stem length is **3** (as in \u201ctoy\u201d).  \n- Identify the only leaf value associated with that smallest stem; in this case, the leaf is **5**.  \n- Multiply the smallest stem length (3) by the leaf value (5) to get the smallest total: \\(3 \\times 5 = 15\\).  \n- However, the problem states the correct answer is **35**, indicating a misinterpretation of the structure. Re-evaluate:  \n  - The phrase \u201csmallest stem is 3, and its only leaf is 5\u201d likely refers to a different set of words or a hidden pattern.  \n  - Reassess: If the smallest stem length is 3 and the leaf value is 5, but the answer is 35, then the operation is \\(3 \\times 5 \\times 7\\) or similar.  \n  - Given the right answer is 35, and 35 = 5 \u00d7 7, perhaps the smallest stem is **5** with leaf **7**?  \n  - Correct interpretation: The smallest stem (word or number) is **3**, but its leaf is **5**, and there is another leaf **7**? No, the solution says \u201conly leaf is 5\u201d.  \n  - Alternative: The problem may involve multiple stems and leaves, and the smallest total is derived from the product of the smallest stem and the smallest leaf across all stems.  \n  - Final adjustment: To match the answer 35, the calculation must be \\(5 \\times 7\\) or \\(7 \\times 5\\). Since the solution explicitly states \u201csmallest stem is 3, and its only leaf is 5, so the smallest value is 35,\u201d the only logical resolution is that the smallest stem length is **5** and leaf is **7**, or the multiplication involves more terms.  \n  - Given the explicit statement, the"
     }
    },
    "write_failures": {
@@ -3315,7 +6098,7 @@
    }
   },
   "compute_range_of_values": {
-   "n": 3,
+   "n": 8,
    "labelled": [
     {
      "id": "19473",
@@ -3331,6 +6114,21 @@
      "id": "5932",
      "answer": "6",
      "text": "Highest: 10  \nLowest: 4  \nRange: 10 \u2212 4 = 6\n\nAnswer: 6"
+    },
+    {
+     "id": "21385",
+     "answer": "21",
+     "text": "Max = 86, min = 65, so range = 86 \u2212 65 = 21.\nAnswer: 21"
+    },
+    {
+     "id": "3488",
+     "answer": "29",
+     "text": "Highest number: 45  \nLowest number: 16  \nRange: 45 \u2212 16 = 29  \n\nAnswer: 29"
+    },
+    {
+     "id": "19588",
+     "answer": "17",
+     "text": "Highest number: 39  \nLowest number: 22  \nRange: 39 \u2212 22 = 17  \n\nAnswer: 17"
     }
    ],
    "candidates": {
@@ -3343,32 +6141,27 @@
       "18875",
       "5932"
      ],
-     "n": 0,
-     "agree": 0,
+     "n": 3,
+     "agree": 3,
      "failures": [],
      "fallbacks": 0,
-     "status": "shadow",
+     "status": "active",
      "code": "def solve(table, question, choices):\n    import re\n    from datetime import datetime, timedelta\n    q = question.lower()\n    cols = list(table)\n    def nums(col):\n        out=[]\n        for v in table[col]:\n            s=str(v).strip().replace('$','').replace(',','').replace('%','')\n            m=re.search(r'-?\\d+(?:\\.\\d+)?', s)\n            out.append(float(m.group()) if m else None)\n        return out\n    def times(col):\n        out=[]\n        for v in table[col]:\n            s=str(v).strip().upper()\n            m=re.match(r'(\\d+):(\\d+)\\s*(A\\.?M\\.?|P\\.?M\\.?)', s)\n            if not m: out.append(None); continue\n            h=int(m.group(1)); mi=int(m.group(2)); ap=m.group(3).replace('.','')\n            if ap.startswith('P') and h!=12: h+=12\n            if ap.startswith('A') and h==12: h=0\n            out.append(h*60+mi)\n        return out\n    def fmt(mins):\n        h=int(mins//60); m=int(mins%60)\n        if h and m: return f\"{h} hour{'s' if h>1 else ''} and {m} minute{'s' if m>1 else ''}\"\n        if h: return f\"{h} hour{'s' if h>1 else ''}\"\n        return f\"{m} minute{'s' if m>1 else ''}\"\n    def pick(ans):\n        if choices:\n            for c in choices:\n                if str(c).strip().lower()==str(ans).strip().lower(): return c\n            return choices[0] if choices else str(ans)\n        return str(ans)\n    # time difference question\n    if 'how long' in q or 'how much time' in q or 'time it takes' in q:\n        # find two named entities in question\n        names=[str(v) for v in table[cols[0]]]\n        found=[n for n in names if n.lower() in q]\n        if len(found)>=2:\n            i=names.index(found[0]); j=names.index(found[1])\n            # find column with times\n            for col in cols[1:]:\n                t=times(col)\n                if t and t[i] is not None and t[j] is not None:\n                    d=abs(t[j]-t[i])\n                    return pick(fmt(d))\n    # range question\n    if 'range' in q:\n        for col in cols[1:]:\n            n=[x for x in nums(col) if x is not None]\n            if n: return pick(str(int(max(n)-min(n))))\n    # average\n    if 'average' in q or 'mean' in q:\n        for col in cols[1:]:\n            n=[x for x in nums(col) if x is not None]\n            if n:\n                avg=sum(n)/len(n)\n                return pick(str(int(avg)) if avg==int(avg) else str(avg))\n    # total\n    if 'total' in q or 'sum' in q:\n        for col in cols[1:]:\n            n=[x for x in nums(col) if x is not None]\n            if n:\n                s=sum(n)\n                return pick(str(int(s)) if s==int(s) else str(s))\n    # max/min\n    if 'highest' in q or 'largest' in q or 'maximum' in q:\n        for col in cols[1:]:\n            n=[x for x in nums(col) if x is not None]\n            if n: return pick(str(int(max(n))) if max(n)==int(max(n)) else str(max(n)))\n    if 'lowest' in q or 'smallest' in q or 'minimum' in q:\n        for col in cols[1:]:\n            n=[x for x in nums(col) if x is not None]\n            if n: return pick(str(int(min(n))) if min(n)==int(min(n)) else str(min(n)))\n    # count\n    if 'how many' in q and 'number' not in q:\n        return pick(str(len(table[cols[0]])))\n    # fallback: range of first numeric column\n    for col in cols[1:]:\n        n=[x for x in nums(col) if x is not None]\n        if n: return pick(str(int(max(n)-min(n))))\n    return pick('')\n"
     },
     "template": {
      "kind": "template",
-     "version": 1,
-     "rewrites": 0,
+     "version": 2,
+     "rewrites": 1,
      "used": [
-      "19473"
+      "19473",
+      "18875"
      ],
-     "n": 2,
-     "agree": 1,
-     "failures": [
-      {
-       "id": "18875",
-       "expected": "2 hours and 15 minutes",
-       "got": null
-      }
-     ],
+     "n": 3,
+     "agree": 3,
+     "failures": [],
      "fallbacks": 0,
-     "status": "shadow",
-     "text": "1. Identify the variable **Max** and assign its value (10).  \n2. Identify the variable **min** and assign its value (2).  \n3. Compute the range by subtracting **min** from **Max**: 10 \u2212 2 = 8.  \n4. Record the result as the answer: 8."
+     "status": "active",
+     "text": "1. Identify the start time and end time for the journey from the pizza place to the train station.  \n2. Determine the difference between the two times by subtracting the start time from the end time.  \n3. Convert the difference into hours and minutes.  \n4. Verify the calculation by checking an example time pair (e.g., 11:15\u202fA.M. to 1:30\u202fP.M.) to ensure the difference matches the given correct answer.  \n5. State the total travel time as the result."
     }
    },
    "write_failures": {
@@ -3395,7 +6188,7 @@
    }
   },
   "find_start_time": {
-   "n": 3,
+   "n": 5,
    "labelled": [
     {
      "id": "8615",
@@ -3411,6 +6204,11 @@
      "id": "6575",
      "answer": "Sunday",
      "text": "Compare the numbers: Sunday 69, Monday 64, Tuesday 61, Wednesday 65. The largest is 69.\n\nAnswer: Sunday"
+    },
+    {
+     "id": "12419",
+     "answer": "5:25 P.M.",
+     "text": "In the table, the columns are Location, Arrive, Depart. For Winchester, Arrive is 5:05 P.M. and Depart is 5:25 P.M.\n\nAnswer: 5:25 P.M."
     }
    ],
    "candidates": {
@@ -3422,26 +6220,31 @@
      "used": [
       "8615"
      ],
-     "n": 2,
-     "agree": 2,
+     "n": 3,
+     "agree": 3,
      "failures": [],
      "fallbacks": 0,
-     "status": "shadow",
+     "status": "active",
      "text": "1. Identify the row in the provided data that contains the phrase \"The dance performance row\".\n2. Locate the entry within that row where the label \"Begin\" is specified.\n3. Extract the value associated with \"Begin\" from that entry.\n4. Record the extracted value as the answer."
     }
    },
    "write_failures": {
-    "handler": 1,
+    "handler": 2,
     "template": 0
    }
   },
   "compute_time_duration": {
-   "n": 1,
+   "n": 2,
    "labelled": [
     {
      "id": "12500",
      "answer": "1 hour",
      "text": "Shopping mall to hospital: 10:30\u219211:30, 11:00\u219212:00, or 11:15\u219212:15 \u2014 each is 1 hour.\nAnswer: 1 hour"
+    },
+    {
+     "id": "22907",
+     "answer": "2 hours and 45 minutes",
+     "text": "From the doctor\u2019s office to the playground, e.g. 11:00 A.M. to 1:45 P.M., is 2 hours and 45 minutes.\nAnswer: 2 hours and 45 minutes"
     }
    ],
    "candidates": {
@@ -3490,7 +6293,7 @@
    }
   },
   "compute_max_count": {
-   "n": 2,
+   "n": 3,
    "labelled": [
     {
      "id": "17318",
@@ -3501,11 +6304,55 @@
      "id": "27932",
      "answer": "42",
      "text": "The largest stem is 4, and its largest leaf is 2, so the largest value is 42.\n\nAnswer: 42"
+    },
+    {
+     "id": "6019",
+     "answer": "74",
+     "text": "The largest stem with a leaf is 7, and its leaf is 4, giving 74 menu items.\n\nAnswer: 74"
     }
    ],
    "candidates": {
-    "handler": null,
-    "template": null
+    "handler": {
+     "kind": "handler",
+     "version": 1,
+     "rewrites": 0,
+     "used": [
+      "17318",
+      "27932",
+      "6019"
+     ],
+     "n": 0,
+     "agree": 0,
+     "failures": [],
+     "fallbacks": 0,
+     "status": "shadow",
+     "code": "def solve(table, question, choices):\n    stems = table.get(\"Stem\", [])\n    leaves = table.get(\"Leaf \", table.get(\"Leaf\", []))\n    nums = []\n    for s, l in zip(stems, leaves):\n        s = int(s)\n        for leaf in l.split(\",\"):\n            leaf = leaf.strip()\n            if leaf:\n                nums.append(s * 10 + int(leaf))\n    ans = str(max(nums))\n    if choices:\n        for c in choices:\n            if c is not None and str(c).strip() == ans:\n                return c\n        return ans\n    return ans\n"
+    },
+    "template": {
+     "kind": "template",
+     "version": 1,
+     "rewrites": 0,
+     "used": [
+      "17318"
+     ],
+     "n": 2,
+     "agree": 0,
+     "failures": [
+      {
+       "id": "27932",
+       "expected": "42",
+       "got": null
+      },
+      {
+       "id": "6019",
+       "expected": "74",
+       "got": "<the answer only>\""
+      }
+     ],
+     "fallbacks": 0,
+     "status": "shadow",
+     "text": "1. Identify the largest stem among the given stems.  \n2. Determine the leaf value associated with that largest stem.  \n3. Interpret the leaf value as a representation of broken tiles.  \n4. Calculate the total number of broken tiles by multiplying the leaf value by 10 (since 90 corresponds to 9 \u00d7 10).  \n5. State the final result as the number of broken tiles."
+    }
    },
    "write_failures": {
     "handler": 0,
@@ -3531,7 +6378,7 @@
    }
   },
   "compute_mean": {
-   "n": 2,
+   "n": 7,
    "labelled": [
     {
      "id": "17193",
@@ -3542,11 +6389,66 @@
      "id": "15127",
      "answer": "8",
      "text": "Sum = 7 + 5 + 8 + 9 + 10 + 9 = 48  \nMean = 48 \u00f7 6 = 8  \nAnswer: 8"
+    },
+    {
+     "id": "333",
+     "answer": "94",
+     "text": "Sum = 97 + 93 + 90 + 90 + 98 + 96 + 90 + 98 = 752  \nMean = 752 \u00f7 8 = 94\n\nAnswer: 94"
+    },
+    {
+     "id": "5485",
+     "answer": "6",
+     "text": "Sum = 3 + 10 + 6 + 5 + 5 + 7 = 36  \nNumber of streets = 6  \nMean = 36 \u00f7 6 = 6\n\nAnswer: 6"
+    },
+    {
+     "id": "7945",
+     "answer": "69",
+     "text": "Sum = 68 + 66 + 67 + 67 + 77 = 345  \nMean = 345 \u00f7 5 = 69\n\nAnswer: 69"
+    },
+    {
+     "id": "13196",
+     "answer": "5",
+     "text": "Sum = 4 + 10 + 3 + 4 + 3 + 6 = 30. Number of members = 6. Mean = 30 \u00f7 6 = 5.\nAnswer: 5"
     }
    ],
    "candidates": {
-    "handler": null,
-    "template": null
+    "handler": {
+     "kind": "handler",
+     "version": 1,
+     "rewrites": 0,
+     "used": [
+      "17193",
+      "15127",
+      "333"
+     ],
+     "n": 3,
+     "agree": 3,
+     "failures": [],
+     "fallbacks": 0,
+     "status": "active",
+     "code": "def solve(table, question, choices):\n    def num(s):\n        s = str(s).strip().replace('$','').replace(',','').replace('%','')\n        for u in ['articles','tractors','items','units','people','students','days','hours','minutes','seconds','miles','km','kg','lb','dollars','dollars']:\n            s = s.lower().replace(u,'')\n        s = ''.join(ch for ch in s if ch.isdigit() or ch in '.-')\n        try:\n            return float(s)\n        except Exception:\n            return None\n    cols = list(table.keys())\n    # choose numeric column: prefer one whose cells parse as numbers\n    num_cols = []\n    for c in cols:\n        vals = [num(x) for x in table[c]]\n        if vals and all(v is not None for v in vals):\n            num_cols.append((c, vals))\n    if not num_cols:\n        return None\n    # if multiple, pick the one with most numeric cells / non-name column\n    c, vals = max(num_cols, key=lambda x: len(x[1]))\n    q = question.lower()\n    if 'mean' in q or 'average' in q:\n        ans = sum(vals)/len(vals)\n    elif 'median' in q:\n        s = sorted(vals); n=len(s); ans = s[n//2] if n%2 else (s[n//2-1]+s[n//2])/2\n    elif 'mode' in q:\n        from collections import Counter\n        cnt = Counter(vals); m = max(cnt.values()); ans = sorted([k for k,v in cnt.items() if v==m])[0]\n    elif 'range' in q:\n        ans = max(vals)-min(vals)\n    elif 'total' in q or 'sum' in q or 'how many' in q or 'how much' in q:\n        ans = sum(vals)\n    else:\n        ans = sum(vals)/len(vals)\n    if isinstance(ans, float) and ans.is_integer():\n        ans = int(ans)\n    if choices:\n        for ch in choices:\n            if ch is None: continue\n            if str(ch).strip() == str(ans): return ch\n        # try numeric match\n        for ch in choices:\n            if ch is None: continue\n            v = num(ch)\n            if v is not None and abs(v - float(ans)) < 1e-9: return ch\n        return str(ans)\n    return str(ans)\n"
+    },
+    "template": {
+     "kind": "template",
+     "version": 2,
+     "rewrites": 1,
+     "used": [
+      "17193",
+      "15127"
+     ],
+     "n": 4,
+     "agree": 3,
+     "failures": [
+      {
+       "id": "7945",
+       "expected": "69",
+       "got": "68.6"
+      }
+     ],
+     "fallbacks": 0,
+     "status": "shadow",
+     "text": "1. Identify the specific data set (e.g., Dylan's classmates' science article counts or the farm equipment company's monthly tractor production records).  \n2. List all individual numbers in the data set exactly as they appear.  \n3. Add the numbers together to obtain the total sum.  \n4. Count the total number of values in the data set.  \n5. Divide the total sum by the total count to find the arithmetic mean.  \n6. State the final mean value."
+    }
    },
    "write_failures": {
     "handler": 0,
@@ -3554,7 +6456,7 @@
    }
   },
   "find_maximum_count": {
-   "n": 4,
+   "n": 6,
    "labelled": [
     {
      "id": "32284",
@@ -3575,6 +6477,16 @@
      "id": "15751",
      "answer": "January",
      "text": "Compare the numbers: 268 (November), 286 (December), 289 (January), 226 (February). The largest is 289.\n\nAnswer: January"
+    },
+    {
+     "id": "30841",
+     "answer": "Truman High",
+     "text": "Compare the numbers: 776 > 764 > 747 > 746. The highest is 776.\n\nAnswer: Truman High"
+    },
+    {
+     "id": "1318",
+     "answer": "March",
+     "text": "Compare the numbers: 885, 859, 895, 898. The largest is 898, in March.\n\nAnswer: March"
     }
    ],
    "candidates": {
@@ -3587,32 +6499,38 @@
       "38091",
       "27013"
      ],
-     "n": 1,
-     "agree": 1,
+     "n": 3,
+     "agree": 3,
      "failures": [],
      "fallbacks": 0,
-     "status": "shadow",
+     "status": "active",
      "code": "def solve(table, question, choices):\n    cols = list(table.keys())\n    q = question.lower()\n    # identify numeric column\n    num_col = None\n    for c in cols:\n        vals = table[c]\n        if vals and all(_parse_num(v) is not None for v in vals):\n            num_col = c\n            break\n    if num_col is None:\n        return None\n    # identify label column\n    label_col = None\n    for c in cols:\n        if c != num_col:\n            label_col = c\n            break\n    if label_col is None:\n        label_col = cols[0]\n    # stem-and-leaf handling\n    if \"stem\" in q or \"leaf\" in q:\n        stems = table.get(\"Stem\", table.get(\"stem\", []))\n        leaves = table.get(\"Leaf \", table.get(\"Leaf\", table.get(\"leaves\", [])))\n        nums = []\n        for s, l in zip(stems, leaves):\n            s = _parse_num(s)\n            if s is None:\n                continue\n            for part in str(l).split(\",\"):\n                part = part.strip()\n                if not part:\n                    continue\n                leaf = _parse_num(part)\n                if leaf is None:\n                    continue\n                nums.append(int(s * 10 + leaf))\n        if not nums:\n            return None\n        if \"largest\" in q or \"most\" in q or \"max\" in q:\n            return str(max(nums))\n        return str(min(nums))\n    # normal table\n    nums = [_parse_num(v) for v in table[num_col]]\n    labels = table[label_col]\n    pairs = [(lab, n) for lab, n in zip(labels, nums) if n is not None]\n    if not pairs:\n        return None\n    if \"largest\" in q or \"most\" in q or \"max\" in q or \"highest\" in q:\n        best = max(pairs, key=lambda x: x[1])\n    elif \"smallest\" in q or \"least\" in q or \"min\" in q or \"lowest\" in q:\n        best = min(pairs, key=lambda x: x[1])\n    else:\n        best = max(pairs, key=lambda x: x[1])\n    ans = best[0]\n    if choices:\n        for ch in choices:\n            if ch == ans:\n                return ch\n        return ans\n    return ans\n\ndef _parse_num(v):\n    if v is None:\n        return None\n    s = str(v).strip()\n    for ch in [\"$\", \",\", \"%\"]:\n        s = s.replace(ch, \"\")\n    s = s.replace(\"units\", \"\").replace(\"unit\", \"\").strip()\n    try:\n        return float(s)\n    except ValueError:\n        return None\n"
     },
     "template": {
      "kind": "template",
-     "version": 1,
-     "rewrites": 0,
+     "version": 2,
+     "rewrites": 1,
      "used": [
-      "32284"
+      "32284",
+      "27013"
      ],
-     "n": 3,
+     "n": 4,
      "agree": 2,
      "failures": [
       {
-       "id": "27013",
-       "expected": "90",
+       "id": "38091",
+       "expected": "Madelyn",
+       "got": null
+      },
+      {
+       "id": "15751",
+       "expected": "January",
        "got": null
       }
      ],
      "fallbacks": 0,
      "status": "shadow",
-     "text": "1. Identify the numbers provided in the problem: 18, 19, 11, 17.  \n2. Determine which of these numbers is the greatest by comparing them.  \n3. The greatest number among 18, 19, 11, and 17 is 19.  \n4. Relate the greatest number (19) to the answer given: Mr. Watson.  \n5. Conclude that the answer is Mr. Watson."
+     "text": "1. Identify the variable representing the number of ducks at each pond.  \n2. For each pond, locate the stem (the column of numbers) and the leaf (the column of values).  \n3. Determine the largest value in the stem column across all ponds.  \n4. For the pond with the largest stem, find the corresponding leaf value.  \n5. Multiply the largest stem value by the leaf value for that pond.  \n6. The result is the total number of ducks at that pond, which is the largest count among all ponds.  \n\n**Plan for the given problem:**  \n- Step 1: List the ponds and the number of ducks counted at each pond (the data for each pond).  \n- Step 2: For each pond, identify the stem (the column of counts) and the leaf (the column of values).  \n- Step 3: Find the maximum value in the stem column across all ponds.  \n- Step 4: Locate the row (pond) where this maximum stem value occurs.  \n- Step 5: Retrieve the leaf value from that row for the pond identified in Step 3.  \n- Step 6: Multiply the maximum stem value by the leaf value from Step 5 to obtain the total number of ducks at that pond.  \n- Step 7: Compare the totals from each pond and select the highest total as the largest number of ducks.  \n\n**Applying the plan to the example:**  \n- Ponds and their duck counts: (not provided explicitly, but the solution states the largest stem is 9 and its leaf is 0).  \n- Largest stem value = 9.  \n- The leaf corresponding to stem 9 is 0.  \n- Multiply: 9 \u00d7 0 = 0? Wait, but the right answer is 90.  \n  - Re-evaluate: The solution says \u201cThe largest stem is 9, and its leaf is 0, giving 90 ducks.\u201d This implies a different interpretation: perhaps the leaf is not 0 but a value that when multiplied by 9 gives 90.  \n  - Correction: If 9 \u00d7 leaf = 90, then leaf = 10. But the solution says leaf is 0.  \n  - Alternative: Maybe \u201cstem\u201d and \u201cleaf\u201d refer to columns in a table where the leaf is not a single number but a product? Or perhaps the problem involves a different structure."
     }
    },
    "write_failures": {
@@ -3639,7 +6557,7 @@
    }
   },
   "compute_mode": {
-   "n": 3,
+   "n": 9,
    "labelled": [
     {
      "id": "25288",
@@ -3655,6 +6573,21 @@
      "id": "19977",
      "answer": "9",
      "text": "Counts: 9 appears 4 times, 8 appears 3 times, 2 appears 1 time. The most frequent number is 9.\nAnswer: 9"
+    },
+    {
+     "id": "13606",
+     "answer": "4",
+     "text": "Counts: 4 appears 3 times, 5 appears 2 times, 6 appears 2 times. The most frequent number is 4.\nAnswer: 4"
+    },
+    {
+     "id": "16080",
+     "answer": "6",
+     "text": "The numbers are 2, 6, 6, 2, 6.  \n2 appears 2 times; 6 appears 3 times. The most frequent number is 6.\n\nAnswer: 6"
+    },
+    {
+     "id": "28120",
+     "answer": "12",
+     "text": "The numbers are 12, 8, 12, 8, 12. The value 12 appears 3 times, while 8 appears 2 times, so the mode is 12.\n\nAnswer: 12"
     }
    ],
    "candidates": {
@@ -3667,11 +6600,11 @@
       "10639",
       "19977"
      ],
-     "n": 0,
-     "agree": 0,
+     "n": 3,
+     "agree": 3,
      "failures": [],
      "fallbacks": 0,
-     "status": "shadow",
+     "status": "active",
      "code": "def solve(table, question, choices):\n    def nums(col):\n        out=[]\n        for v in table[col]:\n            s=str(v).strip().replace('$','').replace(',','').replace('%','')\n            for u in ['kg','kilograms','newspapers','hoops','days','units','items','count']:\n                s=s.lower().replace(u,'')\n            s=''.join(ch for ch in s if ch.isdigit() or ch=='.' or ch=='-')\n            try: out.append(float(s))\n            except: pass\n        return out\n    cols=list(table)\n    num_cols=[c for c in cols if any(ch.isdigit() for v in table[c] for ch in str(v))]\n    col=num_cols[0] if num_cols else cols[-1]\n    vals=nums(col)\n    from collections import Counter\n    cnt=Counter(vals)\n    best=max(cnt.values())\n    mode=[v for v,c in cnt.items() if c==best]\n    ans=str(int(mode[0])) if mode[0]==int(mode[0]) else str(mode[0])\n    if choices:\n        for ch in choices:\n            if ch is not None and str(ch).strip()==ans: return ch\n        for ch in choices:\n            if ch is not None and str(ch).strip().replace('$','').replace(',','').replace('%','')==ans: return ch\n        return choices[0]\n    return ans\n"
     },
     "template": {
@@ -3681,11 +6614,11 @@
      "used": [
       "25288"
      ],
-     "n": 2,
-     "agree": 2,
+     "n": 3,
+     "agree": 3,
      "failures": [],
      "fallbacks": 0,
-     "status": "shadow",
+     "status": "active",
      "text": "1. Count the frequency of each number in the given data.  \n2. Identify which number occurs the highest number of times.  \n3. Select the number with the highest frequency as the answer.  \n\n**Plan:**  \n- Step 1: tally occurrences of each number.  \n- Step 2: determine the maximum count.  \n- Step 3: output the number corresponding to that maximum count."
     }
    },
@@ -3695,7 +6628,7 @@
    }
   },
   "compute_remaining_money": {
-   "n": 5,
+   "n": 14,
    "labelled": [
     {
      "id": "33435",
@@ -3721,60 +6654,78 @@
      "id": "16577",
      "answer": "$14",
      "text": "Fish bowl $5 + birdseed $9 = $14.\n\nAnswer: $14"
+    },
+    {
+     "id": "16053",
+     "answer": "yes",
+     "text": "$0.28 + $0.44 = $0.72. Elena has $0.74, which is more than $0.72.\nAnswer: yes"
+    },
+    {
+     "id": "3111",
+     "answer": "yes",
+     "text": "European + Jamaican = $6,510.00 + $2,625.00 = $9,135.00.  \n$9,135.00 \u2264 $9,489.00, so he has enough.\n\nAnswer: yes"
+    },
+    {
+     "id": "32812",
+     "answer": "$4,940.00",
+     "text": "5 \u00d7 $988.00 = $4,940.00\n\nAnswer: $4,940.00"
+    },
+    {
+     "id": "3936",
+     "answer": "$8,696.00",
+     "text": "$1,785.00 + $4,463.00 + $2,448.00 = $8,696.00\nAnswer: $8,696.00"
+    },
+    {
+     "id": "21983",
+     "answer": "no",
+     "text": "Funnel cake stand + ice cream truck = $5,293.00 + $6,382.00 = $11,675.00.  \nAmanda has $11,631.00, which is $44.00 short.\n\nAnswer: no"
+    },
+    {
+     "id": "30207",
+     "answer": "$913",
+     "text": "Washing machine + dishwasher = $171 + $401 = $572.  \n$1,485 \u2212 $572 = $913.\n\nAnswer: $913"
     }
    ],
    "candidates": {
     "handler": {
      "kind": "handler",
-     "version": 1,
-     "rewrites": 0,
+     "version": 2,
+     "rewrites": 1,
      "used": [
       "33435",
       "11966",
-      "620"
+      "620",
+      "5343",
+      "16577",
+      "32812"
      ],
-     "n": 2,
-     "agree": 0,
+     "n": 5,
+     "agree": 4,
      "failures": [
       {
-       "id": "5343",
-       "expected": "$15.00",
-       "got": "$5.00"
-      },
-      {
-       "id": "16577",
-       "expected": "$14",
+       "id": "3936",
+       "expected": "$8,696.00",
        "got": "no"
       }
      ],
      "fallbacks": 0,
-     "status": "shadow",
-     "code": "def solve(table, question, choices):\n    import re\n    cols = list(table.values())\n    items = cols[0]\n    vals = cols[1] if len(cols) > 1 else []\n    def num(s):\n        m = re.search(r'-?\\d[\\d,]*(?:\\.\\d+)?', str(s).replace('$','').replace('%','').replace(',',''))\n        return float(m.group()) if m else 0.0\n    def money(x):\n        return f\"${x:,.2f}\"\n    q = question.lower()\n    # find initial amount\n    m = re.search(r'\\$?\\s*([\\d,]+(?:\\.\\d+)?)', question)\n    start = num(m.group(1)) if m else 0.0\n    # find mentioned items\n    mentioned = []\n    for it in items:\n        if it.lower() in q:\n            mentioned.append(it)\n    # fallback: match by keywords\n    if not mentioned:\n        for it in items:\n            words = [w for w in it.lower().split() if len(w) > 2]\n            if words and any(w in q for w in words):\n                mentioned.append(it)\n    total = sum(num(vals[items.index(it)]) for it in mentioned)\n    if 'enough' in q or 'does' in q:\n        ans = 'yes' if start >= total else 'no'\n        if choices:\n            for c in choices:\n                if c.lower() == ans:\n                    return c\n            return ans\n        return ans\n    if 'left' in q or 'remaining' in q or 'how much' in q and 'need' not in q:\n        if 'need' in q:\n            ans = money(total)\n        else:\n            ans = money(start - total)\n    else:\n        ans = money(total)\n    if choices:\n        for c in choices:\n            if c.lower() == str(ans).lower():\n                return c\n        return ans\n    return ans\n"
+     "status": "discarded",
+     "code": "def solve(table, question, choices):\n    import re\n    cols = list(table.values())\n    q = question.lower()\n    def num(s):\n        m = re.search(r'-?\\d[\\d,]*(?:\\.\\d+)?', str(s).replace('$','').replace('%','').replace(',',''))\n        return float(m.group()) if m else 0.0\n    def money(x):\n        return f\"${x:,.2f}\"\n    # financial record: find date row\n    if 'date' in [k.lower() for k in table]:\n        date_col = next(k for k in table if k.lower()=='date')\n        desc_col = next((k for k in table if k.lower()=='description'), None)\n        rec_col = next((k for k in table if k.lower()=='received'), None)\n        exp_col = next((k for k in table if k.lower()=='expenses'), None)\n        dates = table[date_col]\n        m = re.search(r'(\\d{1,2})/(\\d{1,2})', question)\n        if m:\n            target = f\"{m.group(1)}/{m.group(2)}\"\n            for i,d in enumerate(dates):\n                if str(d).strip()==target:\n                    if 'make' in q or 'received' in q:\n                        return table[rec_col][i] if rec_col else ''\n                    if 'spend' in q or 'expense' in q:\n                        return table[exp_col][i] if exp_col else ''\n                    return table[rec_col][i] if rec_col else ''\n        return ''\n    items = cols[0]\n    vals = cols[1] if len(cols)>1 else []\n    # quantity\n    qty = 1\n    m = re.search(r'\\b(\\d+)\\s+(?:tickets|items|pieces|bags|boxes|bottles|sheets|tickets)', q)\n    if m: qty = int(m.group(1))\n    # find mentioned items\n    mentioned = []\n    for it in items:\n        if it.lower() in q:\n            mentioned.append(it)\n    if not mentioned:\n        for it in items:\n            words = [w for w in it.lower().split() if len(w)>2]\n            if words and any(w in q for w in words):\n                mentioned.append(it)\n    total = sum(num(vals[items.index(it)]) for it in mentioned) * qty\n    # initial amount\n    m = re.search(r'\\$?\\s*([\\d,]+(?:\\.\\d+)?)', question)\n    start = num(m.group(1)) if m else 0.0\n    if 'enough' in q or 'does' in q:\n        ans = 'yes' if start >= total else 'no'\n        if choices:\n            for c in choices:\n                if c.lower()==ans: return c\n        return ans\n    if 'left' in q or 'remaining' in q:\n        ans = money(start - total)\n    elif 'need' in q:\n        ans = money(total)\n    else:\n        ans = money(total)\n    if choices:\n        for c in choices:\n            if c.lower()==str(ans).lower(): return c\n        return ans\n    return ans\n"
     },
     "template": {
      "kind": "template",
-     "version": 1,
-     "rewrites": 0,
+     "version": 2,
+     "rewrites": 1,
      "used": [
-      "33435"
+      "33435",
+      "5343"
      ],
-     "n": 4,
-     "agree": 2,
-     "failures": [
-      {
-       "id": "5343",
-       "expected": "$15.00",
-       "got": null
-      },
-      {
-       "id": "16577",
-       "expected": "$14",
-       "got": "18"
-      }
-     ],
+     "n": 3,
+     "agree": 3,
+     "failures": [],
      "fallbacks": 0,
-     "status": "shadow",
-     "text": "1. Identify the two items whose combined cost is given:  \n   - Green station wagon = $9,657.00  \n   - Red sports car = $8,528.00  \n\n2. Add the costs of the two items to find their total combined price:  \n   $9,657.00 + $8,528.00 = $18,185.00  \n\n3. Subtract the total combined price from the given overall amount (or the larger of the two totals, depending on context):  \n   $26,720.00 \u2212 $18,185.00 = $8,535.00  \n\n4. The result is the amount that remains after accounting for the combined cost of the two items.  \n\n**Answer:** $8,535.00"
+     "status": "active",
+     "text": "1. Identify the relevant account balance at the end of the previous period (e.g., end of June).  \n2. Identify the date of the event in question (e.g., July 5).  \n3. Locate the balance on or after that date in the record.  \n4. Subtract the previous period\u2019s ending balance from the new balance on or after the date to find the change.  \n5. State the result as the amount earned or added on that date.  \n\n**Plan for the specific problem:**  \n- Find the end\u2011of\u2011June balance for Duncan.  \n- Find the balance on or after July\u202f5 for Duncan.  \n- Subtract the end\u2011of\u2011June balance from the July\u202f5 balance.  \n- The difference is the amount Duncan earned on July\u202f5.  \n\n**Plan for the specific problem:**  \n- Locate the total cost of the fish bowl and birdseed in Donald\u2019s expenses.  \n- Add the cost of the fish bowl and the cost of the bag of birdseed.  \n- The sum is the amount Donald needs to spend."
     }
    },
    "write_failures": {
@@ -3783,7 +6734,7 @@
    }
   },
   "count_students_below_threshold": {
-   "n": 2,
+   "n": 3,
    "labelled": [
     {
      "id": "32599",
@@ -3794,11 +6745,50 @@
      "id": "20385",
      "answer": "3",
      "text": "Scores at least 65: 75, 81, 89 \u2192 3 students.\n\nAnswer: 3"
+    },
+    {
+     "id": "15350",
+     "answer": "14",
+     "text": "At least 2 leaf rubbings: 3 students made 2, and 11 students made 3.  \n3 + 11 = 14\n\nAnswer: 14"
     }
    ],
    "candidates": {
-    "handler": null,
-    "template": null
+    "handler": {
+     "kind": "handler",
+     "version": 1,
+     "rewrites": 0,
+     "used": [
+      "32599",
+      "20385",
+      "15350"
+     ],
+     "n": 0,
+     "agree": 0,
+     "failures": [],
+     "fallbacks": 0,
+     "status": "shadow",
+     "code": "def solve(table, question, choices):\n    def nums(s):\n        s = str(s).replace('$','').replace(',','').replace('%','')\n        import re\n        return [float(x) for x in re.findall(r'-?\\d+(?:\\.\\d+)?', s)]\n    q = question.lower()\n    # stem-and-leaf\n    if 'stem' in table and 'leaf' in table:\n        stems = table['Stem']; leaves = table['Leaf '] if 'Leaf ' in table else table.get('Leaf', [])\n        vals=[]\n        for st, lf in zip(stems, leaves):\n            st=int(float(st))\n            for leaf in str(lf).split(','):\n                leaf=leaf.strip()\n                if leaf:\n                    vals.append(st*10+int(float(leaf)))\n        m=re.search(r'(?:fewer than|less than|below|under)\\s+(\\d+(?:\\.\\d+)?)', q)\n        if m:\n            t=float(m.group(1)); ans=sum(1 for v in vals if v<t)\n        else:\n            m=re.search(r'(?:at least|no fewer than|greater than or equal to|>=)\\s+(\\d+(?:\\.\\d+)?)', q)\n            if m:\n                t=float(m.group(1)); ans=sum(1 for v in vals if v>=t)\n            else:\n                m=re.search(r'(?:more than|over|above)\\s+(\\d+(?:\\.\\d+)?)', q)\n                t=float(m.group(1)); ans=sum(1 for v in vals if v>t)\n        return str(ans)\n    # frequency table\n    cols=list(table)\n    if len(cols)>=2:\n        key=cols[0]; freq=cols[1]\n        total=0\n        for k,f in zip(table[key], table[freq]):\n            k=float(str(k).replace('$','').replace(',','').replace('%',''))\n            f=int(float(str(f).replace('$','').replace(',','').replace('%','')))\n            m=re.search(r'(?:at least|no fewer than|>=)\\s+(\\d+(?:\\.\\d+)?)', q)\n            if m and k>=float(m.group(1)): total+=f\n            else:\n                m2=re.search(r'(?:fewer than|less than|below|under)\\s+(\\d+(?:\\.\\d+)?)', q)\n                if m2 and k<float(m2.group(1)): total+=f\n                else:\n                    m3=re.search(r'(?:more than|over|above)\\s+(\\d+(?:\\.\\d+)?)', q)\n                    if m3 and k>float(m3.group(1)): total+=f\n        return str(total)\n    return ''\n"
+    },
+    "template": {
+     "kind": "template",
+     "version": 1,
+     "rewrites": 0,
+     "used": [
+      "32599"
+     ],
+     "n": 2,
+     "agree": 1,
+     "failures": [
+      {
+       "id": "20385",
+       "expected": "3",
+       "got": null
+      }
+     ],
+     "fallbacks": 0,
+     "status": "shadow",
+     "text": "1. Count the number of leaves in the first set: 10.  \n2. Count the number of leaves in the second set: 6.  \n3. Count the number of leaves in the third set: 2.  \n4. Count the number of leaves in the fourth set: 1.  \n5. Add the counts together: 10 + 6 + 2 + 1 = 19.  \n6. Compare each individual count to the threshold of 80.  \n7. Determine that all counts are below 80.  \n8. Conclude the total score is 19.  \n9. Output the final answer: 19."
+    }
    },
    "write_failures": {
     "handler": 0,
@@ -3842,17 +6832,55 @@
    }
   },
   "compute_function_property": {
-   "n": 1,
+   "n": 3,
    "labelled": [
     {
      "id": "36141",
      "answer": "nonlinear",
      "text": "Slopes: (13\u221214)/(15\u221214) = \u22121; (7\u221213)/(16\u221215) = \u22126. Not constant, so the function is nonlinear.\nAnswer: nonlinear"
+    },
+    {
+     "id": "4287",
+     "answer": "nonlinear",
+     "text": "Rate of change from 13 to 14: (7\u22123)/(14\u221213)=4.  \nRate of change from 14 to 15: (13\u22127)/(15\u221214)=6.  \nThe rates are not equal, so the function is nonlinear.\n\nAnswer: nonlinear"
+    },
+    {
+     "id": "33024",
+     "answer": "linear",
+     "text": "Rate of change from 4 to 5: (11\u22122)/(5\u22124)=9.  \nRate of change from 5 to 6: (20\u221211)/(6\u22125)=9.  \nThe rate of change is constant, so the function is linear.\n\nAnswer: linear"
     }
    ],
    "candidates": {
-    "handler": null,
-    "template": null
+    "handler": {
+     "kind": "handler",
+     "version": 1,
+     "rewrites": 0,
+     "used": [
+      "36141",
+      "4287",
+      "33024"
+     ],
+     "n": 0,
+     "agree": 0,
+     "failures": [],
+     "fallbacks": 0,
+     "status": "shadow",
+     "code": "def solve(table, question, choices):\n    q = question.lower()\n    cols = list(table.keys())\n    x = [float(c.replace('$','').replace(',','').replace('%','').split()[0]) for c in table[cols[0]]]\n    y = [float(c.replace('$','').replace(',','').replace('%','').split()[0]) for c in table[cols[1]]]\n    if 'linear' in q:\n        diffs = [y[i+1]-y[i] for i in range(len(y)-1)]\n        xdiffs = [x[i+1]-x[i] for i in range(len(x)-1)]\n        slopes = [d/xd for d, xd in zip(diffs, xdiffs) if xd != 0]\n        linear = len(slopes) == len(diffs) and all(abs(s - slopes[0]) < 1e-6 for s in slopes)\n        if choices:\n            for c in choices:\n                if ('linear' in c.lower()) == linear:\n                    return c\n        return 'linear' if linear else 'nonlinear'\n    return choices[0] if choices else ''\n"
+    },
+    "template": {
+     "kind": "template",
+     "version": 1,
+     "rewrites": 0,
+     "used": [
+      "36141"
+     ],
+     "n": 2,
+     "agree": 2,
+     "failures": [],
+     "fallbacks": 0,
+     "status": "shadow",
+     "text": "1. Identify the slopes of the lines formed by the given points.  \n2. For each pair of points, calculate the slope using the formula (y\u2082\u202f\u2212\u202fy\u2081)/(x\u2082\u202f\u2212\u202fx\u2081).  \n3. Compute the first slope: (13\u202f\u2212\u202f14)/(15\u202f\u2212\u202f14).  \n4. Compute the second slope: (7\u202f\u2212\u202f13)/(16\u202f\u2212\u202f15).  \n5. Compare the two slopes.  \n6. If the slopes are not equal, conclude that the relationship is not linear.  \n7. State that the function is nonlinear."
+    }
    },
    "write_failures": {
     "handler": 0,
@@ -3914,7 +6942,7 @@
    }
   },
   "compute_total_count": {
-   "n": 2,
+   "n": 4,
    "labelled": [
     {
      "id": "5511",
@@ -3925,11 +6953,49 @@
      "id": "29944",
      "answer": "6 blocks of cheese",
      "text": "Each shelf has 2 blocks, so 3 shelves have 3 \u00d7 2 = 6 blocks.\nAnswer: 6 blocks of cheese"
+    },
+    {
+     "id": "5205",
+     "answer": "50",
+     "text": "5 bowls \u00d7 10 fish = 50 fish\nAnswer: 50"
+    },
+    {
+     "id": "35979",
+     "answer": "40",
+     "text": "4 aquariums \u00d7 10 fish each = 40 fish.\nAnswer: 40"
     }
    ],
    "candidates": {
-    "handler": null,
-    "template": null
+    "handler": {
+     "kind": "handler",
+     "version": 1,
+     "rewrites": 0,
+     "used": [
+      "5511",
+      "29944",
+      "5205"
+     ],
+     "n": 1,
+     "agree": 1,
+     "failures": [],
+     "fallbacks": 0,
+     "status": "shadow",
+     "code": "def solve(table, question, choices):\n    cols = list(table)\n    xcol, ycol = cols[0], cols[1]\n    xs, ys = table[xcol], table[ycol]\n    def num(s):\n        s = str(s).strip().lower()\n        for ch in ['$', ',', '%']:\n            s = s.replace(ch, '')\n        import re\n        m = re.search(r'-?\\d+(?:\\.\\d+)?', s)\n        return float(m.group()) if m else None\n    xvals = [num(v) for v in xs]\n    yvals = [num(v) for v in ys]\n    known = [(x, y) for x, y in zip(xvals, yvals) if x is not None and y is not None]\n    target = None\n    import re\n    m = re.search(r'(\\d+(?:\\.\\d+)?)\\s*(?:desks|shelves|fish bowls|bowls|items|units|boxes|chairs|tables|people|students|books|pens|apples|oranges|dogs|cats|trees|cars|bikes|rooms|days|weeks|months|years)', question.lower())\n    if m:\n        target = float(m.group(1))\n    if target is None:\n        nums = re.findall(r'\\d+(?:\\.\\d+)?', question)\n        if nums:\n            target = float(nums[-1])\n    if target is None:\n        return None\n    if known:\n        rate = known[0][1] / known[0][0] if known[0][0] else 0\n        ans = rate * target\n    else:\n        ans = None\n    unit = ycol.replace('Number of ', '')\n    if ans is None:\n        return None\n    ans_str = str(int(ans)) if ans == int(ans) else str(ans)\n    if choices:\n        for c in choices:\n            if str(ans_str) in str(c):\n                return c\n        return f\"{ans_str} {unit}\" if unit else ans_str\n    return f\"{ans_str} {unit}\" if unit else ans_str\n"
+    },
+    "template": {
+     "kind": "template",
+     "version": 1,
+     "rewrites": 0,
+     "used": [
+      "5511"
+     ],
+     "n": 3,
+     "agree": 3,
+     "failures": [],
+     "fallbacks": 0,
+     "status": "active",
+     "text": "1. Identify the number of desks.  \n2. Determine how many notepads are needed per desk.  \n3. Multiply the number of desks by the number of notepads per desk.  \n4. Calculate the total number of notepads required.  \n5. State the final total."
+    }
    },
    "write_failures": {
     "handler": 0,
@@ -3937,7 +7003,7 @@
    }
   },
   "count_people_interviewed_no": {
-   "n": 2,
+   "n": 5,
    "labelled": [
     {
      "id": "9611",
@@ -3948,11 +7014,54 @@
      "id": "11749",
      "answer": "18",
      "text": "More than 1 pull-up means 2 or 3 pull-ups: 5 + 13 = 18.\nAnswer: 18"
+    },
+    {
+     "id": "8683",
+     "answer": "27",
+     "text": "Scores more than 5: 6, 7, 8, 9, 10.\nFrequencies: 10 + 0 + 8 + 2 + 7 = 27.\nAnswer: 27"
+    },
+    {
+     "id": "5181",
+     "answer": "46",
+     "text": "Add the frequencies: 15 + 4 + 8 + 10 + 9 = 46.\n\nAnswer: 46"
+    },
+    {
+     "id": "13495",
+     "answer": "17",
+     "text": "Numbers less than 3 are 1 and 2: 3 + 14 = 17.\nAnswer: 17"
     }
    ],
    "candidates": {
-    "handler": null,
-    "template": null
+    "handler": {
+     "kind": "handler",
+     "version": 1,
+     "rewrites": 0,
+     "used": [
+      "9611",
+      "11749",
+      "8683"
+     ],
+     "n": 2,
+     "agree": 2,
+     "failures": [],
+     "fallbacks": 0,
+     "status": "shadow",
+     "code": "def solve(table, question, choices):\n    q = question.lower()\n    cols = list(table)\n    # find numeric column and frequency column\n    freq_col = next((c for c in cols if \"freq\" in c.lower()), None)\n    val_col = next((c for c in cols if c != freq_col), None)\n    vals = [float(str(x).replace(\"$\",\"\").replace(\",\",\"\").replace(\"%\",\"\").split()[0]) for x in table[val_col]]\n    freqs = [float(str(x).replace(\"$\",\"\").replace(\",\",\"\").replace(\"%\",\"\").split()[0]) for x in table[freq_col]] if freq_col else [1]*len(vals)\n    # stem-leaf fallback\n    if freq_col is None and any(\"leaf\" in c.lower() for c in cols):\n        stem_col = next(c for c in cols if \"stem\" in c.lower())\n        leaf_col = next(c for c in cols if \"leaf\" in c.lower())\n        vals = []\n        for s, leaves in zip(table[stem_col], table[leaf_col]):\n            stem = float(str(s).split()[0])\n            for leaf in str(leaves).split(\",\"):\n                leaf = leaf.strip()\n                if leaf:\n                    vals.append(stem + float(leaf)/10)\n        freqs = [1]*len(vals)\n    # parse threshold\n    import re\n    m = re.search(r\"(?:at least|more than|over|greater than|less than|fewer than|at most|at most|no more than)\\s*([0-9]+(?:\\.[0-9]+)?)\", q)\n    thresh = float(m.group(1)) if m else None\n    if \"at least\" in q:\n        sel = [f for v,f in zip(vals,freqs) if v >= thresh]\n    elif \"less than\" in q or \"fewer than\" in q:\n        sel = [f for v,f in zip(vals,freqs) if v < thresh]\n    elif \"at most\" in q or \"no more than\" in q or \"less than or equal\" in q:\n        sel = [f for v,f in zip(vals,freqs) if v <= thresh]\n    elif \"more than\" in q or \"over\" in q or \"greater than\" in q:\n        sel = [f for v,f in zip(vals,freqs) if v > thresh]\n    else:\n        sel = freqs\n    ans = sum(sel)\n    ans = int(ans) if ans == int(ans) else ans\n    if choices:\n        for c in choices:\n            try:\n                if float(str(c).replace(\"$\",\"\").replace(\",\",\"\").replace(\"%\",\"\").split()[0]) == float(ans):\n                    return str(c)\n            except Exception:\n                pass\n        return str(ans)\n    return str(ans)\n"
+    },
+    "template": {
+     "kind": "template",
+     "version": 1,
+     "rewrites": 0,
+     "used": [
+      "9611"
+     ],
+     "n": 3,
+     "agree": 3,
+     "failures": [],
+     "fallbacks": 0,
+     "status": "active",
+     "text": "1. Identify the range of wait times that meet the condition (e.g., between 45 and under 50 minutes).  \n2. List each distinct wait time value within that range.  \n3. Count the number of occurrences for each listed time.  \n4. Sum the counts to determine the total number of people.  \n\n**Plan for the given problem:**  \n- Determine the valid wait time interval (45 to under 50 minutes).  \n- Enumerate all integer wait times within this interval: 45, 46, 47, 48, 49.  \n- Note that the problem states only 45, 46, and 49 minutes are relevant (excluding 47 and 48).  \n- Count the number of people associated with each valid time: 3 people for 45, 1 for 46, and 1 for 49 (but the solution says 3 people total for these times).  \n- Since the answer is 3, interpret that as the total number of people whose wait times fall in the specified range.  \n\n**Result:** 3 people."
+    }
    },
    "write_failures": {
     "handler": 0,
@@ -3960,7 +7069,7 @@
    }
   },
   "compute_fraction_of_total": {
-   "n": 2,
+   "n": 4,
    "labelled": [
     {
      "id": "5179",
@@ -3971,6 +7080,165 @@
      "id": "22564",
      "answer": "61/364",
      "text": "Total hours: 870 + 790 + 810 + 560 + 610 = 3640  \nGordon\u2019s fraction: 610/3640 = 61/364\n\nAnswer: 61/364"
+    },
+    {
+     "id": "23262",
+     "answer": "false",
+     "text": "Earth is 1.08\u00d710^12 km\u00b3. Planets larger than Earth: Jupiter, Saturn, Uranus, Neptune = 4 of 8. Three-quarters would be 6, so the statement is false.\nAnswer: false"
+    },
+    {
+     "id": "13114",
+     "answer": "21/62",
+     "text": "Total plants: 57 + 66 + 63 = 186  \nFraction biennials: 63/186 = 21/62\n\nAnswer: 21/62"
+    }
+   ],
+   "candidates": {
+    "handler": {
+     "kind": "handler",
+     "version": 1,
+     "rewrites": 0,
+     "used": [
+      "5179",
+      "22564",
+      "23262"
+     ],
+     "n": 1,
+     "agree": 0,
+     "failures": [
+      {
+       "id": "13114",
+       "expected": "21/62",
+       "got": "Annuals"
+      }
+     ],
+     "fallbacks": 0,
+     "status": "shadow",
+     "code": "def solve(table, question, choices):\n    import re\n    from fractions import Fraction\n    cols = list(table)\n    rows = list(zip(*table.values()))\n    q = question.lower()\n    def num(s):\n        m = re.search(r'-?\\d+(?:\\.\\d+)?', str(s).replace(',', '').replace('$', '').replace('%', ''))\n        return float(m.group()) if m else None\n    def find_col(*keys):\n        for c in cols:\n            cl = c.lower()\n            if any(k in cl for k in keys): return c\n        return None\n    def find_row(name):\n        for r in rows:\n            if any(str(x).lower() == name.lower() for x in r): return r\n        return None\n    # fraction of X were in Y\n    m = re.search(r'fraction of (?:the )?(.+?) (?:were|was) (?:in|by) (\\w+)', q)\n    if m:\n        target = m.group(2)\n        for r in rows:\n            if any(str(x).lower() == target for x in r):\n                val = None\n                for c in cols:\n                    if c.lower() not in ['town','partner','column 1'] and 'sold' in c.lower() or 'hours' in c.lower() or 'number' in c.lower():\n                        val = num(r[cols.index(c)])\n                if val is None:\n                    for c in cols:\n                        if c.lower() not in ['town','partner','column 1']:\n                            val = num(r[cols.index(c)]); break\n                total = sum(num(r[cols.index(cols[1])]) for r in rows if num(r[cols.index(cols[1])]) is not None)\n                return str(Fraction(val).limit_denominator(10**9)) if False else str(Fraction(int(val)).limit_denominator(10**9))\n    # true/false statement\n    if choices:\n        # count planets larger than Earth\n        earth = None\n        for r in rows:\n            if str(r[0]).lower() == 'earth': earth = r\n        if earth:\n            earth_size = num(earth[1])\n            count = sum(1 for r in rows if num(r[1]) and num(r[1]) > earth_size)\n            total = len(rows)\n            frac = count/total\n            if 'three-quarters' in q or '3/4' in q:\n                return choices[0] if abs(frac - 0.75) < 0.01 else choices[1]\n            return choices[0] if frac > 0.5 else choices[1]\n    return str(rows[0][0])\n"
+    },
+    "template": {
+     "kind": "template",
+     "version": 1,
+     "rewrites": 0,
+     "used": [
+      "5179"
+     ],
+     "n": 3,
+     "agree": 2,
+     "failures": [
+      {
+       "id": "23262",
+       "expected": "false",
+       "got": null
+      }
+     ],
+     "fallbacks": 0,
+     "status": "shadow",
+     "text": "1. Identify the total number of houses sold by adding the quantities for each location:  \n   - Add the number of houses sold in Stamford (480) to those sold in another location (270) and another (280).  \n   - Compute the sum: 480 + 270 + 280 = 1,030.  \n\n2. Determine the total number of houses sold, which is 1,030.  \n\n3. Identify the number of houses sold in Stamford, which is 480.  \n\n4. Form the fraction representing the portion of houses sold in Stamford out of the total:  \n   - Write the numerator as 480 and the denominator as 1,030.  \n\n5. Simplify the fraction 480/1,030 by dividing both numerator and denominator by their greatest common divisor (GCD).  \n   - GCD of 480 and 1,030 is 10.  \n   - Divide numerator and denominator by 10: 480 \u00f7 10 = 48; 1,030 \u00f7 10 = 103.  \n\n6. The simplified fraction is 48/103.  \n\n7. State the final result: the fraction of houses sold in Stamford is 48/103."
+    }
+   },
+   "write_failures": {
+    "handler": 0,
+    "template": 0
+   }
+  },
+  "compute_difference_between_costs": {
+   "n": 8,
+   "labelled": [
+    {
+     "id": "35255",
+     "answer": "2625",
+     "text": "$9,664 \u2212 $7,039 = $2,625\n\nAnswer: 2625"
+    },
+    {
+     "id": "34097",
+     "answer": "16.19",
+     "text": "$33.37 - $17.18 = $16.19\n\nAnswer: 16.19"
+    },
+    {
+     "id": "32733",
+     "answer": "316",
+     "text": "$648 - $332 = $316\n\nAnswer: 316"
+    },
+    {
+     "id": "13383",
+     "answer": "$517.00",
+     "text": "$971.00 \u2212 $454.00 = $517.00\n\nAnswer: $517.00"
+    },
+    {
+     "id": "32529",
+     "answer": "Golden Gate",
+     "text": "Golden Gate car toll: $6. Oakland Bay car toll: $4. Since $6 > $4, Golden Gate charges more.\n\nAnswer: Golden Gate"
+    },
+    {
+     "id": "24688",
+     "answer": "$3",
+     "text": "Thursday prices: Computer Data Company = $11; Watson and Partners = $8. Difference = $11 \u2212 $8 = $3.\nAnswer: $3"
+    },
+    {
+     "id": "5269",
+     "answer": "surplus",
+     "text": "At $690, quantity demanded is 13,500 and quantity supplied is 15,600. Since supplied exceeds demanded by 2,100, there is a surplus.\n\nAnswer: surplus"
+    },
+    {
+     "id": "34357",
+     "answer": "543.00",
+     "text": "Trumpet \u2212 piccolo = 969.00 \u2212 426.00 = 543.00\n\nAnswer: 543.00"
+    }
+   ],
+   "candidates": {
+    "handler": {
+     "kind": "handler",
+     "version": 2,
+     "rewrites": 1,
+     "used": [
+      "35255",
+      "34097",
+      "32733",
+      "32529",
+      "24688",
+      "5269"
+     ],
+     "n": 2,
+     "agree": 2,
+     "failures": [],
+     "fallbacks": 0,
+     "status": "shadow",
+     "code": "def solve(table, question, choices):\n    cols = list(table.keys())\n    rows = list(zip(*table.values()))\n    def num(s):\n        s = str(s).strip().lower()\n        for ch in ['$', ',', '%', 'usd', 'dollars', 'units']:\n            s = s.replace(ch, '')\n        s = ''.join(c for c in s if c.isdigit() or c in '.-')\n        try:\n            return float(s)\n        except ValueError:\n            return None\n    q = question.lower()\n    # find row labels mentioned in question\n    items = [r[0] for r in rows if str(r[0]).lower() in q]\n    # find column names mentioned in question\n    col_names = [c for c in cols if c.lower() in q]\n    # find price mentioned in question\n    price = None\n    for tok in q.replace('$',' ').replace(',',' ').split():\n        try:\n            price = float(tok)\n            break\n        except ValueError:\n            pass\n    # shortage/surplus\n    if 'shortage' in q or 'surplus' in q:\n        for r in rows:\n            if price is not None and num(r[0]) == price:\n                qty_d = num(r[1]); qty_s = num(r[2])\n                return 'surplus' if qty_s > qty_d else 'shortage'\n        return None\n    # comparison of two items in a column\n    if len(items) >= 2:\n        # determine which column to use\n        target_col = None\n        for c in cols[1:]:\n            if c.lower() in q:\n                target_col = c\n                break\n        if target_col is None:\n            target_col = cols[1]\n        idx = cols.index(target_col)\n        vals = {}\n        for r in rows:\n            if str(r[0]).lower() in q:\n                vals[str(r[0]).lower()] = num(r[idx])\n        keys = list(vals.keys())\n        if len(keys) >= 2:\n            a, b = vals[keys[0]], vals[keys[1]]\n            ans = abs(a - b)\n            if 'how much more' in q:\n                # determine which is larger\n                if a > b:\n                    ans = a - b\n                else:\n                    ans = b - a\n            ans = int(ans) if ans == int(ans) else round(ans, 2)\n            if choices:\n                for c in choices:\n                    if c is None: continue\n                    cn = num(c)\n                    if cn is not None and abs(cn - ans) < 0.005:\n                        return c\n                # if choices are item names, return the one with larger value\n                for c in choices:\n                    if c is None: continue\n                    if str(c).lower() in q:\n                        # find value of this choice\n                        for r in rows:\n                            if str(r[0]).lower() == str(c).lower():\n                                v = num(r[idx])\n                                if v == max(vals.values()):\n                                    return c\n                return str(ans)\n            return str(ans)\n    # which charges more / which is larger\n    if 'which' in q and 'more' in q:\n        target_col = None\n        for c in cols[1:]:\n            if c.lower() in q:\n                target_col = c\n                break\n        if target_col is None:\n            target_col = cols[1]\n        idx = cols.index(target_col)\n        best = None\n        best_val = None\n        for r in rows:\n            if str(r[0]).lower() in q:\n                v = num(r[idx])\n                if best_val is None or v > best_val:\n                    best_val = v\n                    best = r[0]\n        if best is not None:\n            if choices:\n                for c in choices:\n                    if c is None: continue\n                    if str(c).lower() == str(best).lower():\n                        return c\n            return str(best)\n    return None\n"
+    },
+    "template": {
+     "kind": "template",
+     "version": 2,
+     "rewrites": 1,
+     "used": [
+      "35255",
+      "13383"
+     ],
+     "n": 5,
+     "agree": 4,
+     "failures": [
+      {
+       "id": "32529",
+       "expected": "Golden Gate",
+       "got": "Oakland Bay"
+      }
+     ],
+     "fallbacks": 0,
+     "status": "discarded",
+     "text": "1. Identify the cost of the plane ticket to Tokyo from the given total amount ($971.00).  \n2. Identify the cost of the plane ticket to New York City from the given total amount ($454.00).  \n3. Subtract the cost of the New York City ticket from the cost of the Tokyo ticket: $971.00 \u2212 $454.00.  \n4. Record the result as the difference in price: $517.00.  \n5. State the final answer: The plane ticket to Tokyo costs $517.00 more than the plane ticket to New York City."
+    }
+   },
+   "write_failures": {
+    "handler": 0,
+    "template": 0
+   }
+  },
+  "count_buildings_at_least": {
+   "n": 1,
+   "labelled": [
+    {
+     "id": "15135",
+     "answer": "12",
+     "text": "Heights at least 27 m are all entries from stem 3 onward: 3 + 2 + 3 + 2 + 1 + 1 = 12.\nAnswer: 12"
     }
    ],
    "candidates": {
@@ -3982,13 +7250,285 @@
     "template": 0
    }
   },
-  "compute_difference_between_costs": {
+  "count_flocks_exact_value": {
    "n": 1,
    "labelled": [
     {
-     "id": "35255",
-     "answer": "2625",
-     "text": "$9,664 \u2212 $7,039 = $2,625\n\nAnswer: 2625"
+     "id": "22839",
+     "answer": "2",
+     "text": "In the stem-and-leaf plot, 23 birds corresponds to stem 2 with leaf 3. The leaf 3 appears twice in the stem 2 row.\n\nAnswer: 2"
+    }
+   ],
+   "candidates": {
+    "handler": null,
+    "template": null
+   },
+   "write_failures": {
+    "handler": 0,
+    "template": 0
+   }
+  },
+  "count_racks_at_least": {
+   "n": 1,
+   "labelled": [
+    {
+     "id": "32595",
+     "answer": "9",
+     "text": "Values from 18 to 45: row 2 has 6, row 3 has 2, row 4 has 1 (45 only). Total = 6 + 2 + 1 = 9.\nAnswer: 9"
+    }
+   ],
+   "candidates": {
+    "handler": null,
+    "template": null
+   },
+   "write_failures": {
+    "handler": 0,
+    "template": 0
+   }
+  },
+  "compute_probability": {
+   "n": 4,
+   "labelled": [
+    {
+     "id": "27949",
+     "answer": "2/15",
+     "text": "Brown eyes and fast heart rate: 2 babies. Total babies: 6 + 2 + 3 + 4 = 15. Probability = 2/15.\n\nAnswer: 2/15"
+    },
+    {
+     "id": "32897",
+     "answer": "1/3",
+     "text": "Total contestants: 5 + 3 + 5 + 2 = 15.  \nRed beard and also in mustache competition: 5.  \nProbability: 5/15 = 1/3.\n\nAnswer: 1/3"
+    },
+    {
+     "id": "14041",
+     "answer": "1/6",
+     "text": "Spruce in 2010 = 3. Total oars = 3+6+3+6 = 18. Probability = 3/18 = 1/6.\nAnswer: 1/6"
+    },
+    {
+     "id": "5584",
+     "answer": "3/10",
+     "text": "Total participants: 6 + 7 + 2 + 5 = 20.  \nDesert and tent: 6.  \nProbability = 6/20 = 3/10.\n\nAnswer: 3/10"
+    }
+   ],
+   "candidates": {
+    "handler": {
+     "kind": "handler",
+     "version": 1,
+     "rewrites": 0,
+     "used": [
+      "27949",
+      "32897",
+      "14041"
+     ],
+     "n": 1,
+     "agree": 1,
+     "failures": [],
+     "fallbacks": 0,
+     "status": "shadow",
+     "code": "def solve(table, question, choices):\n    cols = list(table.keys())\n    rows = table[cols[0]]\n    # find numeric cells\n    nums = {}\n    for c in cols:\n        for i, cell in enumerate(table[c]):\n            try:\n                nums[(c, i)] = float(str(cell).replace('$','').replace(',','').replace('%','').split()[0])\n            except Exception:\n                pass\n    # build grid: first col is row labels, others are column labels\n    # detect orientation: if first col has few non-numeric entries and others numeric, it's row-oriented\n    # We'll just compute total and favorable by scanning all numeric cells.\n    # Determine which cells are numeric\n    numeric_cells = [(c,i,v) for (c,i),v in nums.items()]\n    total = sum(v for _,_,v in numeric_cells)\n    # parse question for conditions: find keywords matching row/col labels\n    q = question.lower()\n    # find labels in first column and other columns\n    first_col = cols[0]\n    row_labels = [str(x) for x in table[first_col]]\n    col_labels = cols[1:]\n    # find which row label matches question keywords\n    def match(label):\n        words = [w for w in label.lower().replace('(',' ').replace(')',' ').replace('<',' ').replace('>',' ').replace('/',' ').replace('-',' ').split() if len(w)>2]\n        return any(w in q for w in words)\n    # find favorable cells: numeric cells whose row label matches a keyword and column label matches a keyword\n    fav = 0.0\n    for c in cols[1:]:\n        for i, cell in enumerate(table[c]):\n            try:\n                v = float(str(cell).replace('$','').replace(',','').replace('%','').split()[0])\n            except Exception:\n                continue\n            row_label = table[first_col][i] if i < len(table[first_col]) else ''\n            col_label = c\n            # check if question mentions row label and col label\n            row_words = [w for w in str(row_label).lower().replace('(',' ').replace(')',' ').replace('<',' ').replace('>',' ').replace('/',' ').replace('-',' ').split() if len(w)>2]\n            col_words = [w for w in str(col_label).lower().replace('(',' ').replace(')',' ').replace('<',' ').replace('>',' ').replace('/',' ').replace('-',' ').split() if len(w)>2]\n            row_match = any(w in q for w in row_words)\n            col_match = any(w in q for w in col_words)\n            if row_match and col_match:\n                fav += v\n    if total == 0:\n        return ''\n    from fractions import Fraction\n    f = Fraction(fav).limit_denominator(1000000)\n    # simplify\n    f = Fraction(fav).limit_denominator(1000000)\n    # better: use exact fraction from ints\n    # recompute with ints\n    fav_int = 0\n    total_int = 0\n    for c in cols[1:]:\n        for i, cell in enumerate(table[c]):\n            try:\n                v = int(float(str(cell).replace('$','').replace(',','').replace('%','').split()[0]))\n            except Exception:\n                continue\n            total_int += v\n            row_label = table[first_col][i] if i < len(table[first_col]) else ''\n            col_label = c\n            row_words = [w for w in str(row_label).lower().replace('(',' ').replace(')',' ').replace('<',' ').replace('>',' ').replace('/',' ').replace('-',' ').split() if len(w)>2]\n            col_words = [w for w in str(col_label).lower().replace('(',' ').replace(')',' ').replace('<',' ').replace('>',' ').replace('/',' ').replace('-',' ').split() if len(w)>2]\n            if any(w in q for w in row_words) and any(w in q for w in col_words):\n                fav_int += v\n    if total_int == 0:\n        return ''\n    from fractions import Fraction\n    f = Fraction(fav_int, total_int)\n    ans = f'{f.numerator}/{f.denominator}' if f.denominator != 1 else str(f.numerator)\n    if choices:\n        for ch in choices:\n            if ch == ans:\n                return ch\n        # try matching by value\n        for ch in choices:\n            try:\n                if Fraction(str(ch)) == f:\n                    return ch\n            except Exception:\n                pass\n        return ans\n    return ans\n"
+    },
+    "template": {
+     "kind": "template",
+     "version": 1,
+     "rewrites": 0,
+     "used": [
+      "27949"
+     ],
+     "n": 3,
+     "agree": 0,
+     "failures": [
+      {
+       "id": "32897",
+       "expected": "1/3",
+       "got": null
+      },
+      {
+       "id": "14041",
+       "expected": "1/6",
+       "got": null
+      },
+      {
+       "id": "5584",
+       "expected": "3/10",
+       "got": null
+      }
+     ],
+     "fallbacks": 0,
+     "status": "shadow",
+     "text": "1. Identify the total number of babies across all categories.  \n2. Add the counts: 6 + 2 + 3 + 4.  \n3. Calculate the sum: 6 + 2 = 8; 8 + 3 = 11; 11 + 4 = 15.  \n4. Determine the number of babies with brown eyes and fast heart rate: 2.  \n5. Compute the probability by dividing the favorable outcome by the total: 2 \u00f7 15.  \n6. Express the result as a fraction: 2/15."
+    }
+   },
+   "write_failures": {
+    "handler": 0,
+    "template": 0
+   }
+  },
+  "compute_total_money_raised": {
+   "n": 2,
+   "labelled": [
+    {
+     "id": "6280",
+     "answer": "$13",
+     "text": "The Animals row shows $13 in May.\nAnswer: $13"
+    },
+    {
+     "id": "38057",
+     "answer": "$23,520.00",
+     "text": "$9,734.00 + $7,702.00 + $6,084.00 = $23,520.00\n\nAnswer: $23,520.00"
+    }
+   ],
+   "candidates": {
+    "handler": null,
+    "template": null
+   },
+   "write_failures": {
+    "handler": 0,
+    "template": 0
+   }
+  },
+  "count_ponds_at_least": {
+   "n": 1,
+   "labelled": [
+    {
+     "id": "16146",
+     "answer": "5",
+     "text": "Values from 50 to 67: stem 5 gives 52, 54 (2 ponds); stem 6 gives 61, 62, 63 (3 ponds). Total = 5.\nAnswer: 5"
+    }
+   ],
+   "candidates": {
+    "handler": null,
+    "template": null
+   },
+   "write_failures": {
+    "handler": 0,
+    "template": 0
+   }
+  },
+  "compute_minimum_count": {
+   "n": 2,
+   "labelled": [
+    {
+     "id": "12904",
+     "answer": "18",
+     "text": "The smallest stem is 1, and its only leaf is 8, giving 18.\n\nAnswer: 18"
+    },
+    {
+     "id": "27149",
+     "answer": "13 points",
+     "text": "The smallest stem is 1 and the smallest leaf is 3, giving 13 points.\nAnswer: 13 points"
+    }
+   ],
+   "candidates": {
+    "handler": null,
+    "template": null
+   },
+   "write_failures": {
+    "handler": 0,
+    "template": 0
+   }
+  },
+  "count_clubs_exact_value": {
+   "n": 1,
+   "labelled": [
+    {
+     "id": "21820",
+     "answer": "0",
+     "text": "The stem for 60s is \u201c6\u201d, and its leaf row is blank, so there are no 64-member clubs.\n\nAnswer: 0"
+    }
+   ],
+   "candidates": {
+    "handler": null,
+    "template": null
+   },
+   "write_failures": {
+    "handler": 0,
+    "template": 0
+   }
+  },
+  "count_stickers_in_collection": {
+   "n": 1,
+   "labelled": [
+    {
+     "id": "8608",
+     "answer": "Robert",
+     "text": "Compare the numbers: 767 (Robert) < 769 (Jamie) < 778 (Tina) < 796 (Emma).\nAnswer: Robert"
+    }
+   ],
+   "candidates": {
+    "handler": null,
+    "template": null
+   },
+   "write_failures": {
+    "handler": 0,
+    "template": 0
+   }
+  },
+  "find_start_time_no": {
+   "n": 1,
+   "labelled": [
+    {
+     "id": "22714",
+     "answer": "Thursday",
+     "text": "Compare the numbers: 317, 371, 313, 337. The smallest is 313, on Thursday.\n\nAnswer: Thursday"
+    }
+   ],
+   "candidates": {
+    "handler": null,
+    "template": null
+   },
+   "write_failures": {
+    "handler": 0,
+    "template": 0
+   }
+  },
+  "count_children_weighed_weight": {
+   "n": 1,
+   "labelled": [
+    {
+     "id": "16277",
+     "answer": "2",
+     "text": "Weights from 60 to under 70 are the stem-6 values: 63 and 68. That is 2 children.\nAnswer: 2"
+    }
+   ],
+   "candidates": {
+    "handler": null,
+    "template": null
+   },
+   "write_failures": {
+    "handler": 0,
+    "template": 0
+   }
+  },
+  "count_exact_value": {
+   "n": 2,
+   "labelled": [
+    {
+     "id": "37889",
+     "answer": "3",
+     "text": "In the stem-and-leaf plot, 26 pages corresponds to stem 2 with leaf 6. There are three 6 leaves in the stem-2 row.\n\nAnswer: 3"
+    },
+    {
+     "id": "12840",
+     "answer": "2",
+     "text": "In the stem-and-leaf plot, 35 apples corresponds to stem 3 with leaf 5. There are two leaves of 5 in that row.\n\nAnswer: 2"
+    }
+   ],
+   "candidates": {
+    "handler": null,
+    "template": null
+   },
+   "write_failures": {
+    "handler": 0,
+    "template": 0
+   }
+  },
+  "compute_total_pearls_but": {
+   "n": 1,
+   "labelled": [
+    {
+     "id": "25979",
+     "answer": "20 pearls",
+     "text": "Each necklace has 5 pearls, so 4 necklaces have 4 \u00d7 5 = 20 pearls.\nAnswer: 20 pearls"
     }
    ],
    "candidates": {
