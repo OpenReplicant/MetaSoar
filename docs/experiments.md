@@ -39,6 +39,7 @@ error.
 | E-13 | Asking where a simulator of a person is unsure improves the map more per question (P4) | no gain per question | the cartographer | W-02 | proposed |
 | E-14 | Surprise is a better guide to attention than recency (P7) | no difference in progress or replies | the stream | A-08 | proposed |
 | E-15 | A model proposing claims at surprises recovers a rule deleted from the atlas (the atlas's model tier) | it does not recover the dial and lock on LS20 | `atlas/` | W-02 | next (`docs/next.md`) |
+| E-16 | Haiku first, escalating to Opus on outcome triggers, matches Opus throughout on success at a fraction of its cost (the orchestrator, `docs/on-substrate.md`) | success is significantly lower than Opus throughout on the same recorded tasks; or cost per task, from the gateway's meter, is not lower | a set of recorded tasks with their own checks; the gateway's meter; a Haiku-main session spawning Opus subagents, checked to work | the orchestrator's routing cell; W-01's model calls per episode | proposed |
 
 ## Tier 2: the whole
 
