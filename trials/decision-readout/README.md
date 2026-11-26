@@ -155,3 +155,36 @@ On the same 779 held-out cases as Inkling's sample:
   - d1-2B is the fast, calibrated, stable one, good where the answer is in the text.
   - That suggests a cascade: d1-2B first, and Inkling when d1-2B is unsure or the question needs knowledge. This
     is the decision-gate study's rule: a cheap first stage that is confident where it is right.
+
+**The cascade: d1-2B first, Inkling when unsure** (`cascade.py`, `results/summary-cascade.md`). Offline, on the
+1,400 cases both models read; choices on `fit`, measured on `eval` (779 cases). Both models are read debiased, so
+a decision costs two reads of each model it reaches; cost is the measured time of those reads.
+
+| Policy | Accuracy | Sent to Inkling | Mean s per decision |
+| --- | --- | --- | --- |
+| d1-2B alone | 0.633 | 0% | 0.30 |
+| Inkling alone | 0.810 | 100% | 9.42 |
+| Escalate below d1-2B's confidence t (t chosen on `fit`) | 0.769 | 38% | 3.44 |
+| Knowledge slices straight to Inkling, d1-2B elsewhere | 0.810 | 58% | 7.16 |
+| Escalate exactly where d1-2B is wrong (oracle) | 0.865 | 37% | 4.53 |
+
+- **A threshold trades accuracy for cost:** a third of Inkling's time for 4 points less (-4.1 [-6.6, -1.6]).
+- **The models' errors differ:** d1-2B is better than Inkling on Aegis (0.82 against 0.75, and 0.83 against 0.67
+  on responses), so the oracle passes Jev's 0.843. d1-2B's confidence finds only part of that gap.
+
+**E-04b: a learned front** (`learned_front.py`, `results/summary-front.md`). A logistic model predicts "d1-2B is
+wrong" from what is known before escalating (its probabilities in both orders, margin, entropy, order flip,
+number of options, prompt length; and, in a second front, the question's type). Trained on `fit` of all 6,516
+cases d1-2B read.
+- **Falsifier met:** the fronts are no better than d1-2B's own confidence. AUROC for its errors is 0.817 for all
+  three; the cascade's accuracy at 30%, 40% and 50% sent differs by at most half a point, every interval across 0.
+- **Why:** d1-2B is calibrated, so its confidence already says how likely it is to be wrong; more features of its
+  own output add nothing (entropy carries the weight, the order features are near zero since it rarely flips).
+- **What does help (exploratory, not registered):** ranking by what escalation gains, P(Inkling right | type) on
+  `fit` minus d1-2B's confidence, not by what d1-2B gets wrong. Escalating where that is positive sends 63% to
+  Inkling and beats Inkling alone: 0.828, +1.8 [+0.3, +3.4]. At 60% sent it beats the confidence by +1.7
+  [+0.8, +2.8].
+- **Reading:** a gate should model the gain, so it needs the second stage's record, not only the first stage's
+  output. Information the first stage does not have (the question's type here; embeddings or nearest cases next)
+  is where a learned gate can add anything. Caveat: the type is the benchmark's slice; in use it would be the
+  kind of question asked, which a typed question has.
