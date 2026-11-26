@@ -1,0 +1,359 @@
+21432 shuffle ('compute_range_of_values', 'handler', '7', True)
+21432 rename ('compute_range_of_values', 'handler', '7', True)
+21432 paraphrase ('compute_range_of_values', 'handler', '7', True)
+35321 shuffle ('compute_total_salt_shakers', 'large', '6', True)
+35321 rename skipped
+35321 paraphrase skipped
+22264 shuffle ('compute_total_cost', 'template', '1', True)
+22264 rename ('compute_total_cost', 'template', '$1', True)
+22264 paraphrase skipped
+25704 shuffle ('compute_difference_between_counts', 'template', '1836', True)
+25704 rename ('compute_difference_between_counts', 'template', '1836', True)
+25704 paraphrase skipped
+37214 shuffle ('compute_difference_between_counts', 'template', '5', False)
+37214 rename skipped
+37214 paraphrase skipped
+25051 shuffle ('compute_remaining_money', 'template', '0.97', True)
+25051 rename ('compute_remaining_money', 'template', '0.97', True)
+25051 paraphrase ('compute_remaining_money', 'template', '0.97', True)
+13380 shuffle ('find_start_time', 'large', 'swing dance class', True)
+13380 rename ('find_start_time', 'template', 'intermediate ballet class', False)
+13380 paraphrase skipped
+8363 shuffle ('compute_difference_between_counts', 'template', '6', True)
+8363 rename ('compute_difference_between_counts', 'template', '6', True)
+8363 paraphrase skipped
+21989 shuffle ('compute_difference_between_values', 'large', '12', True)
+21989 rename skipped
+21989 paraphrase ('compute_difference_between_values', 'large', '12', True)
+16741 shuffle ('compute_total_count', 'handler', '30 yogurt pops', True)
+16741 rename skipped
+16741 paraphrase ('compute_total_count', 'handler', '30 yogurt pops', True)
+34178 shuffle ('compute_remaining_money', 'template', '542.04', True)
+34178 rename ('compute_remaining_money', 'template', '$76.70', False)
+34178 paraphrase ('compute_remaining_money', 'template', '542.04', True)
+27236 shuffle ('check_function_property', 'handler', 'yes', True)
+27236 rename skipped
+27236 paraphrase ('check_function_property', 'handler', 'yes', True)
+32649 shuffle ('check_function_property', 'handler', 'yes', True)
+32649 rename skipped
+32649 paraphrase ('check_function_property', 'handler', 'yes', True)
+34521 shuffle ('compute_total_cost', 'template', '16', True)
+34521 rename ('compute_total_cost', 'template', '16', True)
+34521 paraphrase skipped
+1857 shuffle ('compute_range_of_values', 'handler', '32', True)
+1857 rename ('compute_range_of_values', 'handler', '32', True)
+1857 paraphrase ('compute_range_of_values', 'handler', '32', True)
+7505 shuffle ('compute_total_cost', 'template', '35.33', True)
+7505 rename ('compute_total_cost', 'template', '35.33', True)
+7505 paraphrase ('compute_total_cost', 'template', '35.33', True)
+7145 shuffle ('compute_rate_of_change', 'handler', '-7 Games won /year', True)
+7145 rename skipped
+7145 paraphrase skipped
+6257 shuffle ('find_start_time', 'template', '2:10 P.M.', True)
+6257 rename ('find_start_time', 'template', '2:10 P.M.', True)
+6257 paraphrase ('find_start_time', 'template', '2:10 P.M.', True)
+25427 shuffle ('compute_range_of_values', 'handler', '5', True)
+25427 rename ('compute_range_of_values', 'handler', '5', True)
+25427 paraphrase skipped
+34232 shuffle ('find_start_time', 'template', 'Lee Avenue', True)
+34232 rename ('find_start_time', 'template', 'Franklin Boulevard', True)
+34232 paraphrase ('find_start_time', 'template', 'Lee Avenue', True)
+14537 shuffle ('compute_remaining_money', 'template', '63553', True)
+14537 rename ('compute_remaining_money', 'template', '69,160', False)
+14537 paraphrase ('compute_remaining_money', 'template', '63553', True)
+7465 shuffle ('compute_rate_of_change', 'handler', '0 Games won /year', True)
+7465 rename skipped
+7465 paraphrase skipped
+20150 shuffle ('compute_remaining_money', 'template', '23690.00', True)
+20150 rename ('compute_remaining_money', 'template', '5120', False)
+20150 paraphrase ('compute_remaining_money', 'template', '23690.00', True)
+22188 shuffle ('compute_function_property', 'handler', 'linear', True)
+22188 rename skipped
+22188 paraphrase ('compute_function_property', 'handler', 'linear', True)
+6749 shuffle ('compute_rate_of_change', 'handler', '1 Minutes per day', True)
+6749 rename ('compute_rate_of_change', 'handler', '1 Minutes per day', True)
+6749 paraphrase skipped
+23441 shuffle ('compute_difference_between_counts', 'template', '318', True)
+23441 rename ('compute_difference_between_counts', 'template', '318', True)
+23441 paraphrase ('compute_difference_between_counts', 'template', '318', True)
+35964 shuffle ('check_function_property', 'handler', 'yes', True)
+35964 rename skipped
+35964 paraphrase ('check_function_property', 'handler', 'yes', True)
+19073 shuffle ('compute_difference_between_counts', 'template', '12', True)
+19073 rename ('compute_difference_between_counts', 'template', '12', True)
+19073 paraphrase skipped
+20615 shuffle ('count_people_interviewed_no', 'handler', '11', True)
+20615 rename skipped
+20615 paraphrase skipped
+31997 shuffle ('compute_mode', 'handler', '5', True)
+31997 rename ('compute_mode', 'handler', '5', True)
+31997 paraphrase skipped
+27261 shuffle ('compute_function_property', 'handler', 'linear', True)
+27261 rename skipped
+27261 paraphrase ('compute_function_property', 'handler', 'linear', True)
+19374 shuffle ('count_people_interviewed_no', 'handler', '3', True)
+19374 rename skipped
+19374 paraphrase skipped
+23728 shuffle ('compute_range_of_values', 'handler', '11', True)
+23728 rename ('compute_range_of_values', 'handler', '11', True)
+23728 paraphrase ('compute_range_of_values', 'handler', '11', True)
+1117 shuffle ('compute_total_count', 'handler', '8 flowers', True)
+1117 rename skipped
+1117 paraphrase ('compute_total_count', 'handler', '8 flowers', True)
+6202 shuffle ('count_people_interviewed_no', 'handler', '38', True)
+6202 rename skipped
+6202 paraphrase ('count_people_interviewed_no', 'handler', '38', True)
+32143 shuffle ('compute_total_cost', 'template', '6', True)
+32143 rename ('compute_total_cost', 'template', '6** → but in the context, it\'s dollars, so $6. However, the instruction says "Unit: $" and "Answer: <the answer only>". In the examples, they wrote "$0.08", "$9.00", etc. So probably include the dollar sign? No, in the plan: "The total amount Sasha needs is **$0.08**." So they put the dollar sign in the text, but the answer line is just the number? Let\'s check the user\'s message: "Work it out briefly, then end with one line: Answer: <the answer only>". In the examples, they wrote "Answer: $0.08" etc.? Let\'s see: In the plan for Sasha: "The total amount Sasha needs is **$0.08**." Then for Damon: "The total amount Damon needs is **$11.34**." For Trudy:', True)
+32143 paraphrase ('compute_total_cost', 'template', '6', True)
+14458 shuffle ('find_minimum_count', 'handler', '14', False)
+14458 rename skipped
+14458 paraphrase skipped
+29538 shuffle ('compute_total_cost', 'template', '5.70', True)
+29538 rename ('compute_total_cost', 'template', '5.70', True)
+29538 paraphrase ('compute_total_cost', 'template', '5.70', True)
+2754 shuffle ('find_maximum_count', 'handler', '0', False)
+2754 rename skipped
+2754 paraphrase ('find_maximum_count', 'handler', '0', False)
+10189 shuffle ('compute_remaining_money', 'template', '0.14', True)
+10189 rename ('compute_remaining_money', 'template', '0.14', True)
+10189 paraphrase ('compute_remaining_money', 'template', '0.14', True)
+30919 shuffle ('compute_remaining_money', 'template', 'no', True)
+30919 rename ('compute_remaining_money', 'template', 'no', True)
+30919 paraphrase ('compute_remaining_money', 'template', 'no', True)
+7488 shuffle ('compute_median', 'handler', '5', True)
+7488 rename ('compute_median', 'handler', '5', True)
+7488 paraphrase skipped
+3669 shuffle ('find_minimum_count', 'handler', '40', True)
+3669 rename skipped
+3669 paraphrase skipped
+26156 shuffle ('compute_difference_between_counts', 'template', '486', True)
+26156 rename ('compute_difference_between_counts', 'template', '486', True)
+26156 paraphrase skipped
+34651 shuffle ('compute_remaining_money', 'template', '1.01', True)
+34651 rename ('compute_remaining_money', 'template', '1.01', True)
+34651 paraphrase ('compute_remaining_money', 'template', '1.01', True)
+3011 shuffle ('compute_mean', 'handler', '4', True)
+3011 rename ('compute_mean', 'handler', '4', True)
+3011 paraphrase ('compute_mean', 'handler', '4', True)
+13492 shuffle ('count_people_interviewed_no', 'handler', '51', True)
+13492 rename skipped
+13492 paraphrase skipped
+8293 shuffle ('compute_total_money_raised', 'handler', '$7,985', True)
+8293 rename ('compute_total_money_raised', 'handler', '$7,985', True)
+8293 paraphrase ('compute_total_money_raised', 'handler', '$7,985', True)
+32960 shuffle ('find_maximum_count', 'handler', '0, 0, 6, 8, 8', False)
+32960 rename skipped
+32960 paraphrase skipped
+759 shuffle ('compute_total_count', 'handler', '20 silver buttons', True)
+759 rename skipped
+759 paraphrase ('compute_total_count', 'handler', '20 silver buttons', True)
+28338 shuffle ('compute_total_count', 'handler', '25 screwdrivers', True)
+28338 rename skipped
+28338 paraphrase ('compute_total_count', 'handler', '25 screwdrivers', True)
+15542 shuffle ('check_function_property', 'handler', 'yes', True)
+15542 rename skipped
+15542 paraphrase ('check_function_property', 'handler', 'yes', True)
+35334 shuffle ('compute_total_count', 'handler', '15 belts', True)
+35334 rename skipped
+35334 paraphrase ('compute_total_count', 'handler', '15 belts', True)
+13815 shuffle ('find_minimum_count', 'handler', 'photography club', True)
+13815 rename ('find_minimum_count', 'handler', 'art club', True)
+13815 paraphrase ('find_minimum_count', 'handler', 'photography club', True)
+4766 shuffle ('compute_total_money_raised', 'handler', '$169', True)
+4766 rename ('compute_total_money_raised', 'handler', '$169', True)
+4766 paraphrase ('compute_total_amount_required', 'large', '$169', True)
+33903 shuffle ('compute_remaining_money', 'template', '0.07', True)
+33903 rename ('compute_remaining_money', 'template', '0.07', True)
+33903 paraphrase ('compute_remaining_money', 'template', '0.07', True)
+34713 shuffle ('compute_total_count', 'handler', '12 pairs of jeans', True)
+34713 rename skipped
+34713 paraphrase ('compute_total_count', 'handler', '12 pairs of jeans', True)
+16797 shuffle ('compute_rate_of_change', 'handler', '3 minutes /year', True)
+16797 rename skipped
+16797 paraphrase ('compute_rate_of_change', 'handler', '3 minutes /year', True)
+7285 shuffle ('compute_total_count', 'handler', 'None', False)
+7285 rename ('compute_total_count', 'handler', 'None', False)
+7285 paraphrase ('compute_total_count', 'handler', 'None', False)
+29535 shuffle ('compute_total_count', 'handler', '25 pumpkin scones', True)
+29535 rename skipped
+29535 paraphrase ('compute_total_count', 'handler', '25 pumpkin scones', True)
+14033 shuffle ('compute_mean', 'handler', '74', True)
+14033 rename ('compute_mean', 'handler', '74', True)
+14033 paraphrase skipped
+6775 shuffle ('compute_total_cost', 'template', '84', True)
+6775 rename ('compute_total_cost', 'template', '84', True)
+6775 paraphrase skipped
+16891 shuffle ('find_start_time_no', 'handler', 'education', False)
+16891 rename ('find_start_time_no', 'handler', 'hunger', True)
+16891 paraphrase ('find_minimum_count', 'handler', 'education', False)
+30072 shuffle ('compute_remaining_money', 'template', '66.60', True)
+30072 rename ('compute_remaining_money', 'template', '50.56', False)
+30072 paraphrase ('compute_remaining_money', 'template', '66.60', True)
+18212 shuffle ('compute_max_count', 'large', '48', True)
+18212 rename skipped
+18212 paraphrase skipped
+34882 shuffle ('compute_remaining_money', 'template', 'yes', True)
+34882 rename ('compute_remaining_money', 'template', 'yes', True)
+34882 paraphrase ('compute_remaining_money', 'template', 'yes', True)
+25673 shuffle ('compute_rate_of_change', 'handler', '-3 Students per unit', True)
+25673 rename skipped
+25673 paraphrase ('compute_rate_of_change', 'handler', '-3 Students per unit', True)
+2274 shuffle ('compute_remaining_money', 'template', 'no', True)
+2274 rename ('compute_remaining_money', 'template', 'no', True)
+2274 paraphrase ('compute_remaining_money', 'template', 'no', True)
+26621 shuffle ('find_start_time_no', 'handler', 'Saturday', True)
+26621 rename ('find_start_time_no', 'handler', 'Friday', True)
+26621 paraphrase ('find_start_time_no', 'handler', 'Saturday', True)
+11709 shuffle ('compute_total_cost', 'template', '0.46', True)
+11709 rename ('compute_total_cost', 'template', '0.46', True)
+11709 paraphrase ('compute_total_cost', 'template', '0.46', True)
+17030 shuffle ('compute_total_cost', 'template', '36.18', True)
+17030 rename ('compute_total_cost', 'template', '36.18', True)
+17030 paraphrase ('compute_total_cost', 'template', '36.18', True)
+6681 shuffle ('compute_remaining_money', 'template', '1978.41', False)
+6681 rename ('compute_remaining_money', 'template', '134.40', False)
+6681 paraphrase ('compute_remaining_money', 'template', '1522.81', True)
+15197 shuffle ('find_maximum_count', 'handler', '5, 6, 8', False)
+15197 rename skipped
+15197 paraphrase skipped
+13426 shuffle ('compute_difference_between_counts', 'large', '11', True)
+13426 rename skipped
+13426 paraphrase skipped
+5216 shuffle ('compute_remaining_money', 'template', 'yes', True)
+5216 rename ('compute_remaining_money', 'template', 'yes', True)
+5216 paraphrase skipped
+19582 shuffle ('compute_remaining_money', 'template', 'no', True)
+19582 rename ('compute_remaining_money', 'template', 'no', True)
+19582 paraphrase ('compute_remaining_money', 'template', 'no', True)
+25188 shuffle ('compute_total_count', 'handler', '20 turtleneck sweaters', True)
+25188 rename skipped
+25188 paraphrase ('compute_total_count', 'handler', '20 turtleneck sweaters', True)
+5583 shuffle ('compute_total_cost', 'template', '14.80', True)
+5583 rename ('compute_total_cost', 'template', '14.80', True)
+5583 paraphrase skipped
+21351 shuffle ('find_maximum_count', 'handler', 'Thursday', True)
+21351 rename ('find_maximum_count', 'handler', 'Tuesday', True)
+21351 paraphrase skipped
+15572 shuffle ('compute_total_cost', 'template', '50.31', True)
+15572 rename ('compute_total_cost', 'template', '50.31', True)
+15572 paraphrase ('compute_total_cost', 'template', '50.31', True)
+25413 shuffle ('compute_difference_between_counts', 'template', '9', True)
+25413 rename ('compute_difference_between_counts', 'template', '9', True)
+25413 paraphrase skipped
+36923 shuffle ('find_minimum_count', 'handler', '22', True)
+36923 rename skipped
+36923 paraphrase skipped
+21230 shuffle ('compute_range_of_values', 'handler', '8', True)
+21230 rename ('compute_range_of_values', 'handler', '8', True)
+21230 paraphrase ('compute_range_of_values', 'handler', '8', True)
+38312 shuffle ('compute_difference_between_costs', 'handler', 'White and Company', True)
+38312 rename ('compute_difference_between_costs', 'handler', 'Watson and Partners', True)
+38312 paraphrase ('compute_difference_between_costs', 'handler', 'White and Company', True)
+32341 shuffle ('compute_mean', 'handler', '64', True)
+32341 rename ('compute_mean', 'handler', '64', True)
+32341 paraphrase skipped
+1237 shuffle ('find_minimum_count', 'handler', 'Spanish club', True)
+1237 rename ('find_minimum_count', 'handler', 'Japanese club', True)
+1237 paraphrase ('find_minimum_count', 'handler', 'Spanish club', True)
+20251 shuffle ('find_minimum_count', 'handler', '12', True)
+20251 rename skipped
+20251 paraphrase skipped
+30486 shuffle ('count_people_interviewed_no', 'handler', '35', True)
+30486 rename skipped
+30486 paraphrase skipped
+17701 shuffle ('count_people_interviewed_no', 'handler', '34', True)
+17701 rename skipped
+17701 paraphrase ('count_people_interviewed_no', 'handler', '34', True)
+20891 shuffle ('compute_total_count', 'handler', '100 pens', False)
+20891 rename skipped
+20891 paraphrase ('compute_total_count', 'handler', '100 pens', False)
+35289 shuffle ('find_minimum_count', 'handler', 'June', True)
+35289 rename ('find_minimum_count', 'handler', 'May', True)
+35289 paraphrase ('find_minimum_count', 'handler', 'June', True)
+11832 shuffle ('compute_total_money_raised', 'handler', '$0.14', True)
+11832 rename ('compute_remaining_money', 'template', '0.14', True)
+11832 paraphrase ('compute_total_money_raised', 'handler', '$0.14', True)
+30876 shuffle ('compute_function_property', 'handler', 'linear', True)
+30876 rename skipped
+30876 paraphrase ('compute_function_property', 'handler', 'linear', True)
+37451 shuffle ('compute_difference_between_costs', 'handler', '5', True)
+37451 rename ('compute_difference_between_costs', 'handler', '5', True)
+37451 paraphrase ('compute_difference_between_values', 'large', '$5', True)
+3856 shuffle ('compute_total_money_raised', 'handler', '$7', True)
+3856 rename ('compute_total_money_raised', 'handler', '$15', False)
+3856 paraphrase ('compute_total_donations_collected', 'large', '$7', True)
+6428 shuffle ('compute_total_cost', 'template', '2.80', True)
+6428 rename ('compute_total_cost', 'template', '2.80', True)
+6428 paraphrase skipped
+7222 shuffle ('compute_range_of_values', 'handler', '9', True)
+7222 rename ('compute_range_of_values', 'handler', '9', True)
+7222 paraphrase ('compute_range_of_values', 'handler', '9', True)
+2250 shuffle ('compute_total_cost', 'template', '1', True)
+2250 rename ('compute_total_cost', 'template', '1', True)
+2250 paraphrase ('compute_cost_of_stock', 'large', '$1', True)
+19018 shuffle ('compute_difference_between_amounts', 'template', '2', True)
+19018 rename ('compute_difference_between_counts', 'template', '2', True)
+19018 paraphrase ('compute_difference_between_amounts', 'template', '$2', True)
+35296 shuffle ('compute_total_cost', 'template', '13.26', True)
+35296 rename ('compute_total_cost', 'template', '13.26', True)
+35296 paraphrase ('compute_total_cost', 'template', '13.26', True)
+7361 shuffle ('check_function_property', 'handler', 'no', True)
+7361 rename skipped
+7361 paraphrase ('check_function_property', 'handler', 'no', True)
+10146 shuffle ('find_start_time_no', 'handler', 'Friday', True)
+10146 rename ('find_start_time_no', 'handler', 'Saturday', True)
+10146 paraphrase ('find_minimum_count', 'handler', 'Friday', True)
+36241 shuffle ('compute_total_cost', 'template', '1.80', True)
+36241 rename ('compute_total_cost', 'template', '1.80', True)
+36241 paraphrase skipped
+1174 shuffle ('compute_mean', 'handler', '44', True)
+1174 rename ('compute_mean', 'handler', '44', True)
+1174 paraphrase skipped
+37708 shuffle ('compute_difference_between_amounts', 'template', 'shortage', True)
+37708 rename skipped
+37708 paraphrase skipped
+38283 shuffle ('compute_mean', 'handler', '6', True)
+38283 rename ('compute_mean', 'handler', '6', True)
+38283 paraphrase ('compute_mean', 'handler', '6', True)
+32731 shuffle ('compute_remaining_money', 'template', 'no', True)
+32731 rename ('compute_remaining_money', 'template', 'no', True)
+32731 paraphrase ('compute_remaining_money', 'template', 'no', True)
+4345 shuffle ('compute_mean', 'handler', '81', True)
+4345 rename ('compute_mean', 'handler', '81', True)
+4345 paraphrase ('compute_mean', 'handler', '81', True)
+7321 shuffle ('compute_mean', 'handler', '5', True)
+7321 rename ('compute_mean', 'handler', '5', True)
+7321 paraphrase ('compute_mean', 'handler', '5', True)
+23229 shuffle ('compute_remaining_money', 'template', 'no', True)
+23229 rename ('compute_remaining_money', 'template', 'no', True)
+23229 paraphrase ('compute_remaining_money', 'template', 'no', True)
+15381 shuffle ('compute_difference_between_amounts', 'template', 'surplus', True)
+15381 rename skipped
+15381 paraphrase skipped
+# E-17c: answer-preserving perturbations of E-17b's cheaper-rung cases
+
+| perturbation | variants | accuracy, original | accuracy, variant | paired difference [95% interval] | same intent | still template or handler | fallbacks |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| shuffle | 111 | 91.9% | 91.9% | +0.0 [-3.6, +3.6] | 96.4% | 95.5% | 2 |
+| rename | 70 | 97.1% | 88.6% | -8.6 [-15.7, -1.4] | 97.1% | 100.0% | 0 |
+| paraphrase | 72 | 94.4% | 94.4% | +0.0 [+0.0, +0.0] | 88.9% | 93.1% | 0 |
+
+Skipped (the perturbation did not apply, or a paraphrase lost a number or label): shuffle 0, rename 41, paraphrase 39
+
+## E-17c verdict line
+
+- refutation condition met (any perturbation's interval upper end below -3 points): NO
+
+## Wrong on a variant, right on the original
+
+- 37214 shuffle: compute_difference_between_counts -> compute_difference_between_counts by template, '5' (gold '8')
+- 13380 rename: find_start_time -> find_start_time by template, 'intermediate ballet class' (gold 'swing dance class')
+- 34178 rename: compute_remaining_money -> compute_remaining_money by template, '$76.70' (gold '542.04')
+- 14537 rename: compute_remaining_money -> compute_remaining_money by template, '69,160' (gold '63,553')
+- 20150 rename: compute_remaining_money -> compute_remaining_money by template, '5120' (gold '23,690')
+- 30072 rename: compute_remaining_money -> compute_remaining_money by template, '50.56' (gold '66.60')
+- 6681 shuffle: compute_remaining_money -> compute_remaining_money by template, '1978.41' (gold '1,522.81')
+- 6681 rename: compute_remaining_money -> compute_remaining_money by template, '134.40' (gold '1,522.81')
+- 3856 rename: compute_total_money_raised -> compute_total_money_raised by handler, '$15' (gold '7')
+

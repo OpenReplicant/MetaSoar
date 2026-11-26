@@ -27,13 +27,18 @@ class T(unittest.TestCase):
             self.assertEqual(r, f"{a} | {b}")
 
     def test_rename_is_consistent(self):
-        v, m = perturb.rename(CASE, random.Random(0))
+        v, sub = perturb.rename(CASE, random.Random(0))
+        m = {x: sub(x) for x in ("Ann", "Bob", "Cyd")}
         self.assertTrue(all(a != b for a, b in m.items()))
         self.assertEqual(v["question"], f"Who has more, {m['Ann']} or {m['Bob']}?")
         self.assertEqual(v["choices"], [m["Ann"], m["Bob"], m["Cyd"]])
         self.assertIn(f"{m['Bob']} | 5", v["table"])
-        self.assertEqual(perturb.gold_for("Bob", m), m["Bob"])
-        self.assertEqual(perturb.gold_for("7", m), "7")
+        self.assertEqual(perturb.gold_for("Bob", sub), m["Bob"])
+        self.assertEqual(perturb.gold_for("Bob's class", sub), m["Bob"] + "'s class")
+        self.assertEqual(perturb.gold_for("7", sub), "7")
+        self.assertIsNone(perturb.rename(dict(CASE, question="Who has more, ann or Bob?"), random.Random(0)))
+        form = dict(CASE, table_for_pd={"Name": ["Ann", "Bob", "Cyd"], "Count": ["3", "", "1"]})
+        self.assertIsNone(perturb.rename(form, random.Random(0)))
         self.assertIsNone(perturb.rename(dict(CASE, table_for_pd={"Year": ["2001", "2002"], "N": ["1", "2"]},
                                               table="Year | N\n2001 | 1\n2002 | 2"), random.Random(0)))
 

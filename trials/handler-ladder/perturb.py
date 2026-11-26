@@ -5,7 +5,8 @@ answer-preserving variants of each, routed through the ladder as it stands at th
 its state; nothing is learned or saved):
 - shuffle: the table's rows in another order
 - rename: the first column's labels permuted among themselves, everywhere they occur (table, question, choices,
-  and the gold answer when it is one of them), so the problem is the same up to names
+  and the gold answer wherever it contains one), so the problem is the same up to names; not applied to forms
+  (tables with empty cells) or when the question names a label inexactly (a fix after the first run, 2026-11-26)
 - paraphrase: the question reworded by the small model, kept only if every number and every table label it had is
   still there
 Each variant is elaborated (its intent), then answered by the cheapest active policy, with the large model on a failed
@@ -60,6 +61,14 @@ def rename(case, rng):
     labels = [x.strip() for x in case["table_for_pd"][first]]
     if not parts or len(set(labels)) != len(labels) or any(re.search(r"\d", x) or len(x) < 3 for x in labels):
         return None
+    if any(not x.strip() for col in case["table_for_pd"].values() for x in col):
+        return None  # a form (a pay stub): its labels are field names, and permuting them changes the problem
+    q = case["question"]
+    for x in labels:  # a label the question names inexactly ("parks" for Parks, "pairs of shorts" for "pair of
+        # shorts") would not be renamed there, so the question would change meaning
+        exact = re.search(r"(?<!\w)" + re.escape(x) + r"(?!\w)", q)
+        if not exact and any(len(w) > 2 and re.search(r"(?<!\w)" + re.escape(w), q, re.I) for w in x.lower().split()):
+            return None
     perm = labels[:]
     while any(a == b for a, b in zip(labels, perm)):
         rng.shuffle(perm)
@@ -72,7 +81,7 @@ def rename(case, rng):
     v["table_for_pd"][first] = [m[x.strip()] for x in case["table_for_pd"][first]]
     v["question"] = sub(case["question"])
     v["choices"] = [sub(c) for c in case["choices"]] if case.get("choices") else case.get("choices")
-    return v, m
+    return v, sub
 
 
 def paraphrase(case, small):
@@ -89,8 +98,9 @@ def paraphrase(case, small):
     return v, None
 
 
-def gold_for(answer, mapping):
-    return mapping.get(str(answer).strip(), answer) if mapping else answer
+def gold_for(answer, rename_fn):
+    """The gold answer under a renaming: every label in it renamed ("swing dance class" too, not only "swing dance")."""
+    return rename_fn(str(answer)) if rename_fn else answer
 
 
 def route(s, case):
