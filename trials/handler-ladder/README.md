@@ -48,3 +48,14 @@ counts, so a CPU small model shows up as small-model seconds). The small model m
   promotion rests on its next 3 labelled cases (3 of 3); there is no demotion (a promoted policy that goes bad
   falls back case by case); the TabMWP file holds gold beside the questions, so gold is in memory while cases load,
   but no runner object carries it (tested).
+- **Fixed after 13 real cases (the run was stopped and restarted from the start, its record kept in
+  `results/aborted-2026-11-26/`):** LFM3's reasoning leaked into intent keys (`..._think_intent_che`), so the key is
+  now the first answer line after `Intent:`, cut at `<`, "end with" or a hedge (" or "), at most 4 words. Inkling
+  reasoned for its whole budget on handler prompts and wrote no code, so its reply is prefilled with
+  `def solve(...)`, which gives code at once. The harness pre-imports `re`, `math`, `statistics`, `fractions`,
+  `datetime` and `collections`. Answers that both hold numbers agree when the numbers do and neither answer's words
+  contradict the other's (`-34 kg per year` and `-34 kg/year` agree; `March 3` and `April 3` do not). A write that
+  returns nothing usable is retried once on a later label.
+- **Serving:** `serve.sh ladder`. Inkling has loop layers 6-11 on the GPU, and LFM3 is on the GPU with its KV cache
+  in RAM. Inkling runs at 13.6 tok/s, against 14.5 with 8 layers, and an intent call takes 0.41 s, against 3.0 s
+  with LFM3 on the CPU.

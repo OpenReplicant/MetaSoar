@@ -50,7 +50,7 @@ class Fakes:
     def find(self, text):
         return next(q for q in self.lookup if q in text)
 
-    def large(self, text, max_tokens):
+    def large(self, text, max_tokens, prefill=None):
         self.n += 1
         if self.crash_after and self.n > self.crash_after:
             raise RuntimeError("crash")

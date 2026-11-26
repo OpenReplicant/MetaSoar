@@ -22,6 +22,10 @@ import smoke  # noqa: E402  (prompt, extract, number, DATA)
 PROBLEM_FIELDS = ("question", "choices", "table", "table_for_pd", "table_title", "unit")
 K, THRESHOLD, MIN_PROMOTE, MIN_DISCARD = 3, 0.95, 3, 5
 LARGE_EXTRA = {"reasoning_effort": "none"}
+LARGE_TOKENS, HANDLER_TOKENS, INTENT_TOKENS = 1500, 3000, 60
+# Inkling reasons at length even at reasoning_effort none (4,000 tokens and no code on a handler prompt); a reply
+# prefilled with the start of the function goes straight to code (about 500 tokens, 44 s).
+HANDLER_PREFILL = "```python\ndef solve(table, question, choices):\n"
 SMALL_EXTRA = {"chat_template_kwargs": {"enable_thinking": False}}
 
 ELABORATE = ("Name the intent of the question below as one short snake_case key (2 to 4 words) for the kind of "
@@ -31,8 +35,8 @@ HANDLER = ("Write a Python function `solve(table, question, choices)` that answe
            "from its table, with no model. `table` maps each column name to a list of string cells, `question` is "
            "the question text, `choices` is a list of strings or None. Return the answer as a string, in the form "
            "of the examples (when choices exist, return one choice as written). Standard library only; parse "
-           "numbers defensively (strip $ , % and units).\n\nExamples:\n{examples}\n{redo}\nReply with one "
-           "```python code block.")
+           "numbers defensively (strip $ , % and units).\n\nExamples:\n{examples}\n{redo}\nReply at once with one "
+           "```python code block and nothing else. Keep it short: under 40 lines, no helper classes.")
 TEMPLATE = ("Rewrite this worked solution as a generic plan for any problem of this kind: numbered steps, every "
             "specific name, number and value removed. Output only the plan.\n{redo}\nSolution:\n{text}")
 HARNESS = '''
@@ -49,7 +53,9 @@ def _no(*a, **k):
 socket.socket = socket.create_connection = socket.getaddrinfo = _no
 args = json.load(sys.stdin)
 real, sys.stdout = sys.stdout, open(os.devnull, "w")
-ns = {}
+import re, math, statistics, fractions, datetime, collections  # the reply is prefilled from `def solve`, so no imports precede it
+ns = {"re": re, "math": math, "statistics": statistics, "fractions": fractions, "datetime": datetime,
+      "collections": collections}
 exec(compile(open("handler.py").read(), "handler.py", "exec"), ns)
 real.write(json.dumps({"out": str(ns["solve"](args["table"], args["question"], args["choices"]))}))
 '''
@@ -59,14 +65,20 @@ real.write(json.dumps({"out": str(ns["solve"](args["table"], args["question"], a
 
 def http_model(url, model, extra):
     """An OpenAI-style chat endpoint as fn(text, max_tokens) -> (content, usage)."""
-    def fn(text, max_tokens=700):
-        body = {"model": model, "messages": [{"role": "user", "content": text}], "max_tokens": max_tokens,
-                "temperature": 0, **extra}
+    def fn(text, max_tokens=700, prefill=None):
+        msgs = [{"role": "user", "content": text}] + ([{"role": "assistant", "content": prefill}] if prefill else [])
+        body = {"model": model, "messages": msgs, "max_tokens": max_tokens, "temperature": 0, **extra}
         req = urllib.request.Request(url.rstrip("/") + "/v1/chat/completions", data=json.dumps(body).encode(),
                                      headers={"Content-Type": "application/json"})
         with urllib.request.urlopen(req, timeout=900) as r:
             d = json.load(r)
-        return d["choices"][0]["message"]["content"] or "", d.get("usage", {})
+        m = d["choices"][0]["message"]
+        # Inkling reasons even at reasoning_effort none; when the budget ends inside its reasoning the content is
+        # empty, and the reasoning is the only text there is.
+        out = (m.get("content") or "").strip() or (m.get("reasoning_content") or "")
+        if prefill and not out.lstrip().startswith(prefill.strip()[:10]):
+            out = prefill + out  # llama.cpp returns only the continuation of a prefilled reply
+        return out, d.get("usage", {})
     return fn
 
 
@@ -76,10 +88,10 @@ class Meter:
     def __init__(self, fn):
         self.fn, self.calls, self.prompt_tokens, self.completion_tokens, self.seconds = fn, 0, 0, 0, 0.0
 
-    def ask(self, text, max_tokens=700):
+    def ask(self, text, max_tokens=700, prefill=None):
         t = time.perf_counter()
         try:
-            out, usage = self.fn(text, max_tokens)
+            out, usage = self.fn(text, max_tokens, prefill) if prefill else self.fn(text, max_tokens)
         finally:
             self.seconds += time.perf_counter() - t
             self.calls += 1
@@ -127,10 +139,27 @@ def lead_number(s):
     return smoke.number(m.group(1).replace(",", "")) if m else None
 
 
+def numbers(s):
+    """Every number in an answer, in order, as floats ('$1,250.50' -> [1250.5]; '11:15 A.M.' -> [11, 15])."""
+    return [float(x.replace(",", "")) for x in re.findall(r"-?\d[\d,]*\.?\d*|-?\.\d+", s)]
+
+
 def same(a, b):
-    """Agreement: numbers as numbers (a bare number also equals number + unit words), other text case-folded."""
+    """Agreement. Answers that both hold numbers agree when their numbers do, whatever the unit words ('-34 kg per
+    year' and '-34 kg/year'); fractions are compared by value; other text is case-folded."""
     if a is None or b is None:
         return False
+    if re.search(r"\d", a) and re.search(r"\d", b):
+        fa, fb = full_number(a), full_number(b)
+        if fa is not None and fb is not None:  # covers fractions such as 3/4 against 0.75
+            return abs(fa - fb) <= 1e-6 * max(1, abs(fb))
+        xa, xb = numbers(a), numbers(b)
+        if len(xa) != len(xb) or any(abs(x - y) > 1e-6 * max(1, abs(y)) for x, y in zip(xa, xb)):
+            return False
+        # the words must not contradict: one answer's words within the other's ('kg/year' within 'kg per year';
+        # 'March 3' against 'April 3' is a disagreement)
+        wa, wb = (set(re.findall(r"[a-z]+", t.casefold())) - {"per", "of", "the", "a"} for t in (a, b))
+        return wa <= wb or wb <= wa
     na, nb = full_number(a), full_number(b)
     if na is None and nb is not None:
         na = lead_number(a)
@@ -177,9 +206,9 @@ def run_handler(code, case, timeout=5):
 
 
 def code_block(text):
-    blocks = [b for b in re.findall(r"```(?:python)?\s*\n(.*?)```", text or "", re.S) if "def solve" in b]
-    return blocks[-1].strip() if blocks else None
-
+    """The ```python block holding `def solve`; an unclosed final block is accepted (it is compiled before use)."""
+    blocks = [b for b in re.findall(r"```(?:python)?\s*\n(.*?)(?:```|$)", text or "", re.S) if "def solve" in b]
+    return blocks[-1] if blocks else None
 
 def show(case, answer=None):
     lines = [f"Question: {case['question']}"]
@@ -250,7 +279,7 @@ class Stream:
             # A cheaper candidate learns only from the large model's labels, so while one is in shadow the large
             # model also labels cases the template answers (bounded: it stops once the handler is promoted or
             # discarded). The case's answer stays the template's; the call is counted in its cost.
-            ltext = self.large.ask(smoke.prompt(case))
+            ltext = self.large.ask(smoke.prompt(case), LARGE_TOKENS)
             raw = smoke.extract(ltext)
             self.retain_label(intent, it, case, check(raw, case) or raw or "", ltext)
             shadow_label = True
@@ -265,9 +294,13 @@ class Stream:
 
     def elaborate(self, case):
         known = ", ".join(self.state["intents"]) or "(none yet)"
-        text = self.small.ask(ELABORATE.format(known=known, question=case["question"]), 400)
-        found = re.findall(r"Intent:\s*(.+)", text)
-        return norm_key(found[-1]) if found else "unknown"
+        text = self.small.ask(ELABORATE.format(known=known, question=case["question"]), INTENT_TOKENS)
+        text = re.sub(r"<think>.*?(</think>|$)", "", text, flags=re.S)
+        found = re.findall(r"Intent:[ \t]*([^\n]*)", text)  # the first answer line; LFM3 may echo the instruction after it
+        if not found:
+            return "unknown"
+        key = re.split(r"<|end with|[ _]or[ _]", found[0], flags=re.I)[0]  # a hedge ("x or maybe y") keeps x
+        return "_".join(norm_key(key).split("_")[:4])  # the prompt asks for 2 to 4 words
 
     def decide_apply(self, case, it):
         """Cheapest promoted policy, checked; the large model on a failed check. -> (rung, answer, fallback_from, large text)."""
@@ -281,7 +314,7 @@ class Stream:
                 c["fallbacks"] = c.get("fallbacks", 0) + 1
                 fallback_from = kind
                 break
-        text = self.large.ask(smoke.prompt(case))
+        text = self.large.ask(smoke.prompt(case), LARGE_TOKENS)
         raw = smoke.extract(text)
         return "large", check(raw, case) or raw or "", fallback_from, text
 
@@ -320,8 +353,9 @@ class Stream:
                     self.compile_one(it, kind, rewrite=c)
 
     def compile(self, it):
+        wf = it.setdefault("write_failures", {"handler": 0, "template": 0})
         for kind in ("handler", "template"):
-            if it["candidates"][kind] is None and len(it["labelled"]) >= self.k:
+            if it["candidates"][kind] is None and len(it["labelled"]) >= self.k + wf[kind] and wf[kind] < 2:
                 self.compile_one(it, kind)
 
     def compile_one(self, it, kind, rewrite=None):
@@ -338,7 +372,7 @@ class Stream:
                 redo = ("Your earlier version gave wrong answers here (earlier code below). Fix it.\n" +
                         "\n\n".join(show(self.byid[f["id"]], f["expected"]) + f"\nYour answer: {f['got']}" for f in fails[:3]) +
                         f"\nEarlier code:\n```python\n{rewrite['code']}\n```\n")
-            code = code_block(self.large.ask(HANDLER.format(examples=ex, redo=redo), 1500))
+            code = code_block(self.large.ask(HANDLER.format(examples=ex, redo=redo), HANDLER_TOKENS, HANDLER_PREFILL))
             if code:
                 try:
                     compile(code, "handler", "exec")
@@ -356,6 +390,11 @@ class Stream:
         c = {"kind": kind, "version": (rewrite["version"] + 1) if rewrite else 1, "rewrites": 1 if rewrite else 0,
              "used": used, "n": 0, "agree": 0, "failures": [], "fallbacks": 0,
              "status": "shadow" if all(body.values()) else "discarded", **body}
+        if not all(body.values()) and not rewrite:
+            # nothing usable came back (no code block, a syntax error, an empty plan): try again on the next label
+            it.setdefault("write_failures", {"handler": 0, "template": 0})[kind] += 1
+            it["candidates"][kind] = None
+            return
         it["candidates"][kind] = c
         for r in lab:
             if c["status"] != "shadow":
