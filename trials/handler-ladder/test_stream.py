@@ -181,7 +181,7 @@ class T(unittest.TestCase):
         n = baseline.run(self.d, out, Fakes(self.lookup).large, n=40, last=15, log=lambda *_: None)
         self.assertGreater(n, 0)
         self.assertEqual(baseline.run(self.d, out, Fakes(self.lookup).large, n=40, last=15, log=lambda *_: None), 0)
-        text = summarize.summarize(out, self.d, chunk_size=10, last=15)
+        text = summarize.summarize(out, self.d, chunk_size=10, last=15, total=40)
         self.assertTrue(os.path.exists(os.path.join(out, "summary-e17.md")))
         for s in ("## Per chunk", "paired accuracy difference", "coverage below 30%", "total_items"):
             self.assertIn(s, text)

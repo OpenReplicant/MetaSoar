@@ -34,7 +34,7 @@ def bootstrap(xs, reps=2000, seed=0):
     return sum(xs) / n, means[int(0.025 * reps)], means[int(0.975 * reps) - 1]
 
 
-def summarize(out_dir, data_dir, chunk_size=100, last=150):
+def summarize(out_dir, data_dir, chunk_size=100, last=150, total=300):
     recs, base = jsonl(os.path.join(out_dir, "stream.jsonl")), {r["id"]: r for r in jsonl(os.path.join(out_dir, "baseline.jsonl"))}
     gold = load(os.path.join(data_dir, "problems_test1k.json"))  # the only place gold is read
     ok = lambda pid, ans: bool(smoke.correct(ans, gold[pid]))
@@ -67,12 +67,15 @@ def summarize(out_dir, data_dir, chunk_size=100, last=150):
         L.append(f"- paired accuracy difference, stream minus large alone: {100 * mean:+.1f} points, 95% bootstrap interval [{100 * lo:+.1f}, {100 * hi:+.1f}]")
         diff = hi < -0.02
         refuted.append(diff)
-    L += ["", "## E-17 verdict lines", "",
+    if len(recs) < total:  # the falsifier is about the stream's last segment, so it is not read before the stream ends
+        L += ["", "## E-17 verdict lines", "", f"- withheld: the stream is incomplete ({len(recs)} of {total} cases)"]
+        refuted, diff = [], "incomplete"
+    L += ([] if diff == "incomplete" else ["", "## E-17 verdict lines", "",
           f"- coverage below 30%? {'YES' if cover < 0.30 else 'NO'} ({pct(cover)})",
           f"- accuracy more than 2 points below the large model alone, beyond the interval (interval's upper end < -2)? "
           + ("not computed" if diff is None else "YES" if diff else "NO"),
-          "- refutation condition met: " + ("YES" if any(refuted) else "NO" if diff is not None else "not yet (difference not computed)"),
-          "", "## Intents", "", "| intent | cases | rungs used (handler/template/large) | highest rung reached | handler agreement | template agreement |",
+          "- refutation condition met: " + ("YES" if any(refuted) else "NO" if diff is not None else "not yet (difference not computed)")])
+    L += ["", "## Intents", "", "| intent | cases | rungs used (handler/template/large) | highest rung reached | handler agreement | template agreement |",
           "| --- | --- | --- | --- | --- | --- |"]
     sp = os.path.join(out_dir, "state.json")
     intents = load(sp)["intents"] if os.path.exists(sp) else {}
