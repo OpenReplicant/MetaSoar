@@ -2,6 +2,7 @@
 # Start one llama.cpp server for E-04a, on localhost only, with Substrate's pinned image and model files (S-169).
 #   serve.sh fast   LFM3 1.7B Q6_K wholly on the GPU, :8082
 #   serve.sh slow   Inkling 2 Mini Q4_K, attention on the GPU and the experts of loop layers 6-12 on the GPU, :8081
+#   serve.sh slow8  as slow, with loop layer 13's experts on the GPU as well (layers 6-13), :8081
 #   serve.sh stop   stop both
 set -eu
 IMG=ghcr.io/ggml-org/llama.cpp:server-cuda12-b12627
@@ -30,6 +31,11 @@ d1)
   docker run -d --name e04a-d1 $SAFE $GPU -v /home/pete/.lmstudio/models/LiquidAI:/models:ro -p 127.0.0.1:8083:8080 \
     --entrypoint /app/llama-server $IMG -m "/models/$2" --host 0.0.0.0 --port 8080 --alias d1 \
     -ngl 999 -t 2 -c 16384 -b 8192 -ub 8192 ;;
+slow8)
+  docker run -d --name e04a-slow $SAFE $GPU -v $M/Inkling-2-Mini-Uncensored-GGUF:/models:ro -p 127.0.0.1:8081:8080 \
+    --entrypoint /app/llama-server $IMG -m /models/Inkling-2-Mini-Uncensored-AD-Q4_K.gguf --host 0.0.0.0 --port 8080 \
+    --alias slow --jinja -ngl 999 -ot 'blk\.([0-5]|1[4-9]|2[0-3])\.ffn_.*_exps.*=CPU' --no-op-offload -t 6 \
+    -c 16384 -b 512 -ub 128 -ctk q4_0 -ctv q4_0 -fa on ;;
 stop)
   docker rm -f e04a-fast e04a-slow e04a-d1 2>/dev/null || true ;;
 esac
