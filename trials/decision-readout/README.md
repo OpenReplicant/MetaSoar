@@ -110,5 +110,48 @@ Pooled on the `eval` half (779 cases):
   and 25 s on ATBench's long trajectories. LFM3 takes 0.11 s.
 - **Caveat:** a sample of 100 families per slice, half of them held out. Every slice is in it.
 
-**Liquid's open d1 models** (d1-omni-600M, d1-2B, d1-3B, from their own GGUFs on llama.cpp's `/v1/systemone`,
-`readout_d1.py`, `run_d1.sh`): running.
+**Liquid's open d1 models: every usable case** (`results/summary-d1.md`).
+- **Setup:** their own GGUFs at Q8_0 (Hugging Face revisions: d1-2B `4a18109`, d1-omni-600M `8eb2d2a`), on
+  llama.cpp's native `/v1/systemone` endpoint (`readout_d1.py`). The JevBench question is sent as it is, in both
+  option orders; 13,032 reads each, no errors.
+- **d1-3B is not run:** Liquid has deprecated it, saying d1-2B is more accurate with a third fewer parameters.
+
+Pooled on the `eval` half (3,412 cases):
+
+| System | Accuracy [95% CI] | Brier | Calibration error (as shipped / scaled) | Coverage at 5% risk | Order-flip rate | ms per read |
+| --- | --- | --- | --- | --- | --- | --- |
+| d1-2B | 0.640 [0.619, 0.660] | 0.461 | 0.037 / 0.016 | 0.33 | 0.09 | 77 |
+| d1-omni-600M | 0.457 [0.438, 0.476] | 0.683 | 0.188 / 0.028 | 0.01 | 0.20 | 23 |
+| LFM3 1.7B, our readout | 0.501 raw, 0.528 debiased | 0.764 | 0.311 / 0.026 | 0.09 | 0.33 | 108 |
+| Jev 1.13 | 0.842 [0.828, 0.857] | 0.229 | 0.024 | 0.67 | - | - |
+
+On the same 779 held-out cases as Inkling's sample:
+
+| System | Accuracy |
+| --- | --- |
+| Inkling (debiased) | 0.810 |
+| d1-2B (debiased) | 0.633 |
+| LFM3 (debiased) | 0.561 |
+| d1-omni-600M (debiased) | 0.481 |
+| Jev 1.13 | 0.843 |
+
+- **E-04a's falsifier is met for both d1 models:** d1-2B is 20 points below Jev, and d1-omni-600M 38 points below.
+- **What d1-2B's training buys over the general model at its size** (LFM3, read by us):
+  - 11 points of accuracy;
+  - calibration as shipped close to Jev's (0.037);
+  - order-stable answers (no flips at all on yes or no questions);
+  - 77 ms per read.
+- **Where d1-2B is close to Jev:**
+  - PubMedQA: 0.70 against 0.72.
+  - Prompt injections: 0.72 against 0.74.
+  - Aegis: 0.81 against 0.85, and 0.77 against 0.80.
+  - Jailbreak: 0.95 against 0.99.
+- **Where it is far behind:**
+  - Knowledge: MedQA 0.50 against 0.86, MedMCQA 0.42 against 0.76, MMLU-Pro 0.40 against 0.79. Its own card warns
+    that knowledge-heavy questions favour larger models.
+  - ATBench's long agent trajectories: 0.64 against 0.92.
+- **Reading so far:**
+  - Inkling read by its probabilities is the only local backend near Jev's accuracy, at 2.3 s a decision.
+  - d1-2B is the fast, calibrated, stable one, good where the answer is in the text.
+  - That suggests a cascade: d1-2B first, and Inkling when d1-2B is unsure or the question needs knowledge. This
+    is the decision-gate study's rule: a cheap first stage that is confident where it is right.
