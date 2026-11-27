@@ -87,7 +87,9 @@ def main():
     for t in threads:
         t.join()
 
-    llama = os.path.dirname(glob.glob("/kaggle/input/**/llama-server", recursive=True)[0])
+    built = os.path.dirname(glob.glob("/kaggle/input/**/llama-server", recursive=True)[0])
+    llama = "/kaggle/tmp/llama"  # inputs are mounted read-only, so copy before marking it executable
+    shutil.copytree(built, llama, dirs_exist_ok=True)
     os.chmod(os.path.join(llama, "llama-server"), 0o755)
     procs = []
     for s in JOB["servers"]:
