@@ -35,6 +35,8 @@ HF = {  # name: (repo, file, sha256) -- the files under ~/.lmstudio/models local
     "d1": ("LiquidAI/d1-2B-GGUF", "d1-2B-Q8_0.gguf", "073313d92b53b0ac8193db6e906cb3c78a98183d244b15b7b8f5426115c6738c"),
     "embed": ("Qwen/Qwen3-Embedding-0.6B-GGUF", "Qwen3-Embedding-0.6B-Q8_0.gguf",
               "06507c7b42688469c4e7298b0a1e16deff06caf291cf0a5b278c308249c3e439"),
+    "dspark": ("AtomicChat/Inkling-2-Mini-Uncensored-GGUF", "dspark-Inkling-2-Mini-Q8_0.gguf",
+               "f51f32d3fb4dca9ca2f094e447b80741caac0a3445ec02af02a8cc3c86e45992"),
 }
 SERVERS = {  # name: (model, port, CUDA devices, flags). Inkling first, placed by llama.cpp's fit with margins
     # left for the others: about 4 GB on GPU 0 (LFM3, the embedder) and 3 GB on GPU 1 (d1-2B)
@@ -42,7 +44,12 @@ SERVERS = {  # name: (model, port, CUDA devices, flags). Inkling first, placed b
     "fast": ("lfm3", 8082, "0", "--alias fast --jinja -ngl 999 -c 8192 -fa on -ctk q8_0 -ctv q8_0 -t 2"),
     "d1": ("d1", 8083, "1", "--alias d1 -ngl 999 -c 16384 -b 8192 -ub 8192 -t 2"),
     "embed": ("embed", 8084, "0", "--alias embed --embedding --pooling last -ngl 999 -c 8192 -b 8192 -ub 8192 -t 2"),
+    # Inkling with its DSpark drafter (speculative decoding, as the model card runs it); serves as "slow" on 8081.
+    # Greedy outputs can differ from plain decoding (the card says so), so it needs its own baseline.
+    "slow-dspark": ("inkling", 8081, "0,1", "--alias slow --jinja -sm layer -fitt 4096,4096 -c 16384 -ctk q4_0 -ctv q4_0 "
+                    "-fa on -t 4 -md @dspark --spec-type draft-dspark --spec-draft-n-max 3 -ngld 99"),
 }
+EXTRA = {"slow-dspark": ["dspark"]}  # further model files a server needs, named in its flags as @name
 TABMWP = {"problems_test1k.json": "bf34a84d359c48ba", "problems_dev1k.json": "e8a3acdb3726c7ab"}  # sha256 prefixes
 
 
@@ -70,7 +77,7 @@ def fetch(name):
 def main():
     log("job", json.dumps(JOB))
     subprocess.run(["nvidia-smi"], check=False)
-    need = {SERVERS[s][0] for s in JOB["servers"]}
+    need = {SERVERS[s][0] for s in JOB["servers"]} | {m for s in JOB["servers"] for m in EXTRA.get(s, [])}
     threads = [threading.Thread(target=fetch, args=(m,)) for m in need]
     for t in threads:
         t.start()
@@ -99,7 +106,8 @@ def main():
         env = dict(os.environ, CUDA_VISIBLE_DEVICES=dev, LD_LIBRARY_PATH=llama)
         f = open(os.path.join(OUT, f"server-{s}.log"), "w")
         procs.append(subprocess.Popen([os.path.join(llama, "llama-server"), "-m", os.path.join(MODELS, HF[model][1]),
-                                       "--host", "127.0.0.1", "--port", str(port), *flags.split()],
+                                       "--host", "127.0.0.1", "--port", str(port),
+                                       *[os.path.join(MODELS, HF[x[1:]][1]) if x.startswith("@") else x for x in flags.split()]],
                                       env=env, stdout=f, stderr=subprocess.STDOUT))
         t = time.time()
         while True:  # one at a time, so each places its buffers before the next
