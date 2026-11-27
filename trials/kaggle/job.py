@@ -32,10 +32,12 @@ def main():
     ap.add_argument("--out", action="append", default=[])
     ap.add_argument("--timeout", type=int, default=11 * 3600, help="seconds (Kaggle's limit is 12 h a session)")
     ap.add_argument("--no-wait", action="store_true")
+    ap.add_argument("--resume", help="an earlier job's NAME: its output is attached, and the --out paths are copied from it first")
     a = ap.parse_args()
     if subprocess.run(["git", "branch", "-r", "--contains", a.commit], capture_output=True, text=True).stdout.strip() == "":
         sys.exit(f"{a.commit} is not on any pushed branch; push it first")
-    job = {"name": a.name, "commit": a.commit, "servers": a.servers.split(","), "commands": a.cmd, "outputs": a.out}
+    job = {"name": a.name, "commit": a.commit, "servers": a.servers.split(","), "commands": a.cmd, "outputs": a.out,
+           "resume": a.out if a.resume else []}
     slug = f"{USER}/metasoar-{a.name}"
     with tempfile.TemporaryDirectory() as d:
         src = open(os.path.join(HERE, "run.py")).read().replace("JOB = {}  # written by job.py", f"JOB = {json.dumps(job)}")
@@ -43,7 +45,7 @@ def main():
         json.dump({"id": slug, "title": f"metasoar {a.name}", "code_file": "run.py", "language": "python",
                    "kernel_type": "script", "is_private": "true", "enable_gpu": "true", "enable_tpu": "false",
                    "enable_internet": "true", "machine_shape": "", "dataset_sources": [], "competition_sources": [],
-                   "kernel_sources": [BUILD], "model_sources": []}, open(os.path.join(d, "kernel-metadata.json"), "w"))
+                   "kernel_sources": [BUILD] + ([f"{USER}/metasoar-{a.resume}"] if a.resume else []), "model_sources": []}, open(os.path.join(d, "kernel-metadata.json"), "w"))
         print(kaggle("kernels", "push", "-p", d, "--accelerator", "NvidiaTeslaT4", "-t", str(a.timeout)).strip())
     if a.no_wait:
         return
