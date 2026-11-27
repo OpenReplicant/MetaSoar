@@ -13,6 +13,7 @@ sys.path.insert(0, HERE)
 import smoke  # noqa: E402
 import smoke_wtq  # noqa: E402
 import stream  # noqa: E402
+import stream_v3  # noqa: E402
 import summarize  # noqa: E402
 import wtq  # noqa: E402
 
@@ -37,7 +38,7 @@ def baseline(data_dir, out_dir, large_fn, n=450, last=150, log=print):
             if pid in have:
                 continue
             before = large.snap()
-            text = large.ask(smoke_wtq.prompt(cases[pid]), stream.LARGE_TOKENS)
+            text = large.ask(smoke_wtq.prompt(cases[pid]), stream_v3.LARGE_TOKENS)
             raw = smoke.extract(text)
             f.write(json.dumps({"id": pid, "answer": raw or "", "text": text, "large": stream.delta(before, large.snap())}) + "\n")
             f.flush()

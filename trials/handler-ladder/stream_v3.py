@@ -16,7 +16,7 @@ observed on every label, a strict check), with these changes:
   E-17d's exact shape would also have admitted the case is recorded (`exact_admit`).
 - Agreement by WTQ's evaluator (`agree`: `wtq.score` with either answer read as the gold list), so lists are sets.
 - WTQ prompts (`smoke_wtq.prompt`), answers as comma-separated lists; the check refuses non-answers and placeholders,
-  and allows lists.
+  and allows lists. The large model's answers pass the same check, and a non-answer is never a label (from the pilot).
 - The large model labels a case a cheaper rung answered while a cheaper candidate for it is in shadow (as E-17's
   shadow labels), so class handlers do not starve.
 
@@ -47,6 +47,7 @@ CLASSES = {  # name: what d1-2B is shown
     "average": "Compute an average or mean of values",
     "yes_no": "Answer yes or no about the table",
     "list": "List several items that meet a condition (name all, which ones, other than ...)",
+    "filter": "Find the one item whose row meets a condition (the only one that ..., which one has no ..., the year when ...)",
     "lookup": "Read one value from the row that the question names (what, who, when, where, which)",
 }
 CLASS_INSTRUCTIONS = ("The state holds a question about a table. Which option describes the operation the question asks "
@@ -63,6 +64,7 @@ HANDLER = ("Write a Python function `solve(table, question, choices)` that answe
            "only; parse numbers defensively.\n\nExamples:\n{examples}\n{redo}\nReply at once with one ```python code "
            "block and nothing else. Keep it under 60 lines.")
 MAX_LEN, WITHDRAW_N, WITHDRAW_BELOW = 300, 5, 0.90
+LARGE_TOKENS = 3000  # the pilot: at 1,500 some WTQ answers ran out inside the reasoning
 MISFIT_N, MISFIT_BELOW = 3, 0.50  # a clear misfit is withdrawn sooner
 CLASS_MIN_DISCARD, CLASS_DISCARD_BELOW = 10, 0.50  # a class handler is discarded (and rewritten) only when it fails
 # broadly; one that fits some intents and not others is withdrawn from those, and promotion still needs the 0.70 bound
@@ -169,11 +171,13 @@ class StreamV3(stream_v2.StreamV2):
         rung, answer, fb, text, exact = self.decide_apply(case, it)
         shadow_label = False
         if rung == "large":
-            self.retain_label(intent, it, case, answer, text)
+            if answer:  # a non-answer (empty, a placeholder echoed) is never a label
+                self.retain_label(intent, it, case, answer, text)
         elif self.cheaper_in_shadow(rung, it, ct):
-            ltext = self.large.ask(smoke_wtq.prompt(case), stream.LARGE_TOKENS)
-            raw = smoke.extract(ltext)
-            self.retain_label(intent, it, case, strict(raw, case) or raw or "", ltext)
+            ltext = self.large.ask(smoke_wtq.prompt(case), LARGE_TOKENS)
+            label = strict(smoke.extract(ltext), case)
+            if label:
+                self.retain_label(intent, it, case, label, ltext)
             shadow_label = True
         s1 = (self.large.snap(), self.small.snap())
         rec = {"id": case["id"], "chunk": chunk, "intent": intent, "class": cls, "new_intent": new, "rung": rung,
@@ -215,9 +219,8 @@ class StreamV3(stream_v2.StreamV2):
                 break
         else:
             fb = None
-        text = self.large.ask(smoke_wtq.prompt(case), stream.LARGE_TOKENS)
-        raw = smoke.extract(text)
-        return "large", strict(raw, case) or raw or "", fb, text, None
+        text = self.large.ask(smoke_wtq.prompt(case), LARGE_TOKENS)
+        return "large", strict(smoke.extract(text), case) or "", fb, text, None
 
     def run_candidate(self, c, case):
         if c["kind"] == "handler":
