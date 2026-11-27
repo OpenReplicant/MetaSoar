@@ -65,6 +65,8 @@ HANDLER = ("Write a Python function `solve(table, question, choices)` that answe
            "block and nothing else. Keep it under 60 lines.")
 MAX_LEN, WITHDRAW_N, WITHDRAW_BELOW = 300, 5, 0.90
 LARGE_TOKENS = 3000  # the pilot: at 1,500 some WTQ answers ran out inside the reasoning
+WRITE_TRIES = 4  # the pilot: a class's handler came back unusable twice; class handlers are what E-18 tests, so a
+# class may try 4 times, each after 3 more labels
 MISFIT_N, MISFIT_BELOW = 3, 0.50  # a clear misfit is withdrawn sooner
 CLASS_MIN_DISCARD, CLASS_DISCARD_BELOW = 10, 0.50  # a class handler is discarded (and rewritten) only when it fails
 # broadly; one that fits some intents and not others is withdrawn from those, and promotion still needs the 0.70 bound
@@ -291,7 +293,8 @@ class StreamV3(stream_v2.StreamV2):
             self.observe(it, "handler", h, label, stats)
             self.withdraw_if_misfit(it, h)
         self.compile(it)
-        if it["class"] != "other" and ct["handler"] is None and ct["write_failures"] < 2:
+        if (it["class"] != "other" and ct["handler"] is None and ct["write_failures"] < WRITE_TRIES
+                and len(ct["labelled"]) >= 3 * (1 + ct["write_failures"])):
             self.write_class_handler(it["class"])
 
     def compile(self, it):
@@ -337,6 +340,7 @@ class StreamV3(stream_v2.StreamV2):
         if not code:
             if not rewrite:
                 ct["write_failures"] += 1
+            ct.setdefault("failed_writes", []).append(text[-600:])  # for diagnosis
             return
         c = {"kind": "handler", "scope": "class", "class": cls, "version": (rewrite["version"] + 1) if rewrite else 1,
              "rewrites": 1 if rewrite else 0, "used": [r["id"] for r in ex], "n": 0, "agree": 0, "failures": [],

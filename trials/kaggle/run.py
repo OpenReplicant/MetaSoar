@@ -91,6 +91,13 @@ def main():
         p = os.path.join(data, f)
         urllib.request.urlretrieve(f"https://raw.githubusercontent.com/lupantech/PromptPG/5a1a522/data/tabmwp/{f}", p)
         assert sha256(p).startswith(want), f
+    for rel in JOB.get("resume", []):  # a later job of one run: the earlier job's outputs, attached as a kernel source
+        src = glob.glob(f"/kaggle/input/**/out/{rel}", recursive=True)
+        if not src:
+            raise SystemExit(f"resume: {rel} not found in the attached outputs")
+        dst = os.path.join(REPO, rel)
+        (shutil.copytree(src[0], dst, dirs_exist_ok=True) if os.path.isdir(src[0]) else shutil.copy2(src[0], dst))
+        log("resumed", rel)
     times["clone and data"] = round(time.time() - t)
     for t in threads:
         t.join()
