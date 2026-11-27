@@ -25,7 +25,7 @@ Gold is never read here. Usage:
 """
 from __future__ import annotations
 
-import argparse, hashlib, json, os, sys, time
+import argparse, hashlib, json, os, re, sys, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -43,6 +43,21 @@ AUDIT_EVERY = 5
 NEAREST, MAX_EXAMPLES = 3, 200
 
 
+def lead(a):
+    m = re.match(r"\s*(-?\d[\d,]*(?:\.\d+)?)\s*([^\d]*)$", str(a))
+    return (float(m.group(1).replace(",", "")), m.group(2).strip()) if m else None
+
+
+def agree_form(a, b):
+    """WTQ's evaluator (`stream_v3.agree`), or the same leading number where the rest of either is only a unit
+    ("5" and "5 years", "2.04" and "2.04 seconds"): the large model adds units the table's cells do not."""
+    if stream_v3.agree(a, b):
+        return True
+    x, y = lead(a), lead(b)
+    unit = lambda u: u == "" or (len(u) <= 12 and re.fullmatch(r"[a-zA-Z%. ]+", u) is not None)
+    return bool(x and y and x[0] == y[0] and unit(x[1]) and unit(y[1]))
+
+
 def audited(pid):
     return int(hashlib.sha256(pid.encode()).hexdigest(), 16) % AUDIT_EVERY == 0
 
@@ -52,7 +67,9 @@ def table_of(case):
 
 
 class StreamV4:
-    def __init__(self, data_dir, out_dir, large_fn, small_ask, embed_fn=None, choose_fn=None, log=print, total=TOTAL):
+    def __init__(self, data_dir, out_dir, large_fn, small_ask, embed_fn=None, choose_fn=None, log=print, total=TOTAL,
+                 k=1, m=1, think_fn=None):
+        self.k, self.m, self.think_fn, self._extra = k, m, think_fn, {}
         self.cases = stream.load_cases(data_dir, total)
         self.byid = {c["id"]: c for c in self.cases}
         self.large = stream.Meter(large_fn)
@@ -99,14 +116,38 @@ class StreamV4:
         return seeds + [e["text"] for e in reversed(near)]  # the nearest last
 
     def run_parser(self, case, cls):
+        """k programs (the first greedy); the cheap answer is the largest agreeing group's, if it has m votes or more.
+        Every sample is recorded (`samples`), so precision and coverage can be recomputed for any m."""
         t = time.perf_counter()
         try:
-            ans, prog, why = parse.parse(case, self.small_ask, self.examples(cls, case), cls)
+            got = parse.samples(case, self.small_ask, self.examples(cls, case), cls, self.k)
         finally:
-            self.small_calls += 1
+            self.small_calls += self.k
             self.small_seconds += time.perf_counter() - t
-        ans = stream_v3.strict(ans, case) if ans is not None else None
+        got = [(stream_v3.strict(a, case) if a is not None else None, p, w) for a, p, w in got]
+        voted, votes = parse.vote([a for a, _, _ in got], agree_form)
+        prog = next((p for a, p, _ in got if a is not None and voted is not None and agree_form(a, voted)), got[0][1])
+        why = got[0][2] if voted is None else "ok"
+        self._extra = {"samples": [{"answer": a, "program": p, "why": w} for a, p, w in got], "votes": votes,
+                       "voted": voted, "greedy": got[0][0], "seconds_parser": round(time.perf_counter() - t, 3)}
+        ans = voted if votes >= self.m else None
+        if voted is not None and ans is None:
+            why = f"votes {votes} of {self.k}"
         return ans, prog, why
+
+    def think_arm(self, case, cls, label):
+        """The comparison arm (not used for promotion): where the greedy program disagrees with the label or gave no
+        answer, the same prompt with Inkling thinking first, no practical cap."""
+        greedy = self._extra.get("greedy")
+        if not self.think_fn or not label or (greedy is not None and agree_form(greedy, label)):
+            return None
+        t = time.perf_counter()
+        text = parse.prompt(case, self.examples(cls, case), cls)
+        reply, usage = self.think_fn(text, list(table_of(case)), cls)
+        a, p, w = parse.evaluate(case, reply)
+        a = stream_v3.strict(a, case) if a is not None else None
+        return {"answer": a, "program": p, "why": w, "agreed": a is not None and agree_form(a, label),
+                "thinking_tokens": usage.get("thinking_tokens"), "seconds": round(time.perf_counter() - t, 3)}
 
     def observe(self, cls, case, ans, prog, label):
         c = self.cls_state(cls)
@@ -115,7 +156,7 @@ class StreamV4:
         if ans is None:
             c["abstain"] += 1
             return None
-        ok = stream_v3.agree(ans, label)
+        ok = agree_form(ans, label)
         c["n"] += 1
         c["agree"] += ok
         if ok:
@@ -138,7 +179,7 @@ class StreamV4:
                "audited": rung == "parser" and label is not None, "status_after": self.cls_state(cls)["status"],
                "large": stream.delta(large0, self.large.snap()),
                "small": {"calls": self.small_calls - small0[0], "seconds": round(self.small_seconds - small0[1], 3)},
-               "shape": coarse_shape(case), "route": route or {}}
+               "shape": coarse_shape(case), "route": route or {}, **self._extra}
         self.state["cases"].append(rec)
         self.done.add(case["id"])
         self.save()
@@ -158,6 +199,7 @@ class StreamV4:
             large0, small0 = self.large.snap(), (self.small_calls, self.small_seconds)
             label = r["answer"] if r["rung"] == "large" and r["answer"] else None
             ans, prog, why = self.run_parser(case, cls)
+            self._extra["think"] = self.think_arm(case, cls, label)  # before observe: the case is not yet an example
             ok = self.observe(cls, case, ans, prog, label)
             rec = self.record(case, "replay", r["chunk"], cls, "replay", label, ans, prog, why, label, ok, large0, small0)
             self.log(f"[replay] {len(self.done)} {case['id']} {cls} {self.cls_state(cls)['status']} "
@@ -211,13 +253,17 @@ def main():
     g.add_argument("--replay", metavar="E18_OUT")
     ap.add_argument("--parser-url", help="the parser's endpoint (default: the small model's)")
     ap.add_argument("--parser-model", help="its alias (default: the small model's)")
+    ap.add_argument("--k", type=int, default=1, help="programs sampled a case (the first greedy)")
+    ap.add_argument("--m", type=int, default=1, help="agreeing answers needed for a cheap answer")
+    ap.add_argument("--think-arm", action="store_true", help="replay only: the thinking-on comparison arm")
     ap.add_argument("--replay-n", type=int, default=REPLAY_N, help="development only: replay fewer cases")
     stream.add_model_flags(ap)
     a = ap.parse_args()
     large, _ = stream.build_models(a)
     purl, pmodel = a.parser_url or a.small_url, a.parser_model or a.small_model
-    small = lambda text, cols, cls: parse.ask(text, cols, cls, purl, pmodel)
-    s = StreamV4(a.data, a.out, large, small)
+    small = lambda text, cols, cls, temperature=0, seed=None: parse.ask(text, cols, cls, purl, pmodel, temperature, seed)
+    think = (lambda text, cols, cls: parse.ask_thinking(text, cols, cls, purl)) if a.think_arm else None
+    s = StreamV4(a.data, a.out, large, small, k=a.k, m=a.m, think_fn=think)
     t = time.time()
     try:
         s.replay(a.replay, a.replay_n) if a.replay else s.run_chunk(a.chunk)

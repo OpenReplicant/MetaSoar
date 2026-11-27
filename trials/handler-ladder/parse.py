@@ -6,17 +6,19 @@ agreed with the large model on the same class (`examples` argument).
 """
 from __future__ import annotations
 
-import json, os, sys, time, urllib.request
+import json, os, re, sys, time, urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import ops  # noqa: E402
 
 MAX_ROWS, MAX_CHARS, MAX_TOKENS = 40, 5000, 300
+ONE = re.compile(r"\s*(name|give|list|tell me|what is|who is|which is)\s+(a|an|one|any)\b", re.I)
 CLASS_OPS = {  # the ops a class (stream_v3.CLASSES, chosen by d1-2B) may use; `other` may use all
-    "count": ("count", "value"), "superlative": ("argmax", "argmin", "max", "min", "nth"), "ordinal": ("nth", "value"),
-    "comparison": ("argmax", "argmin", "value"), "neighbour": ("next", "previous"), "difference": ("difference",),
-    "sum": ("sum", "count"), "average": ("average",), "yes_no": ("exists",), "list": ("value",),
+    "count": ("count", "value", "consecutive"), "superlative": ("argmax", "argmin", "max", "min", "nth"),
+    "ordinal": ("nth", "value"), "comparison": ("compare", "argmax", "argmin", "value"),
+    "neighbour": ("next", "previous"), "difference": ("difference", "compare"),
+    "sum": ("sum", "count"), "average": ("average",), "yes_no": ("exists", "compare"), "list": ("value",),
     "filter": ("value", "argmax", "argmin"), "lookup": ("value", "nth"),
 }
 
@@ -29,6 +31,10 @@ GUIDE = """Turn the question into a program that a computer runs on the table. O
 - next, previous: the row after or before the row that items[0] names in "key"; answer its "column"
 - difference: the difference in "column" between the rows items[0] and items[1] name in "key"
 - exists: yes or no, whether any row meets "where"
+- compare: the "column" value of items[0] against items[1] (or against "than"), found by name in "key"; "direction" is
+  greater, less or equal; "answer_as" is yes_no, item (which of the items), or the question's pair of words:
+  more_less, above_below, higher_lower, before_after, longer_shorter, older_younger
+- consecutive: the longest run of adjacent rows that meet "where" (how many in a row, how many consecutive)
 "where" conditions compare a column's cells with a value ("=", "!=", ">", "<", ">=", "<=", "contains"); copy values
 exactly as they are written in the table. "items" are row names exactly as written in the "key" column."""
 
@@ -63,6 +69,18 @@ SEEDS = [  # (columns, two rows, question, program): made up, one or two per op
      "Did anyone from Sweden win a gold medal?",
      {"op": "exists", "column": "Name", "where": [{"column": "Country", "is": "=", "value": "Sweden"},
                                                   {"column": "Medal", "is": "=", "value": "Gold"}]}),
+    (["Peak", "Height (m)"], [["Ben Alder", "1,148"], ["Ben More", "1,174"]], "Is Ben Alder taller than Ben More?",
+     {"op": "compare", "column": "Height (m)", "key": "Peak", "items": ["Ben Alder", "Ben More"], "direction": "greater",
+      "answer_as": "yes_no"}),
+    (["Peak", "Height (m)"], [["Ben Alder", "1,148"], ["Ben More", "1,174"]], "Is Ben More above or below 1,150 m?",
+     {"op": "compare", "column": "Height (m)", "key": "Peak", "items": ["Ben More"], "than": "1150",
+      "answer_as": "above_below"}),
+    (["Year", "League", "Place"], [["2001", "Div 2", "1st"], ["2002", "Div 1", "4th"]],
+     "How many seasons in a row did they play in Div 1?",
+     {"op": "consecutive", "column": "Year", "where": [{"column": "League", "is": "=", "value": "Div 1"}]}),
+    (["Date", "Tournament", "Outcome"], [["March 2011", "Bern", "Winner"], ["May 2013", "Oslo", "Runner-up"]],
+     "How many tournaments took place after 2012?",
+     {"op": "count", "column": "Tournament", "where": [{"column": "Date", "is": ">", "value": "2012"}]}),
 ]
 
 
@@ -84,7 +102,8 @@ def example_text(cols, rows, question, prog):
     return f"Table:\n{t}\nQuestion: {question}\nProgram: {json.dumps(prog)}"
 
 
-NEEDS_ITEMS = {"comparison": 2, "difference": 2, "neighbour": 1}  # a class whose question names rows must name them
+NEEDS_ITEMS = {"neighbour": 1}  # a class whose question names rows must name them (comparison and difference may
+# compare an item with a value, so they need one item at least: see `schema`)  # a class whose question names rows must name them
 THINK = os.environ.get("PARSE_THINK") == "1"
 
 
@@ -100,10 +119,15 @@ def schema(cols, cls=None):
             "column": c, "is": {"enum": list(ops.CMPS)}, "value": {"type": "string", "maxLength": 80}},
             "required": ["column", "is", "value"]}},
         "key": c, "items": {"type": "array", "maxItems": 2, "items": {"type": "string", "maxLength": 80}},
-        "by": c, "n": {"type": "integer"}}, "required": ["op", "column"]}
+        "by": c, "n": {"type": "integer"}, "than": {"type": "string", "maxLength": 40},
+        "direction": {"enum": list(ops.DIRECTIONS)}, "answer_as": {"enum": list(ops.ANSWER_AS)}},
+        "required": ["op", "column"]}
     if cls in NEEDS_ITEMS:
         k = NEEDS_ITEMS[cls]
         out["properties"]["items"].update(minItems=k, maxItems=k)
+        out["required"] += ["key", "items"]
+    elif cls in ("comparison", "difference"):
+        out["properties"]["items"].update(minItems=1)
         out["required"] += ["key", "items"]
     if THINK:
         out["properties"] = {"thought": {"type": "string", "maxLength": 240}, **out["properties"]}
@@ -112,10 +136,15 @@ def schema(cols, cls=None):
 
 
 def guide(cls):
-    lines = GUIDE.split("\n")
-    ok = allowed(cls)
-    return "\n".join(l for l in lines if not l.startswith("- ") or any(l.startswith(f"- {o}") for o in ok)
-                     or any(f", {o}" in l.split(":")[0] for o in ok))
+    ok, out, keep = allowed(cls), [], True
+    for l in GUIDE.split("\n"):
+        if l.startswith("- "):
+            keep = any(l.startswith(f"- {o}") for o in ok) or any(f", {o}" in l.split(":")[0] for o in ok)
+        elif not l.startswith("  "):
+            keep = True
+        if keep:
+            out.append(l)
+    return "\n".join(out)
 
 
 def prompt(case, examples=None, cls=None):
@@ -137,45 +166,107 @@ def _post(url, path, body):
         return json.load(r)
 
 
-def ask_no_thinking(text, cols, cls=None, url="http://127.0.0.1:8081"):
+TEMPERATURE = 0.7  # the samples after the first (greedy) one
+
+
+def ask_no_thinking(text, cols, cls=None, url="http://127.0.0.1:8081", temperature=0, seed=None):
     """Inkling with its thinking closed before it starts: no request switch turns it off (the dev replay: 401 of 450
-    replies spent the budget thinking), so the prompt is the chat template's, then an empty thinking block."""
+    replies spent the budget thinking), so the prompt is the chat template's, then an empty thinking block. The
+    prompt is cached in the server's slot, so later samples of the same case pay only for their own tokens."""
     prompt = _post(url, "/apply-template", {"messages": [{"role": "user", "content": text}]})["prompt"] + EMPTY_THINKING
-    d = _post(url, "/completion", {"prompt": prompt, "n_predict": MAX_TOKENS, "temperature": 0,
-                                   "json_schema": schema(cols, cls)})
+    body = {"prompt": prompt, "n_predict": MAX_TOKENS, "temperature": temperature, "cache_prompt": True,
+            "json_schema": schema(cols, cls)}
+    if seed is not None:
+        body["seed"] = seed
+    d = _post(url, "/completion", body)
     return d.get("content") or "", {"prompt_tokens": d.get("tokens_evaluated"), "completion_tokens": d.get("tokens_predicted")}
 
 
-def ask(text, cols, cls=None, url="http://127.0.0.1:8082", model="fast"):
+THINK_OPEN = "<|message_model|><|content_thinking|>"
+THINK_CLOSE = "<|end_message|><|message_model|><|content_text|>"
+THINK_TOKENS = 12000  # no practical cap: the server's context is 16,384
+
+
+def ask_thinking(text, cols, cls=None, url="http://127.0.0.1:8081"):
+    """The comparison arm: Inkling thinks freely (no schema can apply while it thinks), then writes the program under
+    the schema after its own end of thinking."""
+    base = _post(url, "/apply-template", {"messages": [{"role": "user", "content": text}]})["prompt"] + THINK_OPEN
+    t = _post(url, "/completion", {"prompt": base, "n_predict": THINK_TOKENS, "temperature": 0, "cache_prompt": True,
+                                   "stop": ["<|end_message|>"]})
+    thought = t.get("content") or ""
+    d = _post(url, "/completion", {"prompt": base + thought + THINK_CLOSE, "n_predict": MAX_TOKENS, "temperature": 0,
+                                   "cache_prompt": True, "json_schema": schema(cols, cls)})
+    return d.get("content") or "", {"thinking_tokens": t.get("tokens_predicted"),
+                                    "prompt_tokens": d.get("tokens_evaluated"), "completion_tokens": d.get("tokens_predicted")}
+
+
+def ask(text, cols, cls=None, url="http://127.0.0.1:8082", model="fast", temperature=0, seed=None):
     if model == "slow":
-        return ask_no_thinking(text, cols, cls, url)
-    extra = {"chat_template_kwargs": {"enable_thinking": False}}
-    body = {"model": model, "messages": [{"role": "user", "content": text}], "max_tokens": MAX_TOKENS, "temperature": 0,
-            **extra,
+        return ask_no_thinking(text, cols, cls, url, temperature, seed)
+    body = {"model": model, "messages": [{"role": "user", "content": text}], "max_tokens": MAX_TOKENS,
+            "temperature": temperature, "chat_template_kwargs": {"enable_thinking": False},
             "response_format": {"type": "json_schema", "json_schema": {"schema": schema(cols, cls)}}}
-    req = urllib.request.Request(url.rstrip("/") + "/v1/chat/completions", data=json.dumps(body).encode(),
-                                 headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=300) as r:
-        d = json.load(r)
+    if seed is not None:
+        body["seed"] = seed
+    d = _post(url, "/v1/chat/completions", body)
     return d["choices"][0]["message"].get("content") or "", d.get("usage", {})
 
 
-def parse(case, ask_fn, examples=None, cls=None):
-    """-> (answer or None, program or None, why). ask_fn(text, cols, cls) -> (content, usage)."""
-    table = {k: [str(x) for x in v] for k, v in (case.get("table_for_pd") or {}).items()}
-    if not table:
-        return None, None, "no table"
-    text, _ = ask_fn(prompt(case, examples, cls), list(table), cls)
+def table_of(case):
+    return {k: [str(x) for x in v] for k, v in (case.get("table_for_pd") or {}).items()}
+
+
+def evaluate(case, text):
+    """A model's reply -> (answer or None, program or None, why)."""
+    table = table_of(case)
     try:
         prog = json.loads(text)
     except ValueError:
         return None, None, "bad json"
     try:
-        return ops.run(table, prog), prog, "ok"
+        ans = ops.run(table, prog)
+        if ONE.match(case["question"]) and ", " in ans:
+            ans = ans.split(", ")[0]  # "name one ...", "give an example of ..."
+        return ans, prog, "ok"
     except ops.Unsupported as e:
         return None, prog, f"unsupported: {e}"
     except Exception as e:  # a program the schema allowed but ops did not expect
         return None, prog, f"error: {type(e).__name__}: {e}"
+
+
+def parse(case, ask_fn, examples=None, cls=None):
+    """-> (answer or None, program or None, why). ask_fn(text, cols, cls) -> (content, usage)."""
+    table = table_of(case)
+    if not table:
+        return None, None, "no table"
+    text, _ = ask_fn(prompt(case, examples, cls), list(table), cls)
+    return evaluate(case, text)
+
+
+def samples(case, ask_fn, examples=None, cls=None, k=1):
+    """k programs for one case: the first greedy, the rest at TEMPERATURE with seeds 1..k-1 (the prompt cached).
+    ask_fn(text, cols, cls, temperature, seed) -> (content, usage). -> [(answer, program, why)]."""
+    table = table_of(case)
+    if not table:
+        return [(None, None, "no table")]
+    text = prompt(case, examples, cls)
+    out = []
+    for i in range(k):
+        reply, _ = ask_fn(text, list(table), cls, 0 if i == 0 else TEMPERATURE, None if i == 0 else i)
+        out.append(evaluate(case, reply))
+    return out
+
+
+def vote(answers, agree):
+    """-> (answer, votes): the largest group of agreeing answers (ties: the group holding the first answer)."""
+    best, n = None, 0
+    for a in answers:
+        if a is None:
+            continue
+        c = sum(1 for b in answers if b is not None and agree(a, b))
+        if c > n:
+            best, n = a, c
+    return best, n
 
 
 def pilot(n=100, data=os.path.join(HERE, "..", "data", "wtq-84dd647-problems")):
@@ -191,7 +282,7 @@ def pilot(n=100, data=os.path.join(HERE, "..", "data", "wtq-84dd647-problems")):
                                 stream_v3.CLASS_INSTRUCTIONS)
         best = max(p, key=p.get)
         cls = "other" if best == "none" or p[best] < 0.3 else list(stream_v3.CLASSES)[int(best[1:])]
-        ans, prog, w = parse(case, ask, cls=cls)
+        ans, prog, w = parse(case, lambda t, c, k: ask(t, c, k), cls=cls)
         ok = ans is not None and wtq.correct(ans, case)
         why[w.split(":")[0]] += 1
         out.append({"id": pid, "cls": cls, "q": case["question"], "answer": ans, "gold": case["answer"], "ok": ok, "why": w, "prog": prog})
