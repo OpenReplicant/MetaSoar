@@ -37,7 +37,7 @@ HF = {  # name: (repo, file, sha256) -- the files under ~/.lmstudio/models local
               "06507c7b42688469c4e7298b0a1e16deff06caf291cf0a5b278c308249c3e439"),
 }
 SERVERS = {  # name: (model, port, CUDA devices, flags)
-    "slow": ("inkling", 8081, "0,1", "--alias slow --jinja -ngl 999 -sm layer -ts 1,1 -c 16384 -ctk q4_0 -ctv q4_0 -fa on -t 4"),
+    "slow": ("inkling", 8081, "0,1", "--alias slow --jinja -sm layer -c 16384 -ctk q4_0 -ctv q4_0 -fa on -t 4"),
     "fast": ("lfm3", 8082, "0", "--alias fast --jinja -ngl 999 -c 32768 -fa on -ctk q8_0 -ctv q8_0 -t 2"),
     "d1": ("d1", 8083, "1", "--alias d1 -ngl 999 -c 16384 -b 8192 -ub 8192 -t 2"),
     "embed": ("embed", 8084, "0", "--alias embed --embedding --pooling last -ngl 999 -c 8192 -b 8192 -ub 8192 -t 2"),
@@ -91,6 +91,7 @@ def main():
     llama = "/kaggle/tmp/llama"  # inputs are mounted read-only, so copy before marking it executable
     shutil.copytree(built, llama, dirs_exist_ok=True)
     os.chmod(os.path.join(llama, "llama-server"), 0o755)
+    subprocess.run([os.path.join(llama, "llama-server"), "--list-devices"], env=dict(os.environ, LD_LIBRARY_PATH=llama))
     procs = []
     for s in JOB["servers"]:
         model, port, dev, flags = SERVERS[s]
