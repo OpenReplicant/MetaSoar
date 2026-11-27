@@ -36,9 +36,10 @@ HF = {  # name: (repo, file, sha256) -- the files under ~/.lmstudio/models local
     "embed": ("Qwen/Qwen3-Embedding-0.6B-GGUF", "Qwen3-Embedding-0.6B-Q8_0.gguf",
               "06507c7b42688469c4e7298b0a1e16deff06caf291cf0a5b278c308249c3e439"),
 }
-SERVERS = {  # name: (model, port, CUDA devices, flags)
-    "slow": ("inkling", 8081, "0,1", "--alias slow --jinja -sm layer -c 16384 -ctk q4_0 -ctv q4_0 -fa on -t 4"),
-    "fast": ("lfm3", 8082, "0", "--alias fast --jinja -ngl 999 -c 32768 -fa on -ctk q8_0 -ctv q8_0 -t 2"),
+SERVERS = {  # name: (model, port, CUDA devices, flags). Inkling first, placed by llama.cpp's fit with margins
+    # left for the others: about 4 GB on GPU 0 (LFM3, the embedder) and 3 GB on GPU 1 (d1-2B)
+    "slow": ("inkling", 8081, "0,1", "--alias slow --jinja -sm layer -fitt 4096,3072 -c 16384 -ctk q4_0 -ctv q4_0 -fa on -t 4"),
+    "fast": ("lfm3", 8082, "0", "--alias fast --jinja -ngl 999 -c 8192 -fa on -ctk q8_0 -ctv q8_0 -t 2"),
     "d1": ("d1", 8083, "1", "--alias d1 -ngl 999 -c 16384 -b 8192 -ub 8192 -t 2"),
     "embed": ("embed", 8084, "0", "--alias embed --embedding --pooling last -ngl 999 -c 8192 -b 8192 -ub 8192 -t 2"),
 }
