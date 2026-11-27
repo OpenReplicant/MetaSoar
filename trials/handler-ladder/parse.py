@@ -127,8 +127,29 @@ def prompt(case, examples=None, cls=None):
             f"\n\nTable:\n{show_table(case['table_for_pd'])}\nQuestion: {case['question']}\nProgram:")
 
 
+EMPTY_THINKING = "<|message_model|><|content_thinking|><|end_message|><|message_model|><|content_text|>"
+
+
+def _post(url, path, body):
+    req = urllib.request.Request(url.rstrip("/") + path, data=json.dumps(body).encode(),
+                                 headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=300) as r:
+        return json.load(r)
+
+
+def ask_no_thinking(text, cols, cls=None, url="http://127.0.0.1:8081"):
+    """Inkling with its thinking closed before it starts: no request switch turns it off (the dev replay: 401 of 450
+    replies spent the budget thinking), so the prompt is the chat template's, then an empty thinking block."""
+    prompt = _post(url, "/apply-template", {"messages": [{"role": "user", "content": text}]})["prompt"] + EMPTY_THINKING
+    d = _post(url, "/completion", {"prompt": prompt, "n_predict": MAX_TOKENS, "temperature": 0,
+                                   "json_schema": schema(cols, cls)})
+    return d.get("content") or "", {"prompt_tokens": d.get("tokens_evaluated"), "completion_tokens": d.get("tokens_predicted")}
+
+
 def ask(text, cols, cls=None, url="http://127.0.0.1:8082", model="fast"):
-    extra = {"reasoning_effort": "none"} if model == "slow" else {"chat_template_kwargs": {"enable_thinking": False}}
+    if model == "slow":
+        return ask_no_thinking(text, cols, cls, url)
+    extra = {"chat_template_kwargs": {"enable_thinking": False}}
     body = {"model": model, "messages": [{"role": "user", "content": text}], "max_tokens": MAX_TOKENS, "temperature": 0,
             **extra,
             "response_format": {"type": "json_schema", "json_schema": {"schema": schema(cols, cls)}}}
