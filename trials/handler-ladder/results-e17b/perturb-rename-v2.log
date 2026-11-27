@@ -1,0 +1,130 @@
+21432 rename ('compute_range_of_values', 'handler', '7', True)
+35321 rename skipped
+22264 rename skipped
+25704 rename ('compute_difference_between_counts', 'template', '1836', True)
+37214 rename skipped
+25051 rename ('compute_remaining_money', 'template', '0.97', True)
+13380 rename ('find_start_time', 'template', 'salsa dance class', True)
+8363 rename ('compute_difference_between_counts', 'template', '6', True)
+21989 rename skipped
+16741 rename skipped
+34178 rename skipped
+27236 rename skipped
+32649 rename skipped
+34521 rename skipped
+1857 rename ('compute_range_of_values', 'handler', '32', True)
+7505 rename skipped
+7145 rename skipped
+6257 rename skipped
+25427 rename ('compute_range_of_values', 'handler', '5', True)
+34232 rename ('find_start_time', 'large', 'Church Road', True)
+14537 rename skipped
+7465 rename skipped
+20150 rename skipped
+22188 rename skipped
+6749 rename ('compute_rate_of_change', 'handler', '1 Minutes per day', True)
+23441 rename ('compute_difference_between_counts', 'template', '318', True)
+35964 rename skipped
+19073 rename skipped
+20615 rename skipped
+31997 rename ('compute_mode', 'handler', '5', True)
+27261 rename skipped
+19374 rename skipped
+23728 rename ('compute_range_of_values', 'handler', '11', True)
+1117 rename skipped
+6202 rename skipped
+32143 rename skipped
+14458 rename skipped
+29538 rename skipped
+2754 rename skipped
+10189 rename skipped
+30919 rename ('compute_remaining_money', 'template', 'no', True)
+7488 rename skipped
+3669 rename skipped
+26156 rename ('compute_difference_between_counts', 'template', '486', True)
+34651 rename skipped
+3011 rename ('compute_mean', 'handler', '4', True)
+13492 rename skipped
+8293 rename skipped
+32960 rename skipped
+759 rename skipped
+28338 rename skipped
+15542 rename skipped
+35334 rename skipped
+13815 rename skipped
+4766 rename skipped
+33903 rename skipped
+34713 rename skipped
+16797 rename skipped
+7285 rename ('compute_total_count', 'handler', 'None', False)
+29535 rename skipped
+14033 rename ('compute_mean', 'handler', '74', True)
+6775 rename skipped
+16891 rename ('find_start_time_no', 'handler', 'medical research', False)
+30072 rename skipped
+18212 rename skipped
+34882 rename ('compute_remaining_money', 'template', 'yes', True)
+25673 rename skipped
+2274 rename skipped
+26621 rename ('find_start_time_no', 'handler', 'Sunday', True)
+11709 rename skipped
+17030 rename ('compute_total_cost', 'template', '36.18', True)
+6681 rename skipped
+15197 rename skipped
+13426 rename skipped
+5216 rename skipped
+19582 rename skipped
+25188 rename skipped
+5583 rename ('compute_total_cost', 'template', '14.80', True)
+21351 rename ('find_maximum_count', 'handler', 'Friday', True)
+15572 rename skipped
+25413 rename skipped
+36923 rename skipped
+21230 rename ('compute_range_of_values', 'handler', '8', True)
+38312 rename ('compute_difference_between_costs', 'handler', 'Watson and Partners', True)
+32341 rename ('compute_mean', 'handler', '64', True)
+1237 rename skipped
+20251 rename skipped
+30486 rename skipped
+17701 rename skipped
+20891 rename skipped
+35289 rename ('find_minimum_count', 'handler', 'July', True)
+11832 rename ('compute_total_money_raised', 'handler', '$0.14', True)
+30876 rename skipped
+37451 rename ('compute_difference_between_costs', 'handler', '5', True)
+3856 rename skipped
+6428 rename ('compute_total_cost', 'template', '2.80', True)
+7222 rename ('compute_range_of_values', 'handler', '9', True)
+2250 rename ('compute_total_cost', 'template', '1', True)
+19018 rename ('compute_difference_between_values', 'large', '$2', True)
+35296 rename skipped
+7361 rename skipped
+10146 rename ('find_start_time_no', 'handler', 'Saturday', True)
+36241 rename skipped
+1174 rename ('compute_mean', 'handler', '44', True)
+37708 rename skipped
+38283 rename ('compute_mean', 'handler', '6', True)
+32731 rename skipped
+4345 rename skipped
+7321 rename ('compute_mean', 'handler', '5', True)
+23229 rename skipped
+15381 rename skipped
+# E-17c: answer-preserving perturbations of E-17b's cheaper-rung cases
+
+| perturbation | variants | accuracy, original | accuracy, variant | paired difference [95% interval] | same intent | still template or handler | fallbacks |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| shuffle | 111 | 91.9% | 91.9% | +0.0 [-3.6, +3.6] | 96.4% | 95.5% | 2 |
+| rename | 37 | 94.6% | 94.6% | +0.0 [+0.0, +0.0] | 97.3% | 94.6% | 1 |
+| paraphrase | 72 | 94.4% | 94.4% | +0.0 [+0.0, +0.0] | 88.9% | 93.1% | 0 |
+
+Skipped (the perturbation did not apply, or a paraphrase lost a number or label): shuffle 0, rename 74, paraphrase 39
+
+## E-17c verdict line
+
+- refutation condition met (any perturbation's interval upper end below -3 points): NO
+
+## Wrong on a variant, right on the original
+
+- 37214 shuffle: compute_difference_between_counts -> compute_difference_between_counts by template, '5' (gold '8')
+- 6681 shuffle: compute_remaining_money -> compute_remaining_money by template, '1978.41' (gold '1,522.81')
+
