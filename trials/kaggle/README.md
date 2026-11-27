@@ -34,3 +34,19 @@ build and the same files as locally keeps results comparable and the code known.
 
     python3 -I trials/kaggle/job.py e17-smoke --commit $(git rev-parse HEAD) --servers slow,fast \
         --cmd "cd trials/handler-ladder && python3 -I -u smoke.py 20" --out trials/handler-ladder/results
+
+## First benchmark (2026-11-26, job `smoke20`, commit 09afe5f)
+
+`smoke.py 20` on dev1k, all four servers up (GPU memory 10.0 and 14.7 GB of 15.4).
+
+| | Kaggle 2x T4 | local, 8 GB (E-17 smoke) |
+| --- | --- | --- |
+| correct | 20/20 | 20/20 |
+| median s a case | 10.2 | 12.6 |
+| mean s a case | 12.0 | 15.8 |
+| generation | 15.8 tok/s | 11.6 tok/s |
+
+Same answer strings on 18 of 20. Setup takes about 5.5 minutes a job: fetching and checking the models 208 s
+(Inkling, in parallel with the others), loading Inkling 81 s. So Kaggle is about 1.3 times local at its best and
+about 4 to 6 times local under the RAM pressure of E-17d (40 to 90 s a case). Not yet tried: the draft model in
+Inkling's repo (`dspark-Inkling-2-Mini-Q8_0.gguf`) for speculative decoding.
