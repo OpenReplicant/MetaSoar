@@ -2,3 +2,4 @@
 __pycache__/
 *.pyc
 morphogen.local.yaml
+trials/kaggle/runs/
