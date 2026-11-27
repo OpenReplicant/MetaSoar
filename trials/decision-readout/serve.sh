@@ -52,6 +52,15 @@ ladder)
   docker run -d --name e04a-fast $SAFE $GPU -v $M/LFM3-1.7B-Uncensored-GGUF:/models:ro -p 127.0.0.1:8082:8080 \
     --entrypoint /app/llama-server $IMG -m /models/LFM3-1.7B-Uncensored-AD-Q6_K.gguf --host 0.0.0.0 --port 8080 \
     --alias fast --jinja -ngl 999 -nkvo -t 4 -c 8192 ;;
+elabcpu)
+  # E-17d's intent elaborator beside `ladder` (the GPU is full): d1-2B (:8083) and Qwen3-Embedding-0.6B (:8084), on
+  # the CPU, no GPU devices
+  docker run -d --name e04a-d1 $SAFE -v /home/pete/.lmstudio/models/LiquidAI:/models:ro -p 127.0.0.1:8083:8080 \
+    --entrypoint /app/llama-server $IMG -m /models/d1-2B-GGUF/d1-2B-Q8_0.gguf --host 0.0.0.0 --port 8080 --alias d1 \
+    -ngl 0 -t 4 -c 8192 -b 4096 -ub 4096
+  docker run -d --name e04a-embed $SAFE -v /home/pete/.lmstudio/models/Qwen/Qwen3-Embedding-0.6B-GGUF:/models:ro \
+    -p 127.0.0.1:8084:8080 --entrypoint /app/llama-server $IMG -m /models/Qwen3-Embedding-0.6B-Q8_0.gguf \
+    --host 0.0.0.0 --port 8080 --alias embed --embedding --pooling last -ngl 0 -t 2 -c 4096 -b 4096 -ub 4096 ;;
 stop)
-  docker rm -f e04a-fast e04a-slow e04a-d1 2>/dev/null || true ;;
+  docker rm -f e04a-fast e04a-slow e04a-d1 e04a-embed 2>/dev/null || true ;;
 esac
