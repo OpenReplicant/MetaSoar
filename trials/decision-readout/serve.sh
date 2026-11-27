@@ -2,11 +2,13 @@
 # Start one llama.cpp server for E-04a, on localhost only, with Substrate's pinned image and model files (S-169).
 #   serve.sh fast   LFM3 1.7B Q6_K wholly on the GPU, :8082
 #   serve.sh slow   Inkling 2 Mini Q4_K, attention on the GPU and the experts of loop layers 6-12 on the GPU, :8081
+#   serve.sh embed  Qwen3-Embedding-0.6B Q8_0 (Apache-2.0), last-token pooling, :8084 (E-04c)
 #   serve.sh slow8  as slow, with loop layer 13's experts on the GPU as well (layers 6-13), :8081
 #   serve.sh fastcpu  LFM3 1.7B Q6_K on the CPU only, :8082 (beside slow or slow8 on the GPU; E-17)
 #   serve.sh ladder   E-17's pair: Inkling with loop layers 6-11 on the GPU (:8081) and LFM3 on the GPU with its KV
 #                     cache in RAM (:8082); 13.6 tok/s and 0.4 s an intent call, against 14.5 and 3.0 s with LFM3 on the CPU
-#   serve.sh stop   stop both
+#   serve.sh elabcpu  d1-2B (:8083) and the embedder (:8084) on the CPU, beside ladder (E-17d)
+#   serve.sh stop   stop all
 set -eu
 IMG=ghcr.io/ggml-org/llama.cpp:server-cuda12-b12627
 L=/usr/lib/x86_64-linux-gnu
@@ -34,6 +36,11 @@ d1)
   docker run -d --name e04a-d1 $SAFE $GPU -v /home/pete/.lmstudio/models/LiquidAI:/models:ro -p 127.0.0.1:8083:8080 \
     --entrypoint /app/llama-server $IMG -m "/models/$2" --host 0.0.0.0 --port 8080 --alias d1 \
     -ngl 999 -t 2 -c 16384 -b 8192 -ub 8192 ;;
+embed)
+  # Qwen's official GGUF, revision 370f27d; Qwen3-Embedding pools the last token.
+  docker run -d --name e04a-embed $SAFE $GPU -v /home/pete/.lmstudio/models/Qwen/Qwen3-Embedding-0.6B-GGUF:/models:ro \
+    -p 127.0.0.1:8084:8080 --entrypoint /app/llama-server $IMG -m /models/Qwen3-Embedding-0.6B-Q8_0.gguf \
+    --host 0.0.0.0 --port 8080 --alias embed --embedding --pooling last -ngl 999 -t 2 -c 8192 -b 8192 -ub 8192 ;;
 slow8)
   docker run -d --name e04a-slow $SAFE $GPU -v $M/Inkling-2-Mini-Uncensored-GGUF:/models:ro -p 127.0.0.1:8081:8080 \
     --entrypoint /app/llama-server $IMG -m /models/Inkling-2-Mini-Uncensored-AD-Q4_K.gguf --host 0.0.0.0 --port 8080 \

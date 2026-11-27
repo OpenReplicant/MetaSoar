@@ -155,3 +155,63 @@ On the same 779 held-out cases as Inkling's sample:
   - d1-2B is the fast, calibrated, stable one, good where the answer is in the text.
   - That suggests a cascade: d1-2B first, and Inkling when d1-2B is unsure or the question needs knowledge. This
     is the decision-gate study's rule: a cheap first stage that is confident where it is right.
+
+**The cascade: d1-2B first, Inkling when unsure** (`cascade.py`, `results/summary-cascade.md`). Offline, on the
+1,400 cases both models read; choices on `fit`, measured on `eval` (779 cases). Both models are read debiased, so
+a decision costs two reads of each model it reaches; cost is the measured time of those reads.
+
+| Policy | Accuracy | Sent to Inkling | Mean s per decision |
+| --- | --- | --- | --- |
+| d1-2B alone | 0.633 | 0% | 0.30 |
+| Inkling alone | 0.810 | 100% | 9.42 |
+| Escalate below d1-2B's confidence t (t chosen on `fit`) | 0.769 | 38% | 3.44 |
+| Knowledge slices straight to Inkling, d1-2B elsewhere | 0.810 | 58% | 7.16 |
+| Escalate exactly where d1-2B is wrong (oracle) | 0.865 | 37% | 4.53 |
+
+- **A threshold trades accuracy for cost:** a third of Inkling's time for 4 points less (-4.1 [-6.6, -1.6]).
+- **The models' errors differ:** d1-2B is better than Inkling on Aegis (0.82 against 0.75, and 0.83 against 0.67
+  on responses), so the oracle passes Jev's 0.843. d1-2B's confidence finds only part of that gap.
+
+**E-04b: a learned front** (`learned_front.py`, `results/summary-front.md`). A logistic model predicts "d1-2B is
+wrong" from what is known before escalating (its probabilities in both orders, margin, entropy, order flip,
+number of options, prompt length; and, in a second front, the question's type). Trained on `fit` of all 6,516
+cases d1-2B read.
+- **Falsifier met:** the fronts are no better than d1-2B's own confidence. AUROC for its errors is 0.817 for all
+  three; the cascade's accuracy at 30%, 40% and 50% sent differs by at most half a point, every interval across 0.
+- **Why:** d1-2B is calibrated, so its confidence already says how likely it is to be wrong; more features of its
+  own output add nothing (entropy carries the weight, the order features are near zero since it rarely flips).
+- **What does help (exploratory, not registered):** ranking by what escalation gains, P(Inkling right | type) on
+  `fit` minus d1-2B's confidence, not by what d1-2B gets wrong. Escalating where that is positive sends 63% to
+  Inkling and beats Inkling alone: 0.828, +1.8 [+0.3, +3.4]. At 60% sent it beats the confidence by +1.7
+  [+0.8, +2.8].
+- **Reading:** a gate should model the gain, so it needs the second stage's record, not only the first stage's
+  output. Information the first stage does not have (the question's type here; embeddings or nearest cases next)
+  is where a learned gate can add anything. Caveat: the type is the benchmark's slice; in use it would be the
+  kind of question asked, which a typed question has.
+
+**E-04c: a tabular foundation model as the gate** (`embed.py`, `front_tab.py`, `results/summary-tab.md`). The
+gate ranks by P(Inkling right) - P(d1-2B right), each from a model fitted on the 621 `fit` cases both read.
+- **Learners:** logistic regression (scikit-learn), and TabICL 2.2.0 (BSD-3; checkpoint
+  `tabicl-classifier-v2-20260212`), in-context, untuned, on the CPU.
+- **Features:** E-04b's plus the question's type; then, as well, 32 principal components of an embedding of the
+  question (Qwen3-Embedding-0.6B Q8_0, Apache-2.0, Qwen's own GGUF at `370f27d`; `serve.sh embed`; 3.5 minutes for
+  1,400 questions on the GTX 1070).
+- **Environment:** numpy, scikit-learn and tabicl are not in the system Python; a `uv venv` with them, torch for
+  the CPU. TabICL's checkpoint downloads from Hugging Face on first use.
+
+| Gate | Features | 60% sent | Where expected gain > 0: sent, accuracy, against Inkling alone [95% CI] |
+| --- | --- | --- | --- |
+| logistic | outputs + type | 0.818 | 64%, 0.823, +1.3 [-0.3, +3.0] |
+| TabICL | outputs + type | 0.810 | 82%, 0.823, +1.3 [0.0, +2.7] |
+| logistic | + embedding | 0.815 | 66%, 0.813, +0.3 [-1.7, +2.0] |
+| TabICL | + embedding | 0.816 | 66%, 0.820, +1.0 [-0.7, +2.6] |
+| Inkling's record by type (E-04b) | type | 0.827 | 63%, 0.828, +1.8 [+0.3, +3.4] |
+
+- **Falsifier met:** TabICL is not above logistic regression on the same features at any rate (every interval
+  crosses 0; on outputs and type it is 0.8 to 1.3 points lower).
+- **The embedding adds nothing** for either learner, and costs the logistic gate a point.
+- **The best gate is the simplest:** Inkling's `fit` record per question type, minus d1-2B's confidence.
+- **Reading:** with 621 labelled cases, what predicts the gain is the kind of question and d1-2B's confidence. A
+  richer learner or a richer description of the question fits noise. The embedding mostly restates the type,
+  which is one-hot already. Whether finer signals pay needs far more cases with both outcomes, which is what an
+  online gate collects (E-04d).
