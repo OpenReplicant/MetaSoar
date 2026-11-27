@@ -59,3 +59,14 @@ counts, so a CPU small model shows up as small-model seconds). The small model m
 - **Serving:** `serve.sh ladder`. Inkling has loop layers 6-11 on the GPU, and LFM3 is on the GPU with its KV cache
   in RAM. Inkling runs at 13.6 tok/s, against 14.5 with 8 layers, and an intent call takes 0.41 s, against 3.0 s
   with LFM3 on the CPU.
+
+# E-18 preparation: WikiTableQuestions (draft in `e18-draft.md`, nothing run)
+
+```
+python3 -I wtq.py fetch ../data/wtq-84dd647                                   # pinned release, checksum-checked, not in the repository
+python3 -I wtq.py build ../data/wtq-84dd647 ../data/wtq-84dd647-problems      # problems_test1k.json, dev1k, test
+python3 -I wtq_recurrence.py ../data/wtq-84dd647-problems                     # writes results/wtq-recurrence.md (no model)
+```
+WTQ v1.0.2, commit `84dd647e7a2b47661e990c490d63b49d0b84c42a`, CC BY-SA 4.0 (its `LICENSE`). `wtq.correct` is the
+official scorer ported to Python 3. The runner takes the problems file through `stream.load_cases(dir)`; gold
+(`answer`, `answer_canon`, `answer_type`, `table_id`) is outside `PROBLEM_FIELDS`.
