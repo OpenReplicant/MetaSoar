@@ -79,6 +79,96 @@ usage, so the money is not spent, but the calls count against the limit).
   project work across repositories. Use the result as one signal, not as a verdict on PM-1.
 - **Prompt sensitivity.** One prompt, one wording of "delegate". No prompt variants were run.
 
+## MS-Eval's own harness: read, not run (2026-11-27)
+
+The owner asked for MS-Eval's Docker harness to be run on Haiku, to compare observed delegation with the
+stated decisions above. It was read in full (pinned commit, plus its two submodules at the pinned
+revisions: `Danield21/toolathlon_gym` 872ebef, `Danield21/kimi-code` 4aabe61) and **not run**. Observed
+Haiku numbers are therefore absent.
+
+### How the harness works
+
+- **Agent framework: Kimi-Code**, not Claude Code (`kimi_harness/kimi_main.py`). One Docker image holds the MCP
+  servers and Kimi-Code; a second holds PostgreSQL with the task data. Each task gets a fresh container and database.
+- **It needs a model API endpoint** (`API_BASE_URL`, `API_KEY`, `API_FORMAT` = `anthropic` or `openai`). The
+  `claude-sonnet-5` preset speaks the Anthropic Messages API through a local gateway. There is no Claude Code
+  mode and no subscription-login path.
+- **Tools the main agent gets:** only the task's MCP tools, `TodoList`, and (in the delegation arms) `Agent` and
+  `AgentSwarm`. Kimi's built-ins (Bash, Read, Write, Edit, Glob, Grep, WebFetch, Browser) are disallowed. The
+  agent must finish by calling `claim_done`. Limits in the Sonnet preset: 100 steps, 7,200 s a task.
+- **Rosters:** `spec` (the paper's headline arm, "auto-spec"): `plan` plus six domain specialists, each with a
+  fixed tool ceiling; `gen`: `coder`, `explore`, `plan`; `sa`: no sub-agents (baseline).
+- **Delegation detection:** read from the recorded trace (`raw_stream.jsonl`). A task counts as delegated if the
+  main agent launched at least one non-planning sub-agent through `Agent` or `AgentSwarm`; `plan`-only launches
+  are excluded (`eval/delegation_appropriateness/evaluate.py`). UDR and ODR need no reviewer model; the LLM
+  reviewer (DeepSeek by default) is used only for the hit scores.
+- **Scoring:** UDR = need-tasks with no delegation / 89; ODR = no-need tasks that delegated / 77. Labels come
+  from the golden Delegation Priors, the same split used in this trial.
+
+### Does the tool design steer toward or away from delegation?
+
+Mostly toward delegation, with the main agent's own tools made narrow, and with a few brakes.
+
+- **Toward:** (1) with Bash, file and web tools removed, the main agent has no way to read or write a file, run
+  Python, or fetch a page except through MCP tools; in the spec roster the specialists are the ones with the
+  office-document and workflow tools, so "use the matching specialist" is the natural path. (2) The system prompt names
+  seven sub-agent types, each with a domain description, and gives seven worked examples, six of which end
+  in a launch ("I will launch an `enterprise-data-analyst` agent ..."). Only the first example launches `plan` first.
+  (3) Rules say "delegate when a subtask is independent and would otherwise bloat your own context", "when a
+  domain specialist matches ... delegate to the narrowest matching profile", and describe parallel launches in detail.
+  (4) Every task here is an MCP-heavy office workflow, so a specialist usually matches.
+- **Away:** the prompt also says "Delegate only when a subtask requires more than one reasoning step or more than
+  one serial tool call, and enables an independently verifiable deliverable", "handle single-step work directly",
+  and "when no specialist matches, do the work yourself". Sub-agents are self-contained, so the main agent has to
+  write a full brief, which costs steps. Sub-agent prompts and the `claim_done` rule (only the main agent may end the
+  task) keep the main agent in the loop.
+- **Net (a reading of the prompt, not a measurement):** the `spec` roster plus examples biases a model toward
+  launching, so a model that follows the examples closely may over-delegate on short tasks that merely touch
+  several named systems. The static prompt in this trial, which offers the choice in one
+  sentence with no examples, does not carry that pull.
+
+### Why it was not run
+
+Running it on the subscription means writing an Anthropic-Messages-compatible adapter that answers each Kimi-Code
+turn with a `claude -p --model haiku` call and emulates tool calls in text. That is possible in principle and it is not
+a small adapter, but the cost decides it:
+
+- From the paper's published Sonnet 5 run on these same 40 tasks (`input_summary.csv`): 2,125 agent steps (mean 53
+  a task), 311 M input tokens (mostly cache reads), 9.8 M output tokens, 20 to 70 minutes a task.
+- A text adapter cannot use the native prompt cache across steps. Each of about 2,000 sequential calls would resend a
+  context that grows to 100 k tokens or more, so the shared Claude subscription would be asked for hundreds of
+  millions of input tokens (against 0.2 M for the 40 stated-decision calls). That would drain the owner's shared limit
+  and would stop at the first rate-limit error long before 40 tasks finished.
+- Besides the model, the run needs a 40 GB image build, 16 GB RAM, a PostgreSQL container per task, and live
+  access to the external MCP services some tasks use (arXiv, Yahoo Finance, YouTube, rail data), so a Haiku run would
+  also differ from the paper's in the environment.
+- Emulated tool calling changes how the model behaves, so delegation measured through it would not be Haiku
+  in Kimi-Code with native tool use, which is what the paper measured for Sonnet.
+
+Nothing was built or started: no container, image or `claude` call was made for this part, and no API key was used.
+
+### What can be said from published data instead
+
+MS-Eval published Sonnet 5's per-task observed delegation (`eval/eval_results/claude-sonnet-5/auto-spec/task_metrics.csv`,
+sha256 `0effb0ed66fdb27f63703b5de5ed6e554ed3b57f655dc2a8fce72f4bb35fd41f`, saved under `data/published/`). On the
+trial's 40 tasks (`compare_sonnet.py`, output `results/stated_vs_sonnet.json`):
+
+| | under-delegation (need tasks, n = 20) | over-delegation (direct tasks, n = 20) |
+| --- | --- | --- |
+| Haiku 5.5, stated decision (this trial) | 65% (13/20), Wilson [43%, 82%] | 10% (2/20), [3%, 30%] |
+| Haiku 5.5, observed in the harness | not run | not run |
+| Sonnet 5, observed, same 40 tasks (paper's run) | 30% (6/20), [15%, 52%] | 40% (8/20), [22%, 61%] |
+| Sonnet 5, observed, all tasks (paper) | 39.3% (of 89) | 29.8% (of 77) |
+
+Haiku's stated and Sonnet's observed decisions agree on 19 of 40 tasks and differ on 21. In 17 of the 21
+Sonnet launched sub-agents and Haiku said it would not: 10 need-tasks (mostly multi-system `terminal-*`, `canvas-course-*`,
+`yf-sector-outlook-report`, `ecommerce-commodity-impact`) and 7 direct tasks (`yf-*`, `yt-*`, `wc-category-performance-ppt`
+and others). In the other 4 Haiku said delegate and Sonnet did not: `arxiv-research-pipeline-notion-excel`,
+`canvas-late-submission-gcal`, `supplier-contract-compliance-audit` (need-tasks) and `howtocook-diet-gform-notion-excel`
+(direct). The full list is in `results/stated_vs_sonnet.json`. Different models, so this is not a Haiku-observed diff, and 20 items a side leaves wide intervals. It is
+consistent with the prompt pull described above: on direct tasks Sonnet launched sub-agents in 40% of cases against
+Haiku's stated 10%, and on need-tasks it skipped delegation less often than Haiku said it would (30% against 65%).
+
 ## How to add arms
 
 - **Sonnet 5.5 (the design's comparison arm):** `run_eval.py` with `--model sonnet` in place of the
@@ -88,12 +178,13 @@ usage, so the money is not spent, but the calls count against the limit).
   and write its replies to `results/results-<arm>.jsonl`. Serve them as in `docs/experiments.md` (E-04a).
 - **d1-2B (routing choices):** the same caller, with `{"delegate": ...}` replaced by the routing question
   from PM-1's `F` arm.
-- **Full-run version:** the paper's harness (`LINs-lab/MS-Eval`, `spec/run.sh`) with the arm's model in
-  `config.env`. Needs Docker and a reviewer model key; not attempted here.
+- **Full-run version:** the paper's harness (`LINs-lab/MS-Eval`, `toolathlon_gym/run_sh_eval/<model>/spec/run.sh`) with
+  the arm's model in `config.env`. Needs an API endpoint; see the section above for why it was not run on the subscription.
 
 ## Files
 
 - `fetch_msEval.py`: fetch and verify the pinned files.
 - `manifest.json`: sha256 of each file read.
 - `run_eval.py`: `prepare`, `run` (resumable), `score`.
-- `results/subset.json`, `results/results.jsonl`, `results/summary.json`.
+- `compare_sonnet.py`: stated Haiku decisions against the paper's observed Sonnet 5 delegation.
+- `results/subset.json`, `results/results.jsonl`, `results/summary.json`, `results/stated_vs_sonnet.json`.
