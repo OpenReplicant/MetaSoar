@@ -1,0 +1,48 @@
+{
+ "model": "claude-haiku-5-5 (claude -p --model haiku)",
+ "n_items": 40,
+ "n_need": 20,
+ "n_direct": 20,
+ "UDR": {
+  "k": 13,
+  "n": 20,
+  "rate": 0.65,
+  "wilson95": [
+   0.4329,
+   0.8188
+  ]
+ },
+ "ODR": {
+  "k": 2,
+  "n": 20,
+  "rate": 0.1,
+  "wilson95": [
+   0.0279,
+   0.301
+  ]
+ },
+ "hit_accuracy": {
+  "k": 25,
+  "n": 40,
+  "rate": 0.625
+ },
+ "unparsed": 0,
+ "rate_limited": false,
+ "tokens": {
+  "input": 80,
+  "cache_creation": 75006,
+  "cache_read": 123063,
+  "output": 7708
+ },
+ "total_cost_usd": 0.020094,
+ "wall_s": {
+  "median": 2.05,
+  "max": 4.05
+ },
+ "published_sonnet5_msEval": {
+  "UDR": "39.3% (on 89 need-subagent tasks)",
+  "ODR": "29.8%",
+  "hit_F1": "31.4%",
+  "conditions": "full agent runs in Kimi-Code, 166 tasks, live local MCP/database environment, adaptive effort, runs not stated"
+ }
+}

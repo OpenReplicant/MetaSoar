@@ -1,0 +1,171 @@
+{
+ "haiku_stated": {
+  "UDR": [
+   13,
+   20,
+   0.65,
+   [
+    0.433,
+    0.819
+   ]
+  ],
+  "ODR": [
+   2,
+   20,
+   0.1,
+   [
+    0.028,
+    0.301
+   ]
+  ]
+ },
+ "sonnet_observed_on_subset": {
+  "UDR": [
+   6,
+   20,
+   0.3,
+   [
+    0.145,
+    0.519
+   ]
+  ],
+  "ODR": [
+   8,
+   20,
+   0.4,
+   [
+    0.219,
+    0.613
+   ]
+  ]
+ },
+ "flips": [
+  {
+   "id": "arxiv-research-pipeline-notion-excel",
+   "need": true,
+   "haiku_stated": true,
+   "sonnet_observed": false
+  },
+  {
+   "id": "canvas-course-comparison",
+   "need": true,
+   "haiku_stated": false,
+   "sonnet_observed": true
+  },
+  {
+   "id": "canvas-course-comparison-word",
+   "need": true,
+   "haiku_stated": false,
+   "sonnet_observed": true
+  },
+  {
+   "id": "canvas-course-feedback",
+   "need": true,
+   "haiku_stated": false,
+   "sonnet_observed": true
+  },
+  {
+   "id": "canvas-course-notion-wiki",
+   "need": true,
+   "haiku_stated": false,
+   "sonnet_observed": true
+  },
+  {
+   "id": "canvas-late-submission-gcal",
+   "need": true,
+   "haiku_stated": true,
+   "sonnet_observed": false
+  },
+  {
+   "id": "canvas-ta-workload-excel-email",
+   "need": true,
+   "haiku_stated": false,
+   "sonnet_observed": true
+  },
+  {
+   "id": "ecommerce-commodity-impact",
+   "need": true,
+   "haiku_stated": false,
+   "sonnet_observed": true
+  },
+  {
+   "id": "supplier-contract-compliance-audit",
+   "need": true,
+   "haiku_stated": true,
+   "sonnet_observed": false
+  },
+  {
+   "id": "terminal-sf-wc-yf-excel-ppt",
+   "need": true,
+   "haiku_stated": false,
+   "sonnet_observed": true
+  },
+  {
+   "id": "terminal-yf-canvas-excel-gcal-email",
+   "need": true,
+   "haiku_stated": false,
+   "sonnet_observed": true
+  },
+  {
+   "id": "terminal-yf-wc-excel-word-notion",
+   "need": true,
+   "haiku_stated": false,
+   "sonnet_observed": true
+  },
+  {
+   "id": "yf-sector-outlook-report",
+   "need": true,
+   "haiku_stated": false,
+   "sonnet_observed": true
+  },
+  {
+   "id": "howtocook-diet-gform-notion-excel",
+   "need": false,
+   "haiku_stated": true,
+   "sonnet_observed": false
+  },
+  {
+   "id": "terminal-sf-scholarly-excel-ppt-gcal",
+   "need": false,
+   "haiku_stated": false,
+   "sonnet_observed": true
+  },
+  {
+   "id": "wc-category-performance-ppt",
+   "need": false,
+   "haiku_stated": false,
+   "sonnet_observed": true
+  },
+  {
+   "id": "yf-financial-health-excel-notion",
+   "need": false,
+   "haiku_stated": false,
+   "sonnet_observed": true
+  },
+  {
+   "id": "yf-portfolio-gsheet-pdf-gcal-email",
+   "need": false,
+   "haiku_stated": false,
+   "sonnet_observed": true
+  },
+  {
+   "id": "yf-sector-rotation-dashboard",
+   "need": false,
+   "haiku_stated": false,
+   "sonnet_observed": true
+  },
+  {
+   "id": "yt-fireship-gform-survey-excel-gcal",
+   "need": false,
+   "haiku_stated": false,
+   "sonnet_observed": true
+  },
+  {
+   "id": "yt-ml-repos-github-notion-excel-email",
+   "need": false,
+   "haiku_stated": false,
+   "sonnet_observed": true
+  }
+ ],
+ "agree": 19
+}
