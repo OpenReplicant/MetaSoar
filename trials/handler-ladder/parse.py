@@ -159,10 +159,10 @@ def prompt(case, examples=None, cls=None):
 EMPTY_THINKING = "<|message_model|><|content_thinking|><|end_message|><|message_model|><|content_text|>"
 
 
-def _post(url, path, body):
+def _post(url, path, body, timeout=300):
     req = urllib.request.Request(url.rstrip("/") + path, data=json.dumps(body).encode(),
                                  headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=300) as r:
+    with urllib.request.urlopen(req, timeout=timeout) as r:
         return json.load(r)
 
 
@@ -192,7 +192,7 @@ def ask_thinking(text, cols, cls=None, url="http://127.0.0.1:8081"):
     the schema after its own end of thinking."""
     base = _post(url, "/apply-template", {"messages": [{"role": "user", "content": text}]})["prompt"] + THINK_OPEN
     t = _post(url, "/completion", {"prompt": base, "n_predict": THINK_TOKENS, "temperature": 0, "cache_prompt": True,
-                                   "stop": ["<|end_message|>"]})
+                                   "stop": ["<|end_message|>"]}, timeout=3600)  # ~4,400 tokens at 15 t/s on a T4
     thought = t.get("content") or ""
     d = _post(url, "/completion", {"prompt": base + thought + THINK_CLOSE, "n_predict": MAX_TOKENS, "temperature": 0,
                                    "cache_prompt": True, "json_schema": schema(cols, cls)})

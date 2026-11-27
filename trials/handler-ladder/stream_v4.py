@@ -68,8 +68,9 @@ def table_of(case):
 
 class StreamV4:
     def __init__(self, data_dir, out_dir, large_fn, small_ask, embed_fn=None, choose_fn=None, log=print, total=TOTAL,
-                 k=1, m=1, think_fn=None):
+                 k=1, m=1, think_fn=None, think_max=None):
         self.k, self.m, self.think_fn, self._extra = k, m, think_fn, {}
+        self.think_max, self.think_done = think_max, 0
         self.cases = stream.load_cases(data_dir, total)
         self.byid = {c["id"]: c for c in self.cases}
         self.large = stream.Meter(large_fn)
@@ -141,6 +142,9 @@ class StreamV4:
         greedy = self._extra.get("greedy")
         if not self.think_fn or not label or (greedy is not None and agree_form(greedy, label)):
             return None
+        if self.think_max is not None and (audited(case["id"]) is False or self.think_done >= self.think_max):
+            return None  # a sample: 1 qualifying case in AUDIT_EVERY (by hash), at most think_max (Kaggle's 12 hours)
+        self.think_done += 1
         t = time.perf_counter()
         text = parse.prompt(case, self.examples(cls, case), cls)
         reply, usage = self.think_fn(text, list(table_of(case)), cls)
@@ -256,6 +260,7 @@ def main():
     ap.add_argument("--k", type=int, default=1, help="programs sampled a case (the first greedy)")
     ap.add_argument("--m", type=int, default=1, help="agreeing answers needed for a cheap answer")
     ap.add_argument("--think-arm", action="store_true", help="replay only: the thinking-on comparison arm")
+    ap.add_argument("--think-max", type=int, help="the arm on a hash sample of qualifying cases, at most this many")
     ap.add_argument("--replay-n", type=int, default=REPLAY_N, help="development only: replay fewer cases")
     stream.add_model_flags(ap)
     a = ap.parse_args()
@@ -263,7 +268,7 @@ def main():
     purl, pmodel = a.parser_url or a.small_url, a.parser_model or a.small_model
     small = lambda text, cols, cls, temperature=0, seed=None: parse.ask(text, cols, cls, purl, pmodel, temperature, seed)
     think = (lambda text, cols, cls: parse.ask_thinking(text, cols, cls, purl)) if a.think_arm else None
-    s = StreamV4(a.data, a.out, large, small, k=a.k, m=a.m, think_fn=think)
+    s = StreamV4(a.data, a.out, large, small, k=a.k, m=a.m, think_fn=think, think_max=a.think_max)
     t = time.time()
     try:
         s.replay(a.replay, a.replay_n) if a.replay else s.run_chunk(a.chunk)
