@@ -87,7 +87,7 @@ between stages, not any matcher. The stages are Soar's decision cycle.
 
 | Kind | Soar's phase | In, out | Fillers |
 | --- | --- | --- | --- |
-| **elaborator** | elaboration | state in; features out, written to the blackboard | a regex, a parser, a check of a file or a service, an embedder, a small model that tags |
+| **elaborator** | elaboration | state in; features out, written to the blackboard | a regex, a parser, a check of a file or a service, an embedder, a small model that tags, an intent classifier (M-26: the intent is the feature most policies key on) |
 | **proposer** | proposal | features in; `(policy, score)` proposals out | rules over features, nearest cases, a classifier, a tabular model, a small model asked for probabilities |
 | **applier** | application | the chosen policy in; an effect out | `run`, `inject`, `route`, `veto` (below) |
 | **compiler** | chunking, offline | cases in; a new elaborator, proposer or applier out | an agent writes a script; a nearest-case index or a classifier is fitted; a few-shot prompt is distilled |

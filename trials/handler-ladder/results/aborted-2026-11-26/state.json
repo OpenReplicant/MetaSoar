@@ -1,0 +1,533 @@
+{
+ "cases": [
+  {
+   "id": "5509",
+   "chunk": 1,
+   "intent": "check_function_property_think_intent_che",
+   "new_intent": true,
+   "rung": "large",
+   "answer": "no",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 74,
+    "completion_tokens": 133,
+    "seconds": 17.592
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 91,
+    "completion_tokens": 14,
+    "seconds": 1.091
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "15761",
+   "chunk": 1,
+   "intent": "compute_rate_of_change",
+   "new_intent": true,
+   "rung": "large",
+   "answer": "-34 minutes per month",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 125,
+    "completion_tokens": 138,
+    "seconds": 11.509
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 126,
+    "completion_tokens": 19,
+    "seconds": 1.373
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "36200",
+   "chunk": 1,
+   "intent": "compute_rate_of_change",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "-2 shells per day",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 116,
+    "completion_tokens": 154,
+    "seconds": 12.296
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 127,
+    "completion_tokens": 58,
+    "seconds": 3.135
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "13679",
+   "chunk": 1,
+   "intent": "count_restaurant_rating_exact",
+   "new_intent": true,
+   "rung": "large",
+   "answer": "",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 100,
+    "completion_tokens": 700,
+    "seconds": 49.982
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 113,
+    "completion_tokens": 25,
+    "seconds": 1.588
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "29358",
+   "chunk": 1,
+   "intent": "count_bottles_collected_or_maybe_count_b",
+   "new_intent": true,
+   "rung": "large",
+   "answer": "Darren",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 108,
+    "completion_tokens": 119,
+    "seconds": 9.711
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 124,
+    "completion_tokens": 400,
+    "seconds": 18.812
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "29793",
+   "chunk": 1,
+   "intent": "count_exact_value_occurrences",
+   "new_intent": true,
+   "rung": "large",
+   "answer": "0",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 124,
+    "completion_tokens": 266,
+    "seconds": 20.045
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 141,
+    "completion_tokens": 400,
+    "seconds": 19.116
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "34433",
+   "chunk": 1,
+   "intent": "compute_rate_of_change",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "-34 kg/year",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 2,
+    "prompt_tokens": 584,
+    "completion_tokens": 1654,
+    "seconds": 126.494
+   },
+   "small": {
+    "calls": 4,
+    "prompt_tokens": 721,
+    "completion_tokens": 457,
+    "seconds": 23.64
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "21180",
+   "chunk": 1,
+   "intent": "compute_median_value",
+   "new_intent": true,
+   "rung": "large",
+   "answer": "67",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 104,
+    "completion_tokens": 118,
+    "seconds": 9.66
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 141,
+    "completion_tokens": 19,
+    "seconds": 1.42
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "4358",
+   "chunk": 1,
+   "intent": "compute_rate_of_change",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "$7",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 130,
+    "completion_tokens": 141,
+    "seconds": 11.466
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 403,
+    "completion_tokens": 442,
+    "seconds": 21.667
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "3690",
+   "chunk": 1,
+   "intent": "compute_difference_between_counts_think",
+   "new_intent": true,
+   "rung": "large",
+   "answer": "6 birds",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 124,
+    "completion_tokens": 138,
+    "seconds": 11.25
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 163,
+    "completion_tokens": 16,
+    "seconds": 1.292
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "31804",
+   "chunk": 1,
+   "intent": "compute_gross_income",
+   "new_intent": true,
+   "rung": "large",
+   "answer": "$40,851",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 151,
+    "completion_tokens": 225,
+    "seconds": 18.069
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 188,
+    "completion_tokens": 66,
+    "seconds": 3.699
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "10862",
+   "chunk": 1,
+   "intent": "compute_rate_of_change",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "6 kg/year",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 124,
+    "completion_tokens": 148,
+    "seconds": 11.97
+   },
+   "small": {
+    "calls": 2,
+    "prompt_tokens": 425,
+    "completion_tokens": 213,
+    "seconds": 11.447
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  },
+  {
+   "id": "21458",
+   "chunk": 1,
+   "intent": "compute_difference_between_counts_think",
+   "new_intent": false,
+   "rung": "large",
+   "answer": "34",
+   "fallback": false,
+   "fallback_from": null,
+   "shadow_label": false,
+   "large": {
+    "calls": 1,
+    "prompt_tokens": 106,
+    "completion_tokens": 89,
+    "seconds": 7.732
+   },
+   "small": {
+    "calls": 1,
+    "prompt_tokens": 179,
+    "completion_tokens": 23,
+    "seconds": 1.695
+   },
+   "policies": {
+    "handler": null,
+    "template": null
+   }
+  }
+ ],
+ "intents": {
+  "check_function_property_think_intent_che": {
+   "n": 1,
+   "labelled": [
+    {
+     "id": "5509",
+     "answer": "no",
+     "text": "The x-value 19 is paired with both 2 and 4, so one input has two outputs.\n\nAnswer: no"
+    }
+   ],
+   "candidates": {
+    "handler": null,
+    "template": null
+   }
+  },
+  "compute_rate_of_change": {
+   "n": 5,
+   "labelled": [
+    {
+     "id": "15761",
+     "answer": "-34 minutes per month",
+     "text": "Rate of change = (6 \u2212 40) / (1 month) = \u221234 minutes per month.\nAnswer: -34 minutes per month"
+    },
+    {
+     "id": "36200",
+     "answer": "-2 shells per day",
+     "text": "Rate of change = (0 \u2212 2) / (1 day) = \u22122 shells per day.\nAnswer: -2 shells per day"
+    },
+    {
+     "id": "34433",
+     "answer": "-34 kg/year",
+     "text": "Rate of change = (15 \u2212 49)/(2018 \u2212 2017) = \u221234 kg/year.\nAnswer: -34 kg/year"
+    },
+    {
+     "id": "4358",
+     "answer": "$7",
+     "text": "The table lists peas at $7 per cwt in 2004.\nAnswer: $7"
+    },
+    {
+     "id": "10862",
+     "answer": "6 kg/year",
+     "text": "Rate of change = (37 \u2212 31)/(2014 \u2212 2013) = 6/1 = 6 kg/year.\nAnswer: 6 kg/year"
+    }
+   ],
+   "candidates": {
+    "handler": {
+     "kind": "handler",
+     "version": 1,
+     "rewrites": 0,
+     "used": [
+      "15761",
+      "36200",
+      "34433"
+     ],
+     "n": 0,
+     "agree": 0,
+     "failures": [],
+     "fallbacks": 0,
+     "status": "discarded",
+     "code": null
+    },
+    "template": {
+     "kind": "template",
+     "version": 1,
+     "rewrites": 0,
+     "used": [
+      "15761"
+     ],
+     "n": 4,
+     "agree": 2,
+     "failures": [
+      {
+       "id": "34433",
+       "expected": "-34 kg/year",
+       "got": "-34"
+      },
+      {
+       "id": "10862",
+       "expected": "6 kg/year",
+       "got": "6"
+      }
+     ],
+     "fallbacks": 0,
+     "status": "shadow",
+     "text": "1. Identify the rate of change formula: (final value \u2212 initial value) divided by the time interval.  \n2. Substitute the given initial value (6), final value (40), and time interval (1 month) into the formula.  \n3. Perform the subtraction: 6 \u2212 40 = \u221234.  \n4. Divide the result by the time interval: \u221234 / 1 month = \u221234 minutes per month.  \n5. State the final answer as the rate of change: \u221234 minutes per month."
+    }
+   }
+  },
+  "count_restaurant_rating_exact": {
+   "n": 1,
+   "labelled": [
+    {
+     "id": "13679",
+     "answer": "",
+     "text": ""
+    }
+   ],
+   "candidates": {
+    "handler": null,
+    "template": null
+   }
+  },
+  "count_bottles_collected_or_maybe_count_b": {
+   "n": 1,
+   "labelled": [
+    {
+     "id": "29358",
+     "answer": "Darren",
+     "text": "Compare the numbers: Darren 747, Richard 749, Jayce 779, Sharon 798. The smallest is 747.\n\nAnswer: Darren"
+    }
+   ],
+   "candidates": {
+    "handler": null,
+    "template": null
+   }
+  },
+  "count_exact_value_occurrences": {
+   "n": 1,
+   "labelled": [
+    {
+     "id": "29793",
+     "answer": "0",
+     "text": "56 boxes would be stem 5 with leaf 6. The stem-5 row has leaves 0, 3, 9 only, so there are no 56-box shipments.\n\nAnswer: 0"
+    }
+   ],
+   "candidates": {
+    "handler": null,
+    "template": null
+   }
+  },
+  "compute_median_value": {
+   "n": 1,
+   "labelled": [
+    {
+     "id": "21180",
+     "answer": "67",
+     "text": "Sorted: 57, 60, 67, 76, 86. The middle value is 67.\nAnswer: 67"
+    }
+   ],
+   "candidates": {
+    "handler": null,
+    "template": null
+   }
+  },
+  "compute_difference_between_counts_think": {
+   "n": 2,
+   "labelled": [
+    {
+     "id": "3690",
+     "answer": "6 birds",
+     "text": "Mountain Park: 10 + 19 = 29 birds  \nSkyline Park: 6 + 17 = 23 birds  \nDifference: 29 \u2212 23 = 6 birds  \nAnswer: 6 birds"
+    },
+    {
+     "id": "21458",
+     "answer": "34",
+     "text": "Summer: 47, winter: 13. Difference: 47 \u2212 13 = 34.\nAnswer: 34"
+    }
+   ],
+   "candidates": {
+    "handler": null,
+    "template": null
+   }
+  },
+  "compute_gross_income": {
+   "n": 1,
+   "labelled": [
+    {
+     "id": "31804",
+     "answer": "$40,851",
+     "text": "Gross income = $19,760 + $21,091 = $40,851. Taxes are not subtracted for gross income.\nAnswer: $40,851"
+    }
+   ],
+   "candidates": {
+    "handler": null,
+    "template": null
+   }
+  }
+ }
+}
