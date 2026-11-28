@@ -1,0 +1,23 @@
+{
+ "about": "Round 4 (from r3: m1 and p4 35/43 each; 3-4 of each prompt's misses are 'no final answer in 10 turns' after repeated kernel_search: s23, s26, r05, s33, s17, s01). Same prompts with search_budget 2 and final_nudge: an environment change, no new wording. Round 1's p1env (same options) was 6/10 vs 7/10 on a small common set, so this is the full-43 test.",
+ "candidates": [
+  {
+   "id": "m1env",
+   "prompt": "prompts/m1.md",
+   "env": {
+    "search_budget": 2,
+    "final_nudge": true
+   },
+   "prefill": "auto"
+  },
+  {
+   "id": "p4env",
+   "prompt": "prompts/p4.md",
+   "env": {
+    "search_budget": 2,
+    "final_nudge": true
+   },
+   "prefill": "auto"
+  }
+ ]
+}

@@ -1,0 +1,23 @@
+{
+ "about": "Round 3 (after e836603: no tuned prompt shares a 3/4-gram with a scenario or a day; owner-only rule narrowed). Inkling: p1 (r2's best, 35/43 on the leaky version), p4, m1 (manager.md + owner-only; Haiku 39/43 as m1v2). Full 43 each, to see what the rewording cost. Still in-sample on PM-1a.",
+ "candidates": [
+  {
+   "id": "p1",
+   "prompt": "prompts/p1.md",
+   "env": {},
+   "prefill": "auto"
+  },
+  {
+   "id": "p4",
+   "prompt": "prompts/p4.md",
+   "env": {},
+   "prefill": "auto"
+  },
+  {
+   "id": "m1",
+   "prompt": "prompts/m1.md",
+   "env": {},
+   "prefill": "auto"
+  }
+ ]
+}

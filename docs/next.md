@@ -1,5 +1,7 @@
 # Where the work stands, and what is next (2026-11-19, evening)
 
+**Latest (2026-11-28): `docs/handoff-2026-11-28.md`**, a handoff to a cloud session, which supersedes the lists below.
+
 A handoff for the next session, local or in the cloud. Read `README.md`, `docs/spec.md` and `DECISIONS.md` first.
 
 **Since then (2026-11-24, M-19, M-20):** MetaSoar is the research layer. The improver on its impasses is an agent

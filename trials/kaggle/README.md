@@ -28,7 +28,11 @@ build and the same files as locally keeps results comparable and the code known.
   their state files, so chunks of one experiment can run in consecutive jobs if the state goes through git.
 - Notebooks are private (TabMWP's licence is non-commercial; nothing is published).
 - Inputs come only from git at a pushed commit, so every run can be traced to one.
-- The token stays in `~/.kaggle/`; nothing in the repo reads or copies it.
+- The token stays where the CLI finds it: `~/.kaggle/` on the owner's PC, or a cloud environment's secret
+  (`KAGGLE_API_TOKEN`, or `KAGGLE_USERNAME` with `KAGGLE_KEY`). Nothing in the repo reads or copies it, and it never goes
+  into a job, a log or a commit.
+- In a Claude Code cloud session, `scripts/cloud-setup.sh` (a SessionStart hook) installs the CLI. The environment's
+  network policy must allow `www.kaggle.com` and `storage.googleapis.com` (outputs download from there).
 
 ## Use
 
@@ -48,5 +52,9 @@ build and the same files as locally keeps results comparable and the code known.
 
 Same answer strings on 18 of 20. Setup takes about 5.5 minutes a job: fetching and checking the models 208 s
 (Inkling, in parallel with the others), loading Inkling 81 s. So Kaggle is about 1.3 times local at its best and
-about 4 to 6 times local under the RAM pressure of E-17d (40 to 90 s a case). Not yet tried: the draft model in
-Inkling's repo (`dspark-Inkling-2-Mini-Q8_0.gguf`) for speculative decoding.
+about 4 to 6 times local under the RAM pressure of E-17d (40 to 90 s a case).
+
+The DSpark drafter in Inkling's repo (`dspark-Inkling-2-Mini-Q8_0.gguf`, server `slow-dspark` in `run.py`) does not
+load on b12627 (job `dspark20`: `joint_proj.weight` has shape 5120 x 768, b12627 expects 2816 x 768); the model card
+says it needs llama.cpp PR #32218. Not pursued: the card measured +29% decode speed on an A100, and greedy outputs that
+differ from plain decoding, against a custom build to keep.

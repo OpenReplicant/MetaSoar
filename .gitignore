@@ -3,3 +3,5 @@ __pycache__/
 *.pyc
 morphogen.local.yaml
 trials/kaggle/runs/
+trials/manager-eval/data/
+.claude/worktrees/

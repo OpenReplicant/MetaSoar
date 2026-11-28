@@ -5,14 +5,17 @@
 
 The job runs `run.py` with JOB filled in, as a private notebook `mossmanpete/metasoar-NAME`, with the build notebook
 attached. The commit must be pushed: the notebook clones the public repo. Results land in trials/kaggle/runs/NAME/
-(not committed; copy what an experiment keeps into its own results folder). Needs the Kaggle CLI (~/.venvs/kaggle)
-and its token in ~/.kaggle; nothing here reads the token.
+(not committed; copy what an experiment keeps into its own results folder). Needs the Kaggle CLI: $KAGGLE_CLI, else
+~/.venvs/kaggle/bin/kaggle (the owner's PC), else `kaggle` on PATH (a cloud session: scripts/cloud-setup.sh). The CLI
+finds its own token (~/.kaggle/, or KAGGLE_API_TOKEN, or KAGGLE_USERNAME with KAGGLE_KEY); nothing here reads it.
 """
 import argparse, json, os, shutil, subprocess, sys, tempfile, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-KAGGLE = os.path.expanduser("~/.venvs/kaggle/bin/kaggle")
-USER = "mossmanpete"
+KAGGLE = (os.environ.get("KAGGLE_CLI")
+          or next((p for p in [os.path.expanduser("~/.venvs/kaggle/bin/kaggle")] if os.path.exists(p)), None)
+          or shutil.which("kaggle") or "kaggle")
+USER = os.environ.get("KAGGLE_USERNAME") or "mossmanpete"
 BUILD = f"{USER}/metasoar-build-llama-b12627"
 
 
@@ -32,10 +35,12 @@ def main():
     ap.add_argument("--out", action="append", default=[])
     ap.add_argument("--timeout", type=int, default=11 * 3600, help="seconds (Kaggle's limit is 12 h a session)")
     ap.add_argument("--no-wait", action="store_true")
+    ap.add_argument("--resume", help="an earlier job's NAME: its output is attached, and the --out paths are copied from it first")
     a = ap.parse_args()
     if subprocess.run(["git", "branch", "-r", "--contains", a.commit], capture_output=True, text=True).stdout.strip() == "":
         sys.exit(f"{a.commit} is not on any pushed branch; push it first")
-    job = {"name": a.name, "commit": a.commit, "servers": a.servers.split(","), "commands": a.cmd, "outputs": a.out}
+    job = {"name": a.name, "commit": a.commit, "servers": a.servers.split(","), "commands": a.cmd, "outputs": a.out,
+           "resume": a.out if a.resume else []}
     slug = f"{USER}/metasoar-{a.name}"
     with tempfile.TemporaryDirectory() as d:
         src = open(os.path.join(HERE, "run.py")).read().replace("JOB = {}  # written by job.py", f"JOB = {json.dumps(job)}")
@@ -43,7 +48,7 @@ def main():
         json.dump({"id": slug, "title": f"metasoar {a.name}", "code_file": "run.py", "language": "python",
                    "kernel_type": "script", "is_private": "true", "enable_gpu": "true", "enable_tpu": "false",
                    "enable_internet": "true", "machine_shape": "", "dataset_sources": [], "competition_sources": [],
-                   "kernel_sources": [BUILD], "model_sources": []}, open(os.path.join(d, "kernel-metadata.json"), "w"))
+                   "kernel_sources": [BUILD] + ([f"{USER}/metasoar-{a.resume}"] if a.resume else []), "model_sources": []}, open(os.path.join(d, "kernel-metadata.json"), "w"))
         print(kaggle("kernels", "push", "-p", d, "--accelerator", "NvidiaTeslaT4", "-t", str(a.timeout)).strip())
     if a.no_wait:
         return
