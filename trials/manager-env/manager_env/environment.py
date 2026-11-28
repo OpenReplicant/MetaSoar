@@ -32,7 +32,8 @@ from .models import ManagerAction, ManagerObservation, ManagerState  # noqa: E40
 from .rubric import RoutingRubric  # noqa: E402
 
 DEFAULT_MAX_STEPS = 10
-ENV_KEYS = drivers.OpenAICompatible.ENV_KEYS  # the same option names as the driver's env dict
+ENV_KEYS = drivers.OpenAICompatible.ENV_KEYS + ("project_refs",)  # project_refs: manager_env.refs on the score (off); the rest are
+# the same option names as the driver's env dict
 OPTIONS_VAR = "MANAGER_ENV_OPTIONS"  # JSON; how the served app gets its options
 
 

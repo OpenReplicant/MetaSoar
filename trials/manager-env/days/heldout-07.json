@@ -107,7 +107,7 @@
     "kind": "tempting",
     "message": "Walk me through what the E-18 and E-17d PRs delivered.",
     "expected": {
-     "project": null,
+     "project": "metasoar",
      "action": "answer",
      "escalate": false,
      "also": [
@@ -149,7 +149,7 @@
     "kind": "status",
     "message": "Does PR 34 still apply cleanly on main?",
     "expected": {
-     "project": null,
+     "project": "substrate",
      "action": "answer",
      "escalate": false,
      "also": [
@@ -165,7 +165,7 @@
     "kind": "status",
     "message": "Which local model did we try for the voice router, and did it pass?",
     "expected": {
-     "project": null,
+     "project": "substrate",
      "action": "answer",
      "escalate": false
     }
@@ -207,7 +207,7 @@
     "kind": "status",
     "message": "Is E-19 blocked on anything, or are we just waiting for the run?",
     "expected": {
-     "project": null,
+     "project": "metasoar",
      "action": "answer",
      "escalate": false
     }
@@ -233,7 +233,7 @@
     "kind": "status",
     "message": "List what's in the MetaSoar registry that still has no results.",
     "expected": {
-     "project": null,
+     "project": "metasoar",
      "action": "answer",
      "escalate": false,
      "also": [

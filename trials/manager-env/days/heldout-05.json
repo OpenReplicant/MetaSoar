@@ -142,7 +142,7 @@
     "kind": "status",
     "message": "Remind me why we defaulted the manager to Haiku instead of a local model.",
     "expected": {
-     "project": null,
+     "project": "substrate",
      "action": "answer",
      "escalate": false
     }
@@ -155,7 +155,7 @@
     "kind": "status",
     "message": "Remind me what's left before the E-19 fresh cases can go.",
     "expected": {
-     "project": null,
+     "project": "metasoar",
      "action": "answer",
      "escalate": false
     }
@@ -181,7 +181,7 @@
     "kind": "tempting",
     "message": "Walk me through what the E-18 and E-17d PRs delivered.",
     "expected": {
-     "project": null,
+     "project": "metasoar",
      "action": "answer",
      "escalate": false,
      "also": [
@@ -210,7 +210,7 @@
     "kind": "status",
     "message": "Which registered experiments haven't produced numbers yet?",
     "expected": {
-     "project": null,
+     "project": "metasoar",
      "action": "answer",
      "escalate": false,
      "also": [
@@ -226,7 +226,7 @@
     "kind": "status",
     "message": "Tell me whether the manager design PR has merge conflicts or failing checks.",
     "expected": {
-     "project": null,
+     "project": "substrate",
      "action": "answer",
      "escalate": false,
      "also": [

@@ -83,7 +83,7 @@
     "kind": "status",
     "message": "What did we decide about using the local small model as the router?",
     "expected": {
-     "project": null,
+     "project": "substrate",
      "action": "answer",
      "escalate": false
     }
@@ -163,7 +163,7 @@
     "kind": "status",
     "message": "Which experiments are registered but not run yet?",
     "expected": {
-     "project": null,
+     "project": "metasoar",
      "action": "answer",
      "escalate": false,
      "also": [
@@ -179,7 +179,7 @@
     "kind": "status",
     "message": "Is the manager design PR still mergeable?",
     "expected": {
-     "project": null,
+     "project": "substrate",
      "action": "answer",
      "escalate": false,
      "also": [
@@ -208,7 +208,7 @@
     "kind": "tempting",
     "message": "Summarise the last three PRs on MetaSoar for me.",
     "expected": {
-     "project": null,
+     "project": "metasoar",
      "action": "answer",
      "escalate": false,
      "also": [
@@ -237,7 +237,7 @@
     "kind": "status",
     "message": "Where is the table-question experiment at?",
     "expected": {
-     "project": null,
+     "project": "metasoar",
      "action": "answer",
      "escalate": false
     }

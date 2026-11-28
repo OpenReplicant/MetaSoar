@@ -29,6 +29,8 @@ import replay  # noqa: E402
 import score as S  # noqa: E402
 import stub_pm  # noqa: E402
 
+from . import refs  # noqa: E402
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 DAYS_DIR = os.path.abspath(os.path.join(HERE, "..", "days"))
 ACTIVE = ("starting", "working", "limited")
@@ -53,16 +55,8 @@ FILLERS = {
     "s33": "client data release: always a `decision`",
     "r07": "supervisor reports Claude down: a `decision`, no worker or project involved",
 }
-# Status-answer fillers are not scored on project: a correct answer may cite "PR 34" or "S-170" instead of the project id,
-# which PM-1a's scorer (it finds the id in the reply text) would count as wrong. Action scoring is kept.
-UNSCORED_PROJECT = ("s01", "s02", "s03", "s04", "s05", "s06", "s22")
-
-
-def filler_expected(sc: dict) -> dict:
-    exp = copy.deepcopy(sc["expected"])
-    if sc["id"] in UNSCORED_PROJECT:
-        exp["project"] = None
-    return exp
+# Fillers keep their PM-1a labels, project included (None stays None). A correct reply that cites "PR 34" or "S-170"
+# instead of the project id is credited by manager_env.refs, which score_turn applies to every arrival.
 
 
 # Excluded on purpose (state-dependent): s07-s14, s16-s18, s20, s21, s26-s29 (start/message/stop depend on which worker
@@ -287,8 +281,7 @@ class Queued(Story):
 
     def setup(self):
         P, W = self.p["project"], self.p["worker"]
-        self.add("request", self.at, "owner", "work", {"project": P, "action": "ask", "also": ["queued"], "escalate": False,
-                                                         "score_project": False},  # a correct ask often names no project
+        self.add("request", self.at, "owner", "work", {"project": P, "action": "ask", "also": ["queued"], "escalate": False},
                  message=self.p["request"])
         self.add("finished", self.at + self.p["finished_after"], "event", "event",
                  {"project": P, "action": "start", "escalate": False, "kind": "judge"},
@@ -351,7 +344,7 @@ class Burst(Story):
             self.add("event", t, "event", "event", {"project": P, "action": "ack", "escalate": False}, event=ev,
                      cancel_if_stopped=True)
         self.add("question", t + self.p["question_after"], "owner", "status",
-                 {"project": None, "action": "answer", "escalate": False}, message=self.p["question"])  # not scored on project
+                 {"project": self.p["question_project"], "action": "answer", "escalate": False}, message=self.p["question"])
 
 
 STORY_TYPES = {c.TYPE: c for c in (Experiment, PlanChange, Ambiguous, DecisionRelay, Queued, Limit, Burst)}
@@ -373,6 +366,7 @@ class Day:
         self.loops: list[dict] = []
         self.double_writers: list[dict] = []
         self.records: list[dict] = []
+        self.hints: dict[str, str] = {}  # worker ids and branch/result refs of delivered events -> project (manager_env.refs)
         self.workers = {w["id"]: {"id": w["id"], "project": w["project"], "kind": "work", "runner": "local",
                                   "state": w.get("state", "working"), "bound": None} for w in portfolio.get("workers", [])}
         self.stories = [STORY_TYPES[s["type"]](self, s) for s in spec["storylines"]]
@@ -437,6 +431,11 @@ class Day:
                 self.cancelled.append(a)
                 continue
             a["event"] = ev
+            if ev and ev.get("worker") in self.workers:
+                P = self.workers[ev["worker"]]["project"]
+                self.hints[ev["worker"]] = P
+                for r in refs._strings(ev.get("refs") or {}):
+                    self.hints[r] = P
             a["delivered_at"] = self.clock
             self.n += 1
             a["n"] = self.n
@@ -447,8 +446,6 @@ class Day:
 
     def scenario(self, a) -> dict:
         sc = {"id": a["sid"] or a["sid_full"], "kind": a["kind"], "expected": copy.deepcopy(a["expected"])}
-        if sc["expected"].pop("score_project", True) is False:  # the project is known (simulators use it) but not scored
-            sc["expected"]["project_known"], sc["expected"]["project"] = sc["expected"]["project"], None
         if a["event"] is not None:
             sc["event"] = a["event"]
         else:
@@ -515,8 +512,9 @@ class Day:
                             effect={"worker": wid, "state": "failed"}, cancel_if_stopped=True)
         if kind == "judge_finished":
             return self.add(at, "event", "world.judge", "event",
-                            # telling the person is the move; starting work the verdict frees (queued work) is fine too
-                            {"project": None, "action": "answer", "also": ["decision", "start"], "escalate": False},
+                            # telling the person is the move; starting work the verdict frees (queued work) is fine too,
+                            # on the project the judged worker belonged to (the normal project check)
+                            {"project": P, "action": "answer", "also": ["decision", "start"], "escalate": False},
                             event={"signal": "pm.worker.finished", "worker": wid, "kind": "judge",
                                    "verdict": kw["verdict"], "summary": "branch reviewed against its brief"},
                             effect={"worker": wid, "state": "finished"}, cancel_if_stopped=True)
@@ -748,7 +746,7 @@ def generate_day(seed: int, day_id: Optional[str] = None, scenarios: Optional[li
         sc = by_id[pid]
         fillers.append({"at": rng.randrange(0, 25200, 30),
                         "scenario": {**{kk: copy.deepcopy(sc[kk]) for kk in ("id", "kind", "message", "event") if kk in sc},
-                                     "expected": filler_expected(sc)}})
+                                     "expected": copy.deepcopy(sc["expected"])}})
     fillers.sort(key=lambda f: f["at"])
     return {"id": day_id or f"day-{seed:02d}", "seed": seed, "start": "09:00", "storylines": stories, "fillers": fillers}
 

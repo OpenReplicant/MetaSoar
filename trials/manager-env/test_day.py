@@ -22,7 +22,7 @@ def perfect(env, obs, skip_judge=False, queue_start_now=False):
     d, a = env.day, env.arrival
     sc = d.scenario(a)
     exp, act = sc["expected"], sc["expected"]["action"]
-    P = exp.get("project_known", exp["project"])  # a project the scorer ignores is still where the work belongs
+    P = exp["project"]
     out = []
     if act == "start":
         kind = exp.get("kind", "work")
@@ -41,7 +41,7 @@ def perfect(env, obs, skip_judge=False, queue_start_now=False):
     elif act == "ask":
         out.append(call("desktop_ask", question="Which one do you mean?"))
     elif act == "answer":
-        out.append(call("desktop_say", text=(f"Status of {P}: on track." if P else "Two workers running, nothing needs you.")))
+        out.append(call("desktop_say", text=(f"Status of {P} project: on track." if P else "Two workers running, nothing needs you.")))
     elif act == "decision":
         out.append(call("pm_decision_open", **({"project": P} if P else {}), kind="question", text="Needs your decision."))
     elif act == "message":
@@ -113,6 +113,13 @@ class DayRuns(unittest.TestCase):
             self.assertEqual(ep["owner_wait"]["unanswered"], 0)
             types |= {s["type"] for s in env.day.spec["storylines"]}
         self.assertEqual(types, set(D.STORY_TYPES))  # the ten days between them run all seven storylines
+
+    def test_perfect_manager_scores_one_on_every_held_out_day(self):
+        env = DayEnvironment()
+        for i in range(10):
+            obs = play(env, day_id=f"heldout-{i:02d}")
+            self.assertEqual(obs.episode["routing"], 1.0, (i, [(r["id"], r["score"]["tags"], r["score"]["named"]) for r in
+                                                                env.day.records if not r["routing_ok"]]))
 
     def test_loops_are_opened_and_closed(self):
         env = DayEnvironment()

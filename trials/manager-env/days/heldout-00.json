@@ -104,7 +104,7 @@
     "kind": "status",
     "message": "How far along is the E-19 development run?",
     "expected": {
-     "project": null,
+     "project": "metasoar",
      "action": "answer",
      "escalate": false
     }
@@ -130,7 +130,7 @@
     "kind": "status",
     "message": "Can the manager agent design PR go in as it stands, or does it have conflicts?",
     "expected": {
-     "project": null,
+     "project": "substrate",
      "action": "answer",
      "escalate": false,
      "also": [
@@ -159,7 +159,7 @@
     "kind": "status",
     "message": "List what's in the MetaSoar registry that still has no results.",
     "expected": {
-     "project": null,
+     "project": "metasoar",
      "action": "answer",
      "escalate": false,
      "also": [
@@ -175,7 +175,7 @@
     "kind": "status",
     "message": "What do the notes say about how many tools the small router had to be forced onto?",
     "expected": {
-     "project": null,
+     "project": "substrate",
      "action": "answer",
      "escalate": false
     }
@@ -188,7 +188,7 @@
     "kind": "tempting",
     "message": "Give me a short rundown of the three newest MetaSoar PRs.",
     "expected": {
-     "project": null,
+     "project": "metasoar",
      "action": "answer",
      "escalate": false,
      "also": [

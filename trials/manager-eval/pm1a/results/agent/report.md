@@ -78,3 +78,23 @@ and measured on manager-env days, not on 43 single runs.
 Every number here for a tuned prompt (p1, p3, p4, m1) is in-sample: the failures that shaped the prompts were read on
 these 43 scenarios, and until e836603 the prompts quoted scenario phrases. Kaggle rounds 1 and 2 ran the quoting
 versions. Run-to-run variation of one 43-scenario run is 2 to 3 scenarios. The fair test is E-21's held-out days.
+
+## Haiku with the narrowed owner-only rule (m1v2, after e836603)
+
+`pm1a-agent-haiku-m1v2.json`: **39/43** (base 38, m1 33). The narrowing undid all five m1 regressions (s03, s10, s23,
+s32, r05; s10 "bring main into the branch" is a worker message again), and s26 also passed. Wrong: s14, s17, s18 (asked
+the person instead of starting work), s21 (no move). One point over base is within run-to-run noise (2 to 3 cases), and it
+is in-sample: the rule was written after reading these scenarios' failures.
+
+## Kaggle round 2 (pm1a-gepa-r2, commit 7097fe0: the prompts before the rewording; in-sample)
+
+| Candidate | Routing | Baseline (Kaggle, manager.md) | Won | Lost |
+| --- | --- | --- | --- | --- |
+| inkling-p1 | 35/43 | 30/43 | r01 r06 s09 s14 s21 s29 s30 s33 | s03 s26 s35 |
+| inkling-p3 | 34/43 | 30/43 | r01 r04 s09 s21 s29 s30 s31 s32 s33 | s03 s10 s16 s23 s34 |
+| inkling-p4 | 33/43 | 30/43 | r01 s09 s14 s21 s29 s30 s31 s33 | s03 s23 s24 s26 s35 |
+| lfm3-r1 | 13/43 | 9/43 | r01 r04 s07 s09 s22 s27 s28 s34 | s04 s05 s31 s36 |
+| lfm3-r1req | 12/43 | 9/43 | | |
+| lfm3-p3router | 9/43 | 9/43 | | |
+
+These prompts quoted scenario phrases, so the gains are an upper bound. The test that counts is E-21 on held-out days.

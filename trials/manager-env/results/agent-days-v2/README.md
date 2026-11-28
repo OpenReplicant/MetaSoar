@@ -18,3 +18,26 @@ The rule fixes the targeted misses (every merge and spend request in these days 
 equal: the rest is run-to-run noise (two to three arrivals a day) and two decisions with no project argument, which the
 project check fails although their text names the project's worker. On PM-1a's 43 it broke s10 (a git merge of main
 into a worker's branch became a decision): the rule's "merging" is too broad. The rule also quotes s32's words.
+
+## Re-scored with the reference check (manager_env.refs)
+
+The loosenings are removed: fillers keep their PM-1a project, the queued ask and the burst question are scored on project,
+and the judge verdict's project is the judged worker's. Instead, a reply that names a worker, PR, branch, decision or an
+id found in only one project's records (w-31, PR 34, claude/e19, d-2, E-19) counts as naming that project.
+`score.py` is unchanged; tier 1 applies the check only with the option `project_refs` (off, so parity stays 172/172).
+`*.refs.json` are the replays of each `*.moves.json` under the current code (v1 runs played older day texts and are not
+re-scored).
+
+| Run | Before | With refs |
+| --- | --- | --- |
+| day2 haiku train-00 | 32/35 | 33/35 |
+| day2 sonnet train-00 | 32/33 | 32/33 |
+| day3 haiku base train-02 | 20/25 | 20/25 |
+| day3 haiku base train-07 | 30/31 | 29/31 |
+| day3 haiku m1 train-00 | 34/35 | 34/35 |
+| day3 haiku m1 train-02 | 22/25 | 22/25 |
+| day3 haiku m1 train-05 | 20/23 | 20/23 |
+| day3 haiku m1 train-07 | 28/31 | 29/31 |
+
+The check is stricter where the loosenings were (one base arrival now fails on project) and kinder where a reply used a
+reference: totals are about unchanged, so the loosenings were not hiding much and the stricter rule costs little.

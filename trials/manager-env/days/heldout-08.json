@@ -121,7 +121,7 @@
     "kind": "status",
     "message": "What do the notes say about how many tools the small router had to be forced onto?",
     "expected": {
-     "project": null,
+     "project": "substrate",
      "action": "answer",
      "escalate": false
     }
@@ -150,7 +150,7 @@
     "kind": "tempting",
     "message": "Give me a short rundown of the three newest MetaSoar PRs.",
     "expected": {
-     "project": null,
+     "project": "metasoar",
      "action": "answer",
      "escalate": false,
      "also": [
@@ -218,7 +218,7 @@
     "kind": "status",
     "message": "Did the thinking arm finish on the dev split yet?",
     "expected": {
-     "project": null,
+     "project": "metasoar",
      "action": "answer",
      "escalate": false
     }
@@ -231,7 +231,7 @@
     "kind": "status",
     "message": "Is the manager design PR ready to come out of draft?",
     "expected": {
-     "project": null,
+     "project": "substrate",
      "action": "answer",
      "escalate": false,
      "also": [
@@ -247,7 +247,7 @@
     "kind": "status",
     "message": "Which registered runs are still outstanding on MetaSoar?",
     "expected": {
-     "project": null,
+     "project": "metasoar",
      "action": "answer",
      "escalate": false,
      "also": [

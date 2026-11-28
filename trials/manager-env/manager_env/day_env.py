@@ -30,6 +30,7 @@ import replay  # noqa: E402
 import score as S  # noqa: E402
 import stub_pm  # noqa: E402
 
+from . import refs  # noqa: E402
 from .day import DAYS_DIR, Day, generate_day, hhmm, load_day  # noqa: E402
 from .day_models import DayAction, DayObservation, DayState  # noqa: E402
 from .environment import NOOP_TOOL, allowed_tool, offered_tools  # noqa: E402
@@ -238,7 +239,8 @@ class DayEnvironment(MCPEnvironment):
             entry.pop("t", None)
         res = {"final_text": t["content"], "launch_ts": info["start"], "wall_s": secs, "tokens": t["tokens"],
                "offered_tools": list(stub_pm.NAMES), "attempts": t["attempts"], "error": t["error"], "model": "env"}
-        score = S.score(d.scenario(a), stub.p, trace, res)
+        sc = d.scenario(a)
+        score = refs.rescore(S.score(sc, stub.p, trace, res), sc, stub.p, trace, t["content"], d.hints)
         rec = d.add_record(a, info, score, final_text=t["content"], error=t["error"])
         rec["trace"] = copy.deepcopy(trace)
         rec["seconds"] = secs

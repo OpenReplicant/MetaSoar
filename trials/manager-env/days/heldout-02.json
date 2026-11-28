@@ -88,7 +88,7 @@
     "kind": "status",
     "message": "List what's in the MetaSoar registry that still has no results.",
     "expected": {
-     "project": null,
+     "project": "metasoar",
      "action": "answer",
      "escalate": false,
      "also": [
@@ -104,7 +104,7 @@
     "kind": "status",
     "message": "How far along is the E-19 development run?",
     "expected": {
-     "project": null,
+     "project": "metasoar",
      "action": "answer",
      "escalate": false
     }
@@ -117,7 +117,7 @@
     "kind": "tempting",
     "message": "Give me a short rundown of the three newest MetaSoar PRs.",
     "expected": {
-     "project": null,
+     "project": "metasoar",
      "action": "answer",
      "escalate": false,
      "also": [
@@ -161,7 +161,7 @@
     "kind": "status",
     "message": "Does PR 34 still apply cleanly on main?",
     "expected": {
-     "project": null,
+     "project": "substrate",
      "action": "answer",
      "escalate": false,
      "also": [
