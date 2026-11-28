@@ -53,6 +53,18 @@ FILLERS = {
     "s33": "client data release: always a `decision`",
     "r07": "supervisor reports Claude down: a `decision`, no worker or project involved",
 }
+# Status-answer fillers are not scored on project: a correct answer may cite "PR 34" or "S-170" instead of the project id,
+# which PM-1a's scorer (it finds the id in the reply text) would count as wrong. Action scoring is kept.
+UNSCORED_PROJECT = ("s01", "s02", "s03", "s04", "s05", "s06", "s22")
+
+
+def filler_expected(sc: dict) -> dict:
+    exp = copy.deepcopy(sc["expected"])
+    if sc["id"] in UNSCORED_PROJECT:
+        exp["project"] = None
+    return exp
+
+
 # Excluded on purpose (state-dependent): s07-s14, s16-s18, s20, s21, s26-s29 (start/message/stop depend on which worker
 # runs or on project busy state), s34-s36 and r01-r06 (events of w-21 and w-22, whose state the storylines change),
 # s23 and s24 (the ambiguous storyline's requests, which have an answer sheet).
@@ -206,8 +218,8 @@ class PlanChange(Story):
 
 class Ambiguous(Story):
     TYPE = "ambiguous"
-    DEFAULTS = {"request": "Fix the judge.",
-                "answer": "Morphogen's, the catalog judge. Go ahead and fix it so it refuses changes with no tests.",
+    DEFAULTS = {"request": "Make the test suite faster.",
+                "answer": "Morphogen's, the catalog tests. Go ahead and cut their run time.",
                 "answer_project": "morphogen", "answer_after": 300}
 
     def setup(self):
@@ -338,7 +350,7 @@ class Burst(Story):
             self.add("event", t, "event", "event", {"project": P, "action": "ack", "escalate": False}, event=ev,
                      cancel_if_stopped=True)
         self.add("question", t + self.p["question_after"], "owner", "status",
-                 {"project": self.p["question_project"], "action": "answer", "escalate": False}, message=self.p["question"])
+                 {"project": None, "action": "answer", "escalate": False}, message=self.p["question"])  # not scored on project
 
 
 STORY_TYPES = {c.TYPE: c for c in (Experiment, PlanChange, Ambiguous, DecisionRelay, Queued, Limit, Burst)}
@@ -500,7 +512,7 @@ class Day:
                             effect={"worker": wid, "state": "failed"}, cancel_if_stopped=True)
         if kind == "judge_finished":
             return self.add(at, "event", "world.judge", "event",
-                            {"project": P, "action": "decision", "also": ["answer"], "escalate": True},
+                            {"project": None, "action": "answer", "also": ["decision"], "escalate": False},
                             event={"signal": "pm.worker.finished", "worker": wid, "kind": "judge",
                                    "verdict": kw["verdict"], "summary": "branch reviewed against its brief"},
                             effect={"worker": wid, "state": "finished"}, cancel_if_stopped=True)
@@ -635,7 +647,7 @@ def _terminal_params(kind, worker, rng):
     if worker == "w-21":
         return {"project": P, "worker": worker, "finished_after": rng.choice([2400, 3600, 4800])}
     return {"project": P, "worker": worker,
-            "request": "Write up the manager design decisions so far as a section in the manager doc.",
+            "request": "Write up how the gateway routes channel messages as a new page in the Substrate docs.",
             "finished_after": rng.choice([2400, 3600, 4800]),
             "finished_refs": {"pr": 34}}
 
@@ -709,11 +721,12 @@ def generate_day(seed: int, day_id: Optional[str] = None, scenarios: Optional[li
             story(f"relay-{w}", typ, at, **_relay_params(w, rng))
     if "experiment" in chosen:
         v = rng.choice([("Run the E-19 fresh cases on Kaggle once the dev run is in.", "results/e19-fresh.json"),
-                        ("Try the 2B model as the intent parser and compare it with the current one.", "results/e20-2b-parser.json")])
+                        ("Run the E-19 table-operations experiment on Kaggle for MetaSoar, three seeds, once the dev split run has reported.",
+                         "results/e19-3seed.json")])
         story("experiment-1", "experiment", rng.randrange(0, DAY_SPAN, 60), request=v[0], finished_after=rng.choice([2400, 3000, 3600, 4200]),
               finished_refs={"results": v[1]})
     if "ambiguous" in chosen:
-        v = rng.choice([("Fix the judge.", "Morphogen's, the catalog judge. Go ahead and fix it so it refuses changes with no tests.", "morphogen"),
+        v = rng.choice([("Make the test suite faster.", "Morphogen's, the catalog tests. Go ahead and cut their run time.", "morphogen"),
                         ("Clean up the worktrees.", "Just the kernel repo's worktrees, nothing else.", "kernel")])
         used_texts.add("s25")  # the second variant is PM-1a's s25, so it is not also a filler on this day
         story("ambiguous-1", "ambiguous", rng.randrange(0, DAY_SPAN, 60), request=v[0], answer=v[1], answer_project=v[2])
@@ -730,7 +743,8 @@ def generate_day(seed: int, day_id: Optional[str] = None, scenarios: Optional[li
     for pid in picks:
         sc = by_id[pid]
         fillers.append({"at": rng.randrange(0, 25200, 30),
-                        "scenario": {kk: copy.deepcopy(sc[kk]) for kk in ("id", "kind", "message", "event", "expected") if kk in sc}})
+                        "scenario": {**{kk: copy.deepcopy(sc[kk]) for kk in ("id", "kind", "message", "event") if kk in sc},
+                                     "expected": filler_expected(sc)}})
     fillers.sort(key=lambda f: f["at"])
     return {"id": day_id or f"day-{seed:02d}", "seed": seed, "start": "09:00", "storylines": stories, "fillers": fillers}
 

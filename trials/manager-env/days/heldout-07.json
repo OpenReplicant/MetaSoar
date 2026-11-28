@@ -42,7 +42,7 @@
    "at": 8400,
    "project": "metasoar",
    "worker": "w-21",
-   "request": "Add a section on the fresh-case failure modes to the E-19 notes.",
+   "request": "Add a section on the table-operation naming conventions to the cognitive-model doc.",
    "finished_after": 4200,
    "finished_refs": {
     "branch": "claude/e19",
@@ -53,7 +53,7 @@
    "id": "experiment-1",
    "type": "experiment",
    "at": 12000,
-   "request": "Run the operator-noise check on Kaggle so we have it for the write-up.",
+   "request": "Run the operator-noise check for MetaSoar on Kaggle so we have it for the write-up.",
    "finished_after": 3000,
    "finished_refs": {
     "results": "results/e19-noise-check.json"
@@ -107,7 +107,7 @@
     "kind": "tempting",
     "message": "Walk me through what the E-18 and E-17d PRs delivered.",
     "expected": {
-     "project": "metasoar",
+     "project": null,
      "action": "answer",
      "escalate": false,
      "also": [
@@ -149,7 +149,7 @@
     "kind": "status",
     "message": "Does PR 34 still apply cleanly on main?",
     "expected": {
-     "project": "substrate",
+     "project": null,
      "action": "answer",
      "escalate": false,
      "also": [
@@ -165,7 +165,7 @@
     "kind": "status",
     "message": "Which local model did we try for the voice router, and did it pass?",
     "expected": {
-     "project": "substrate",
+     "project": null,
      "action": "answer",
      "escalate": false
     }
@@ -207,7 +207,7 @@
     "kind": "status",
     "message": "Is E-19 blocked on anything, or are we just waiting for the run?",
     "expected": {
-     "project": "metasoar",
+     "project": null,
      "action": "answer",
      "escalate": false
     }
@@ -233,7 +233,7 @@
     "kind": "status",
     "message": "List what's in the MetaSoar registry that still has no results.",
     "expected": {
-     "project": "metasoar",
+     "project": null,
      "action": "answer",
      "escalate": false,
      "also": [

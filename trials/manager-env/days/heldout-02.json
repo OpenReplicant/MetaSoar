@@ -30,7 +30,7 @@
     }
    ],
    "question": "How's the MetaSoar run doing?",
-   "question_project": "metasoar",
+   "question_project": null,
    "offsets": [
     0,
     60,
@@ -41,7 +41,7 @@
    "id": "experiment-1",
    "type": "experiment",
    "at": 7800,
-   "request": "Run the 7B parser against the E-20 intent set on Kaggle and compare its accuracy with the 2B.",
+   "request": "Run the E-20 intent-set cases on Kaggle for MetaSoar with the 7B model, and compare its accuracy with the 2B results.",
    "finished_after": 2400,
    "finished_refs": {
     "results": "results/e20-7b-vs-2b.json"
@@ -72,7 +72,7 @@
    "at": 14100,
    "project": "metasoar",
    "worker": "w-21",
-   "request": "Please write up the dev-split error analysis as a new page in the MetaSoar docs.",
+   "request": "Please write a new page in the MetaSoar docs explaining how experiments are registered before they run.",
    "finished_after": 2400,
    "finished_refs": {
     "branch": "claude/e19",
@@ -88,7 +88,7 @@
     "kind": "status",
     "message": "List what's in the MetaSoar registry that still has no results.",
     "expected": {
-     "project": "metasoar",
+     "project": null,
      "action": "answer",
      "escalate": false,
      "also": [
@@ -104,7 +104,7 @@
     "kind": "status",
     "message": "How far along is the E-19 development run?",
     "expected": {
-     "project": "metasoar",
+     "project": null,
      "action": "answer",
      "escalate": false
     }
@@ -117,7 +117,7 @@
     "kind": "tempting",
     "message": "Give me a short rundown of the three newest MetaSoar PRs.",
     "expected": {
-     "project": "metasoar",
+     "project": null,
      "action": "answer",
      "escalate": false,
      "also": [
@@ -161,7 +161,7 @@
     "kind": "status",
     "message": "Does PR 34 still apply cleanly on main?",
     "expected": {
-     "project": "substrate",
+     "project": null,
      "action": "answer",
      "escalate": false,
      "also": [

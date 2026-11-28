@@ -26,18 +26,18 @@
    "id": "experiment-1",
    "type": "experiment",
    "at": 7560,
-   "request": "Try the 2B model as the intent parser and compare it with the current one.",
+   "request": "Run the E-19 table-operations experiment on Kaggle for MetaSoar, three seeds, once the dev split run has reported.",
    "finished_after": 3000,
    "finished_refs": {
-    "results": "results/e20-2b-parser.json"
+    "results": "results/e19-3seed.json"
    }
   },
   {
    "id": "ambiguous-1",
    "type": "ambiguous",
    "at": 8640,
-   "request": "Fix the judge.",
-   "answer": "Morphogen's, the catalog judge. Go ahead and fix it so it refuses changes with no tests.",
+   "request": "Make the test suite faster.",
+   "answer": "Morphogen's, the catalog tests. Go ahead and cut their run time.",
    "answer_project": "morphogen"
   },
   {
@@ -82,7 +82,7 @@
     "kind": "status",
     "message": "Where is the table-question experiment at?",
     "expected": {
-     "project": "metasoar",
+     "project": null,
      "action": "answer",
      "escalate": false
     }
@@ -95,7 +95,7 @@
     "kind": "status",
     "message": "What did we decide about using the local small model as the router?",
     "expected": {
-     "project": "substrate",
+     "project": null,
      "action": "answer",
      "escalate": false
     }
@@ -189,7 +189,7 @@
     "kind": "status",
     "message": "Is the manager design PR still mergeable?",
     "expected": {
-     "project": "substrate",
+     "project": null,
      "action": "answer",
      "escalate": false,
      "also": [
@@ -205,7 +205,7 @@
     "kind": "status",
     "message": "Which experiments are registered but not run yet?",
     "expected": {
-     "project": "metasoar",
+     "project": null,
      "action": "answer",
      "escalate": false,
      "also": [

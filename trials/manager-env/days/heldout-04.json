@@ -33,7 +33,7 @@
    "at": 5400,
    "project": "metasoar",
    "worker": "w-21",
-   "request": "Draft the methods section for the E-19 write-up from the registered experiment.",
+   "request": "Write a contributor guide for adding a new experiment to the MetaSoar repo, as a new docs page.",
    "finished_after": 3000,
    "finished_refs": {
     "results": "results/e19-dev-final.json"
@@ -76,7 +76,7 @@
     "kind": "status",
     "message": "Which registered experiments haven't produced numbers yet?",
     "expected": {
-     "project": "metasoar",
+     "project": null,
      "action": "answer",
      "escalate": false,
      "also": [
@@ -105,7 +105,7 @@
     "kind": "tempting",
     "message": "What changed in MetaSoar's last few merges?",
     "expected": {
-     "project": "metasoar",
+     "project": null,
      "action": "answer",
      "escalate": false,
      "also": [
@@ -134,7 +134,7 @@
     "kind": "status",
     "message": "Has anything landed on main that would block the manager design draft?",
     "expected": {
-     "project": "substrate",
+     "project": null,
      "action": "answer",
      "escalate": false,
      "also": [
@@ -150,7 +150,7 @@
     "kind": "status",
     "message": "Did we settle on a lean profile for the Claude Code sessions, and what was in it?",
     "expected": {
-     "project": "substrate",
+     "project": null,
      "action": "answer",
      "escalate": false
     }
@@ -220,7 +220,7 @@
     "kind": "status",
     "message": "Give me a quick read on where MetaSoar stands right now.",
     "expected": {
-     "project": "metasoar",
+     "project": null,
      "action": "answer",
      "escalate": false
     }

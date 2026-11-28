@@ -46,8 +46,8 @@
    "id": "ambiguous-1",
    "type": "ambiguous",
    "at": 10500,
-   "request": "Fix the judge.",
-   "answer": "Morphogen's, the catalog judge. Go ahead and fix it so it refuses changes with no tests.",
+   "request": "Make the test suite faster.",
+   "answer": "Morphogen's, the catalog tests. Go ahead and cut their run time.",
    "answer_project": "morphogen"
   },
   {
@@ -94,7 +94,7 @@
     "kind": "status",
     "message": "Where is the table-question experiment at?",
     "expected": {
-     "project": "metasoar",
+     "project": null,
      "action": "answer",
      "escalate": false
     }
@@ -107,7 +107,7 @@
     "kind": "status",
     "message": "Is the manager design PR still mergeable?",
     "expected": {
-     "project": "substrate",
+     "project": null,
      "action": "answer",
      "escalate": false,
      "also": [
@@ -123,7 +123,7 @@
     "kind": "status",
     "message": "What did we decide about using the local small model as the router?",
     "expected": {
-     "project": "substrate",
+     "project": null,
      "action": "answer",
      "escalate": false
     }

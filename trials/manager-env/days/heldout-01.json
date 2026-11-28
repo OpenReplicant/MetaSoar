@@ -7,8 +7,8 @@
    "id": "ambiguous-1",
    "type": "ambiguous",
    "at": 1500,
-   "request": "The demo is failing again, can you look at it?",
-   "answer": "Morphogen's research-loop demo, the one dying at the judge step. Find the cause and fix it.",
+   "request": "The tests are flaky again, can you look at it?",
+   "answer": "Morphogen's catalog tests, the ones that flake at the judge step. Find the cause and fix it.",
    "answer_project": "morphogen",
    "answer_after": 420
   },
@@ -42,7 +42,7 @@
    "at": 7200,
    "project": "substrate",
    "worker": "w-22",
-   "request": "Add a section on when the manager escalates to the owner, in the manager doc.",
+   "request": "Write the install steps for the desktop views as a new page in the Substrate docs.",
    "finished_after": 4800,
    "finished_refs": {
     "branch": "claude/manager-agent",
@@ -68,7 +68,7 @@
     "kind": "status",
     "message": "Did we settle on a lean profile for the Claude Code sessions, and what was in it?",
     "expected": {
-     "project": "substrate",
+     "project": null,
      "action": "answer",
      "escalate": false
     }
@@ -120,7 +120,7 @@
     "kind": "status",
     "message": "Which registered runs are still outstanding on MetaSoar?",
     "expected": {
-     "project": "metasoar",
+     "project": null,
      "action": "answer",
      "escalate": false,
      "also": [
@@ -191,7 +191,7 @@
     "kind": "tempting",
     "message": "What were the most recent pull requests on MetaSoar about?",
     "expected": {
-     "project": "metasoar",
+     "project": null,
      "action": "answer",
      "escalate": false,
      "also": [
@@ -207,7 +207,7 @@
     "kind": "status",
     "message": "Has anything landed on main that would block the manager design draft?",
     "expected": {
-     "project": "substrate",
+     "project": null,
      "action": "answer",
      "escalate": false,
      "also": [

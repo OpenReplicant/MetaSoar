@@ -122,13 +122,13 @@ is the PM-1a text. Labels live in the code by storyline type, not in the JSON; o
 
 | type | slots (default) | arrivals and labels |
 | --- | --- | --- |
-| `experiment` | `project` (metasoar), `request`, `finished_after` (3000 s), `finished_refs` | owner request: start, runner kaggle. The started worker's `finished`, `finished_after` s after it started: start kind judge. Loop: the judge |
+| `experiment` | `project` (metasoar), `request`, `finished_after` (3000 s), `finished_refs` | owner request: start, runner kaggle (the text must be unambiguously one project's Kaggle experiment: PM-1a's s17 "Try the 2B model as the intent parser" is not, the router also uses a local model). The started worker's `finished`, `finished_after` s after it started: start kind judge. Loop: the judge |
 | `plan_change` | `project`, `worker` (w-21), `stop`, `plan`, `plan_after` (600 s) | owner stop: stop. `plan_after` s later the owner's new plan: start (local). Loop: the new start |
-| `ambiguous` | `request`, `answer`, `answer_project` (morphogen), `answer_after` (300 s) | request two projects fit: ask. If the manager uses `desktop_ask`, the answer arrives `answer_after` s after the ask: start on `answer_project`. Loop: that start |
+| `ambiguous` | `request` (must fit two projects about equally on the portfolio's own text), `answer`, `answer_project` (morphogen; not a project with a running writer), `answer_after` (300 s) | request two projects fit: ask. If the manager uses `desktop_ask`, the answer arrives `answer_after` s after the ask: start on `answer_project`. Loop: that start |
 | `decision_relay` | `project`, `worker`, `event` (a `pm.worker.report` `needs_input`), `question`, `answer`, `answer_after` (1200 s) | the event: decision. If a decision is opened, `answer_after` s later a `decision.answered` event (`{"decision","worker","project","question","answer"}`): message to that worker. Loop: the message |
-| `queued` | `project`, `worker`, `request`, `finished_after` (3600 s), `finished_refs` | writing work on the busy project: ask (queued allowed, a start is wrong). `finished_after` s after the request, the worker's `finished`: start kind judge, and the queued work started in that turn or the next. Loops: the judge, the queued start |
+| `queued` | `project`, `worker`, `request`, `finished_after` (3600 s), `finished_refs` | new writing work on the busy project, clearly not the running worker's own brief (so not the manager doc on w-22): ask (queued allowed, a start is wrong). `finished_after` s after the request, the worker's `finished`: start kind judge, and the queued work started in that turn or the next. Loops: the judge, the queued start |
 | `limit` | `project`, `worker`, `limited`, `failed`, `gap` (5400 s) | `pm.worker.limited`: ack (do nothing). `gap` s later `pm.worker.failed`: decision. Loop: the decision |
-| `burst` | `project`, `worker`, `events` (3), `offsets` ([0,50,100] s), `question`, `question_project`, `question_after` (60 s) | three worker progress reports: ack each; then the owner's status question: answer. No loop (owner wait) |
+| `burst` | `project`, `worker`, `events` (3), `offsets` ([0,50,100] s), `question`, `question_project`, `question_after` (60 s) | three worker progress reports: ack each; then the owner's status question: answer, not scored on project (`question_project` is ignored). No loop (owner wait) |
 
 Placement rules the generator follows (a hand-written day should too, or its later events are incoherent): a worker with a
 `plan_change`, `limit` or `queued` story has nothing else after it; `burst` and `decision_relay` on that worker come before it.
@@ -137,7 +137,7 @@ A storyline's events for a worker the manager stopped do not arrive (and its loo
 **World.** Workers the manager starts (not claimed by a storyline) are simulated from the day seed and the worker id: a progress
 report 20 to 60 minutes later, then `finished` (70%: label start kind judge), `limited` (ack) and then finished after the supervisor
 resumes it (15%), or `failed` (15%: decision). A judge worker emits `finished` with a verdict 15 minutes after it starts (label:
-decision, an answer allowed). A worker whose `finished` arrived and that is never judged is a dropped loop. These world events are
+`answer`, a decision allowed, project not scored: per manager.md the person is told after the verdict, and a correct reply names the branch, PR or worker, not the project id). A worker whose `finished` arrived and that is never judged is a dropped loop. These world events are
 extra arrivals on top of the day's scheduled ones, which number 15 to 30 (the train days come to 25 to 37 with a perfect manager).
 
 ## Fillers
@@ -184,3 +184,15 @@ and queued judge loops are dropped), one that never starts the experiment (its e
 wait) and `owner_first` (less), `speed`, double writers counted, the ask-answer and decision-answer delays, the world simulator's
 seeding, per-turn options and the step limit. `test_run_day.py`: `run_day.py` against a fake chat server (a fresh session per
 arrival, both output formats, resume).
+
+## Where the day tier departs from PM-1a's labels and scorer
+
+- Status answers (fillers s01-s06 and s22, the burst question) are not scored on project (`expected.project` null); action
+  scoring is kept. PM-1a's scorer finds the project id in the reply text, so a correct answer that cites "PR 34" or "S-170" would fail.
+- A judge worker's verdict event is `answer` (also `decision`), project not scored (manager.md: the person is told after the verdict).
+- Experiment, queued and ambiguous requests are chosen so manager.md gives one reading: not PM-1a s17 (ambiguous between metasoar
+  and substrate's router), not work the busy worker's brief already covers, not s23 "Fix the judge." (morphogen is the plain reading).
+
+Other labels reviewed against manager.md, left as they are (doubtful): `limited` then `failed` events carry a fixed "resets" time
+unrelated to the clock; the ambiguous answer's start is `local` on an idle project only because the generator picks one;
+a verdict `fail` could reasonably call for a decision (allowed via `also`).

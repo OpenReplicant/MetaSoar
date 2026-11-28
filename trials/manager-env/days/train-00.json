@@ -12,18 +12,18 @@
    "id": "experiment-1",
    "type": "experiment",
    "at": 5820,
-   "request": "Try the 2B model as the intent parser and compare it with the current one.",
+   "request": "Run the E-19 table-operations experiment on Kaggle for MetaSoar, three seeds, once the dev split run has reported.",
    "finished_after": 2400,
    "finished_refs": {
-    "results": "results/e20-2b-parser.json"
+    "results": "results/e19-3seed.json"
    }
   },
   {
    "id": "ambiguous-1",
    "type": "ambiguous",
    "at": 11040,
-   "request": "Fix the judge.",
-   "answer": "Morphogen's, the catalog judge. Go ahead and fix it so it refuses changes with no tests.",
+   "request": "Make the test suite faster.",
+   "answer": "Morphogen's, the catalog tests. Go ahead and cut their run time.",
    "answer_project": "morphogen"
   },
   {
@@ -32,7 +32,7 @@
    "at": 13740,
    "project": "substrate",
    "worker": "w-22",
-   "request": "Write up the manager design decisions so far as a section in the manager doc.",
+   "request": "Write up how the gateway routes channel messages as a new page in the Substrate docs.",
    "finished_after": 3600,
    "finished_refs": {
     "pr": 34
@@ -83,7 +83,7 @@
     "kind": "status",
     "message": "What did we decide about using the local small model as the router?",
     "expected": {
-     "project": "substrate",
+     "project": null,
      "action": "answer",
      "escalate": false
     }
@@ -163,7 +163,7 @@
     "kind": "status",
     "message": "Which experiments are registered but not run yet?",
     "expected": {
-     "project": "metasoar",
+     "project": null,
      "action": "answer",
      "escalate": false,
      "also": [
@@ -179,7 +179,7 @@
     "kind": "status",
     "message": "Is the manager design PR still mergeable?",
     "expected": {
-     "project": "substrate",
+     "project": null,
      "action": "answer",
      "escalate": false,
      "also": [
@@ -208,7 +208,7 @@
     "kind": "tempting",
     "message": "Summarise the last three PRs on MetaSoar for me.",
     "expected": {
-     "project": "metasoar",
+     "project": null,
      "action": "answer",
      "escalate": false,
      "also": [
@@ -237,7 +237,7 @@
     "kind": "status",
     "message": "Where is the table-question experiment at?",
     "expected": {
-     "project": "metasoar",
+     "project": null,
      "action": "answer",
      "escalate": false
     }

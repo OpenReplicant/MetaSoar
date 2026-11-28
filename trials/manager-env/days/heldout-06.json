@@ -159,7 +159,7 @@
     "kind": "tempting",
     "message": "What changed in MetaSoar's last few merges?",
     "expected": {
-     "project": "metasoar",
+     "project": null,
      "action": "answer",
      "escalate": false,
      "also": [
@@ -188,7 +188,7 @@
     "kind": "status",
     "message": "Which registered experiments haven't produced numbers yet?",
     "expected": {
-     "project": "metasoar",
+     "project": null,
      "action": "answer",
      "escalate": false,
      "also": [
@@ -204,7 +204,7 @@
     "kind": "status",
     "message": "Does PR 34 still apply cleanly on main?",
     "expected": {
-     "project": "substrate",
+     "project": null,
      "action": "answer",
      "escalate": false,
      "also": [
@@ -262,7 +262,7 @@
     "kind": "status",
     "message": "What do the notes say about how many tools the small router had to be forced onto?",
     "expected": {
-     "project": "substrate",
+     "project": null,
      "action": "answer",
      "escalate": false
     }
@@ -275,7 +275,7 @@
     "kind": "status",
     "message": "How far along is the E-19 development run?",
     "expected": {
-     "project": "metasoar",
+     "project": null,
      "action": "answer",
      "escalate": false
     }
