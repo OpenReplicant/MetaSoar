@@ -109,7 +109,7 @@ questions, escalations).
 | plan change | owner: stop the running worker → stop; 10 min later owner gives the new plan → start | the new start |
 | ambiguous | owner sends a request two projects fit → ask; the scripted answer 5 min after the ask names one → start on it | the start after the answer |
 | decision relay | a worker's `needs_input` → decision; the owner answers the decision 20 min later (an arrival of kind `decision.answered`) → message to that worker with the answer | the message |
-| queued | owner asks for writing work on a busy project → ask or queued; later that project's worker `finished` → judge, and the queued work started (in that turn or the next) | the queued start |
+| queued | owner asks for writing work on a busy project → ask or queued; later that project's worker `finished` → judge, and the queued work started (any later turn; amended 2026-11-28 after a subagent started it, sensibly, with the verdict) | the queued start |
 | limit | a worker's `limited` → nothing; then its `failed` after the second resume → decision | the decision |
 | burst | three worker events within 2 minutes, then an owner status question 1 minute later → answer | (owner wait, below) |
 

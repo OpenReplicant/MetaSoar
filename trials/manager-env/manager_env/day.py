@@ -303,7 +303,7 @@ class Queued(Story):
         self.b["fin_n"] = self.day.turn_index
 
     def watch(self, a, turn):
-        if "fin_n" in self.b and self.lq["open"] and self.day.turn_index <= self.b["fin_n"] + 1:  # that turn or the next
+        if "fin_n" in self.b and self.lq["open"]:  # any time after the worker finished (also after its judge's verdict)
             for c in self.calls(turn, "pm_worker_start"):
                 if c["arguments"].get("kind") != "judge" and c["arguments"].get("project") == self.p["project"]:
                     self.day.close(self.lq)
@@ -515,7 +515,8 @@ class Day:
                             effect={"worker": wid, "state": "failed"}, cancel_if_stopped=True)
         if kind == "judge_finished":
             return self.add(at, "event", "world.judge", "event",
-                            {"project": None, "action": "answer", "also": ["decision"], "escalate": False},
+                            # telling the person is the move; starting work the verdict frees (queued work) is fine too
+                            {"project": None, "action": "answer", "also": ["decision", "start"], "escalate": False},
                             event={"signal": "pm.worker.finished", "worker": wid, "kind": "judge",
                                    "verdict": kw["verdict"], "summary": "branch reviewed against its brief"},
                             effect={"worker": wid, "state": "finished"}, cancel_if_stopped=True)
