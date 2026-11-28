@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import os
 import subprocess
 import tempfile
@@ -76,6 +77,19 @@ def post(url, body, timeout=600):
 EMPTY_THINKING = "<|message_model|><|content_thinking|><|end_message|><|message_model|><|content_text|>"
 
 
+def strip_thinking(text):
+    """The reply without Inkling's thinking, which llama.cpp does not parse out of its chat template: the text after the
+    last <|content_text|>, else "" when the reply is only thinking; other template tokens are removed. Text with no
+    template tokens is returned unchanged."""
+    if not text or "<|" not in text:
+        return text
+    if "<|content_thinking|>" in text and "<|content_text|>" not in text:
+        return ""
+    if "<|content_text|>" in text:
+        text = text.rsplit("<|content_text|>", 1)[1]
+    return re.sub(r"<\|[a-z_]+\|>", "", text).strip()
+
+
 class OpenAICompatible:
     """A tool-calling loop over a llama.cpp server's /v1/chat/completions with the same tool schemas. `extra` is merged
     into the request (e.g. {"chat_template_kwargs": {"enable_thinking": false}}). `prefill` closes the model's thinking
@@ -94,10 +108,12 @@ class OpenAICompatible:
       tools (list|None)        offer only these of the stub's tools (a call to another gets "no such tool");
       noop_tool (bool)         also offer NOOP_TOOL: calling it ends the turn with nothing done and nobody told (not traced);
       stop_after_action (bool) end the turn after the first successful start, message, stop, decision, ask or say.
+      strip_thinking (bool) the closing text is strip_thinking(content): Inkling's thinking, which llama.cpp leaves in the
+        content, is not taken as the reply (a reply that is only thinking is no reply).
     The result's "env_intercepts" counts the calls dedupe and search_budget answered themselves (present only when env is set)."""
 
     ENV_KEYS = ("inline_portfolio", "dedupe", "search_budget", "final_nudge", "max_turns", "max_tokens", "tools",
-                "noop_tool", "stop_after_action")
+                "noop_tool", "stop_after_action", "strip_thinking")
     NOOP_TOOL = {"type": "function", "function": {"name": "pm_nothing", "description":
                  "Do nothing: this message or event needs no action and nobody is told (a progress report, a usage limit, "
                  "a stall the person asked for).", "parameters": {"type": "object", "properties": {}}}}
@@ -105,6 +121,7 @@ class OpenAICompatible:
     DEDUPE_MSG = "(You already made this exact call; its result is above. Decide and act now.)"
     SEARCH_MSG = ("(Search budget spent. Act on what you have; if the portfolio and kernel do not hold the answer, "
                   "start a worker or say you do not know.)")
+    THINKING_NUDGE = "You only thought; nothing was done or said. Act now: one tool call, or a plain-text reply."
     FINAL_NUDGE = "Last turn: make your decision now with one tool call, or reply in plain text."
 
     def __init__(self, url, model="local", prompt_file=None, extra=None, max_turns=10, timeout=900, name=None,
@@ -162,9 +179,14 @@ class OpenAICompatible:
                          turns=tok["turns"] + 1)
             m = r["choices"][0]["message"]
             msgs.append({k: v for k, v in m.items() if k in ("role", "content", "tool_calls") and v is not None})
-            final = m.get("content") or final
+            content = m.get("content") or ""
+            final = (strip_thinking(content) if env.get("strip_thinking") else content) or final
             calls = m.get("tool_calls") or []
             if not calls:
+                if env.get("strip_thinking") and not strip_thinking(content) and turn_no < self.max_turns - 1:
+                    hits["thinking_only"] = hits.get("thinking_only", 0) + 1
+                    msgs.append({"role": "user", "content": self.THINKING_NUDGE})
+                    continue
                 break
             done = False
             for c in calls:

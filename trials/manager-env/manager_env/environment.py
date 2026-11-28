@@ -145,6 +145,8 @@ class ManagerEnvironment(MCPEnvironment):
         if ep["done"]:
             raise RuntimeError("the episode is over; reset()")
         md = action.metadata or {}
+        if md.get("content") and self.options.get("strip_thinking"):
+            md = {**md, "content": drivers.strip_thinking(md["content"])}
         if md.get("content"):
             ep["content"] = md["content"]
         if md.get("tokens"):
@@ -154,8 +156,9 @@ class ManagerEnvironment(MCPEnvironment):
         ep["steps"] += 1
         self._state.step_count = ep["steps"]
         if action.type == "end_turn":
-            if action.text.strip():
-                ep["content"] = action.text
+            text = drivers.strip_thinking(action.text) if self.options.get("strip_thinking") else action.text
+            if text.strip():
+                ep["content"] = text
             return self._finish(action)
         # a tool call
         name, args = action.tool_name, action.arguments if isinstance(action.arguments, dict) else {}

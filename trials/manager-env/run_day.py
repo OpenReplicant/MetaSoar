@@ -43,9 +43,11 @@ def play_turn(env, driver, obs, log=print):
     t0 = time.monotonic()
     msgs = [{"role": "system", "content": driver.prompt}, {"role": "user", "content": obs.message}]
     tool_trace, tok = [], drivers.tokens()
+    nudged = None
     while True:
-        if obs.nudge:
+        if obs.nudge and obs is not nudged:  # a thinking-only retry keeps obs: its nudge was already sent
             msgs.append({"role": "user", "content": obs.nudge})
+            nudged = obs
         r = driver.turn(msgs)
         u = r.get("usage") or {}
         tok = drivers.tokens(tok["input"] + u.get("prompt_tokens", 0), tok["output"] + u.get("completion_tokens", 0),
@@ -54,6 +56,9 @@ def play_turn(env, driver, obs, log=print):
         msgs.append({k: v for k, v in m.items() if k in ("role", "content", "tool_calls") and v is not None})
         content, calls = m.get("content") or "", m.get("tool_calls") or []
         now = time.monotonic() - t0
+        if not calls and env.options.get("strip_thinking") and not drivers.strip_thinking(content) and tok["turns"] < env.max_steps:
+            msgs.append({"role": "user", "content": drivers.OpenAICompatible.THINKING_NUDGE})
+            continue
         if not calls:
             return env.step(DayAction(type="end_turn", text=content, seconds=now, metadata={"tokens": tok})), msgs, tool_trace, tok, now
         for c in calls:

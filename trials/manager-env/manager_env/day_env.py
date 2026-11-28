@@ -182,6 +182,8 @@ class DayEnvironment(MCPEnvironment):
             raise RuntimeError("the day is over; reset()")
         t = self.turn
         md = action.metadata or {}
+        if md.get("content") and self.options.get("strip_thinking"):
+            md = {**md, "content": drivers.strip_thinking(md["content"])}
         if md.get("content"):
             t["content"] = md["content"]
         if md.get("tokens"):
@@ -191,8 +193,9 @@ class DayEnvironment(MCPEnvironment):
         t["steps"] += 1
         self._state.step_count += 1
         if action.type == "end_turn":
-            if action.text.strip():
-                t["content"] = action.text
+            text = drivers.strip_thinking(action.text) if self.options.get("strip_thinking") else action.text
+            if text.strip():
+                t["content"] = text
             return self._end_turn(action.seconds)
         name, args = action.tool_name, action.arguments if isinstance(action.arguments, dict) else {}
         opts, stub = self.options, self.stub

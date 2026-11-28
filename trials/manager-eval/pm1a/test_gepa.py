@@ -278,5 +278,15 @@ class ReplayDefaults(Base):
         self.assertEqual(replay.make_driver(a).env, {"dedupe": True})
 
 
+class StripThinkingTests(unittest.TestCase):
+    def test_forms(self):
+        from drivers import strip_thinking as f
+        self.assertEqual(f("Plain answer."), "Plain answer.")
+        self.assertEqual(f("<|message_model|><|content_thinking|>I should check w-21 first"), "")
+        self.assertEqual(f("<|message_model|><|content_thinking|>hmm<|end_message|><|message_model|><|content_text|>Done: sent to w-22."),
+                         "Done: sent to w-22.")
+        self.assertEqual(f(""), "")
+
+
 if __name__ == "__main__":
     unittest.main()

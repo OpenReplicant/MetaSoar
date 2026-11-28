@@ -1,0 +1,31 @@
+{
+ "about": "Round 5 (from r3: under p1/p4 the prefill switched on and 23 of 43 turns ended on a reply that was only Inkling's thinking, which llama.cpp leaves in the content; 6-7 of each prompt's misses are among them; m1 never switched and had none). strip_thinking: a thinking-only reply does not end the turn, a nudge to act is sent. A harness fix, no new wording.",
+ "candidates": [
+  {
+   "id": "p1think",
+   "prompt": "prompts/p1.md",
+   "env": {
+    "strip_thinking": true
+   },
+   "prefill": "auto"
+  },
+  {
+   "id": "p4think",
+   "prompt": "prompts/p4.md",
+   "env": {
+    "strip_thinking": true
+   },
+   "prefill": "auto"
+  },
+  {
+   "id": "p4thinkenv",
+   "prompt": "prompts/p4.md",
+   "env": {
+    "strip_thinking": true,
+    "search_budget": 2,
+    "final_nudge": true
+   },
+   "prefill": "auto"
+  }
+ ]
+}
