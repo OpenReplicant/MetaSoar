@@ -170,6 +170,24 @@ class EnvOptions(Base):
         self.assertEqual(d.info()["env"], {"dedupe": True})
 
 
+class RouterOptions(Base):
+    def test_tools_subset_and_noop(self):
+        f, res = self.drive(scripted([call("pm_portfolio", {}), call("pm_nothing", {}), call("desktop_say", {"text": "x"})]),
+                            {"tools": ["pm_worker_start", "desktop_say"], "noop_tool": True})
+        names = [t["function"]["name"] for t in f.requests[0]["tools"]]
+        self.assertEqual(names, ["pm_worker_start", "desktop_say", "pm_nothing"])
+        self.assertEqual(self.traced(), [])  # hidden tool not run, noop ends the turn before the say
+        self.assertEqual(len(f.requests), 2)
+        self.assertIsNone(res["error"])
+
+    def test_stop_after_action(self):
+        start = {"project": "kernel", "runner": "local", "objective": "o", "output": "o", "boundaries": "b", "done_when": "d"}
+        f, res = self.drive(scripted([call("pm_portfolio", {}), call("pm_worker_start", start), call("pm_worker_start", start)]),
+                            {"stop_after_action": True})
+        self.assertEqual([c["tool"] for c in self.traced()], ["pm_portfolio", "pm_worker_start"])
+        self.assertIsNone(res["error"])
+
+
 def write(path, obj):
     with open(path, "w") as f:
         json.dump(obj, f)

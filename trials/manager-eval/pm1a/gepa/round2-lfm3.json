@@ -1,0 +1,76 @@
+{
+ "about": "Round 2 for LFM3 (from r1: no candidate above 21%; it answers in prose, uses notes as a sink for work, rereads the portfolio, repeats starts): a one-call router environment, portfolio inline, action tools only, a do-nothing tool, the turn ends at the first action.",
+ "candidates": [
+  {
+   "id": "r1",
+   "prompt": "prompts/r1.md",
+   "env": {
+    "inline_portfolio": true,
+    "tools": [
+     "pm_worker_start",
+     "pm_worker_message",
+     "pm_worker_stop",
+     "pm_decision_open",
+     "desktop_ask",
+     "desktop_say"
+    ],
+    "noop_tool": true,
+    "stop_after_action": true,
+    "max_turns": 2
+   },
+   "extra": {
+    "chat_template_kwargs": {
+     "enable_thinking": false
+    }
+   }
+  },
+  {
+   "id": "r1req",
+   "prompt": "prompts/r1.md",
+   "env": {
+    "inline_portfolio": true,
+    "tools": [
+     "pm_worker_start",
+     "pm_worker_message",
+     "pm_worker_stop",
+     "pm_decision_open",
+     "desktop_ask",
+     "desktop_say"
+    ],
+    "noop_tool": true,
+    "stop_after_action": true,
+    "max_turns": 2
+   },
+   "extra": {
+    "chat_template_kwargs": {
+     "enable_thinking": false
+    },
+    "tool_choice": "required"
+   }
+  },
+  {
+   "id": "p3router",
+   "prompt": "prompts/p3.md",
+   "env": {
+    "inline_portfolio": true,
+    "tools": [
+     "pm_worker_start",
+     "pm_worker_message",
+     "pm_worker_stop",
+     "pm_decision_open",
+     "desktop_ask",
+     "desktop_say"
+    ],
+    "noop_tool": true,
+    "stop_after_action": true,
+    "max_turns": 2
+   },
+   "extra": {
+    "chat_template_kwargs": {
+     "enable_thinking": false
+    },
+    "tool_choice": "required"
+   }
+  }
+ ]
+}

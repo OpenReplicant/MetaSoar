@@ -90,10 +90,18 @@ class OpenAICompatible:
                                stub; the model gets DEDUPE_MSG;
       search_budget (int|None) kernel_search calls after this many in a run are not sent to the stub; SEARCH_MSG instead;
       final_nudge (bool)       before the last allowed turn, a user message FINAL_NUDGE is appended;
-      max_turns, max_tokens    override the arguments of the same name.
+      max_turns, max_tokens    override the arguments of the same name;
+      tools (list|None)        offer only these of the stub's tools (a call to another gets "no such tool");
+      noop_tool (bool)         also offer NOOP_TOOL: calling it ends the turn with nothing done and nobody told (not traced);
+      stop_after_action (bool) end the turn after the first successful start, message, stop, decision, ask or say.
     The result's "env_intercepts" counts the calls dedupe and search_budget answered themselves (present only when env is set)."""
 
-    ENV_KEYS = ("inline_portfolio", "dedupe", "search_budget", "final_nudge", "max_turns", "max_tokens")
+    ENV_KEYS = ("inline_portfolio", "dedupe", "search_budget", "final_nudge", "max_turns", "max_tokens", "tools",
+                "noop_tool", "stop_after_action")
+    NOOP_TOOL = {"type": "function", "function": {"name": "pm_nothing", "description":
+                 "Do nothing: this message or event needs no action and nobody is told (a progress report, a usage limit, "
+                 "a stall the person asked for).", "parameters": {"type": "object", "properties": {}}}}
+    ACTIONS = {"pm_worker_start", "pm_worker_message", "pm_worker_stop", "pm_decision_open", "desktop_ask", "desktop_say"}
     DEDUPE_MSG = "(You already made this exact call; its result is above. Decide and act now.)"
     SEARCH_MSG = ("(Search budget spent. Act on what you have; if the portfolio and kernel do not hold the answer, "
                   "start a worker or say you do not know.)")
@@ -123,7 +131,10 @@ class OpenAICompatible:
 
     def turn(self, msgs):
         pre = self.prefill == "on"
-        body = {"model": self.model, "tools": openai_tools(), "temperature": 0, "max_tokens": self.max_tokens, **self.extra,
+        tools = [x for x in openai_tools() if self.env.get("tools") is None or x["function"]["name"] in self.env["tools"]]
+        if self.env.get("noop_tool"):
+            tools.append(self.NOOP_TOOL)
+        body = {"model": self.model, "tools": tools, "temperature": 0, "max_tokens": self.max_tokens, **self.extra,
                 "messages": msgs + ([{"role": "assistant", "content": EMPTY_THINKING}] if pre else [])}
         r = post(self.url + "/v1/chat/completions", body, self.timeout)
         m = r["choices"][0]["message"]
@@ -155,6 +166,7 @@ class OpenAICompatible:
             calls = m.get("tool_calls") or []
             if not calls:
                 break
+            done = False
             for c in calls:
                 fn = c["function"]
                 try:
@@ -162,6 +174,9 @@ class OpenAICompatible:
                     args = json.loads(args) if isinstance(args, str) else args
                 except ValueError:
                     args = {}
+                if env.get("noop_tool") and fn["name"] == "pm_nothing":
+                    done = True
+                    break
                 attempts.append(fn["name"])
                 key = fn["name"] + json.dumps(args, sort_keys=True, separators=(",", ":"))
                 if env.get("dedupe") and key in seen:
@@ -174,9 +189,19 @@ class OpenAICompatible:
                 else:
                     if fn["name"] == "kernel_search":
                         searches += 1
-                    res = stub.call(fn["name"], args)[0] if fn["name"] in stub_pm.NAMES else f"no such tool: {fn['name']}"
+                    allowed = fn["name"] in stub_pm.NAMES and (env.get("tools") is None or fn["name"] in env["tools"])
+                    if allowed:
+                        res, err = stub.call(fn["name"], args)
+                        if env.get("stop_after_action") and not err and fn["name"] in self.ACTIONS:
+                            done = True
+                    else:
+                        res = f"no such tool: {fn['name']}"
                 seen.add(key)
                 msgs.append({"role": "tool", "tool_call_id": c.get("id", ""), "content": res})
+                if done:
+                    break
+            if done:
+                break
         else:
             error = f"no final answer in {self.max_turns} turns"
         out = {"final_text": final, "launch_ts": t0, "wall_s": time.time() - t0, "tokens": tok,

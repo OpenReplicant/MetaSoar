@@ -1,0 +1,17 @@
+{
+ "about": "Round 2 (from r1: p1 fixed 9 of 13; s31/s32 passed permission and spend orders to workers; s17/s18 still asked): p3 = p1 with orders-to-grant-or-spend as decisions and project matching by goal; full-43 runs of p1 and p3 check regressions.",
+ "candidates": [
+  {
+   "id": "p1",
+   "prompt": "prompts/p1.md",
+   "env": {},
+   "prefill": "auto"
+  },
+  {
+   "id": "p3",
+   "prompt": "prompts/p3.md",
+   "env": {},
+   "prefill": "auto"
+  }
+ ]
+}
