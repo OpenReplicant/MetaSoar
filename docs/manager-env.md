@@ -90,3 +90,50 @@ separately.
   answer sheets (deterministic, more work).
 - Where `manager-env` lives: MetaSoar, where the experiments are registered, or Substrate, which owns the manager.
   This proposal assumes MetaSoar, with Substrate's harness as the source of the tools.
+
+## Tier 2 spec, v1 (2026-11-28; the owner: "don't wait for me so much")
+
+Defaults taken where the open questions above are unanswered: the owner is **scripted** (answer sheets, deterministic);
+the episode terms are **reported separately**, with no weighted sum until the owner sets weights; it lives in MetaSoar.
+
+**A day** is a list of arrivals on a simulated clock from 09:00: the owner's messages and the supervisor's and
+workers' events. It is built from **storylines**, short sequences whose later arrivals depend on what the manager did
+earlier, interleaved by a seed, plus **fillers**: PM-1a scenarios whose label does not depend on state (status
+questions, escalations).
+
+**Storylines (v1).** Each has its arrivals, its labels, and the loop it opens:
+
+| Storyline | Arrivals and labels | Loop to close |
+| --- | --- | --- |
+| experiment | owner asks for a Kaggle run on a project with a running worker → start (kaggle runner); later the started worker's `finished` → start kind judge on it | the judge |
+| plan change | owner: stop the running worker → stop; 10 min later owner gives the new plan → start | the new start |
+| ambiguous | owner sends a request two projects fit → ask; the scripted answer 5 min after the ask names one → start on it | the start after the answer |
+| decision relay | a worker's `needs_input` → decision; the owner answers the decision 20 min later (an arrival of kind `decision.answered`) → message to that worker with the answer | the message |
+| queued | owner asks for writing work on a busy project → ask or queued; later that project's worker `finished` → judge, and the queued work started (in that turn or the next) | the queued start |
+| limit | a worker's `limited` → nothing; then its `failed` after the second resume → decision | the decision |
+| burst | three worker events within 2 minutes, then an owner status question 1 minute later → answer | (owner wait, below) |
+
+Labels that name a worker are resolved at run time: "the worker started in this storyline's first arrival". If that
+worker was never started, its later events do not arrive and the storyline's loop counts as dropped.
+
+**World.** One portfolio for the whole day (`stub_pm.Stub`, not reset between turns). Workers the manager starts are
+simulated by a seed: a progress report 20 to 60 minutes later, then `finished` (70%), `limited` and then resumed by
+the supervisor (15%), or `failed` (15%). A judge worker emits `finished` with a verdict 15 minutes after it starts.
+Two writing workers on one project at the same time are recorded (kind judge and kaggle runs are not writers).
+
+**Turns.** One turn per arrival, a fresh model session each time (the portfolio, its notes and open decisions are the
+manager's memory, as designed). The clock advances by the turn's measured seconds times `speed` (default 1.0), so a
+slow manager lets arrivals queue. The queue order is FIFO; `owner_first: true` is an option (it is a design lever for
+"always attended", so it is measured, not assumed).
+
+**Measured, per day:**
+- routing per arrival, by `score.score` with each arrival's resolved label (as tier 1);
+- owner wait: for each owner message, from its arrival to the first desktop_say, desktop_ask, pm_decision_open or
+  pm_worker_start in the turn that handles it (median and 90th percentile, simulated seconds);
+- dropped loops: storyline loops still open at the end of the day;
+- double writers;
+- interruptions: asks and decisions on arrivals whose label expects neither.
+
+**Data.** Days of 15 to 30 arrivals: 10 train days built from the PM-1a texts, and 10 held-out days whose storyline and
+filler messages are rewritten by an agent that has not seen the prompts or candidates (same structure, new words and
+project details), kept out of every optimisation run.
