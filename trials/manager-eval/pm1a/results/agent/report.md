@@ -72,3 +72,9 @@ decision: the rule's "merging" is too broad; s03 and s23 flipped with no relatio
 43); r05 is void (the subagent ran two stray commands on it). The rule also quotes s32 ("whatever it costs"), so its
 PM-1a score is in-sample. To be rewritten (narrow: approving a pull request or release into main; examples in new words)
 and measured on manager-env days, not on 43 single runs.
+
+## In-sample (recorded 2026-11-28)
+
+Every number here for a tuned prompt (p1, p3, p4, m1) is in-sample: the failures that shaped the prompts were read on
+these 43 scenarios, and until e836603 the prompts quoted scenario phrases. Kaggle rounds 1 and 2 ran the quoting
+versions. Run-to-run variation of one 43-scenario run is 2 to 3 scenarios. The fair test is E-21's held-out days.
