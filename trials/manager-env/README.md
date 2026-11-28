@@ -174,6 +174,8 @@ text on w-22 and substrate, or the s14 text's wording on the manager doc). Three
 held-out days are not here: another agent writes them by hand in the JSON format above, from the structure of these, without the
 prompts or candidates, and they stay out of every optimisation run.
 
+`days/heldout-00.json` to `heldout-09.json` exist (hand-written, all text newly worded); they must never be used in optimisation.
+
 ## Tests
 
 `test_day.py`: determinism by seed (and the committed files equal `generate_day`), a perfect scripted manager that closes every
