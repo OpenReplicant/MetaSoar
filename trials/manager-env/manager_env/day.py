@@ -287,7 +287,8 @@ class Queued(Story):
 
     def setup(self):
         P, W = self.p["project"], self.p["worker"]
-        self.add("request", self.at, "owner", "work", {"project": P, "action": "ask", "also": ["queued"], "escalate": False},
+        self.add("request", self.at, "owner", "work", {"project": P, "action": "ask", "also": ["queued"], "escalate": False,
+                                                         "score_project": False},  # a correct ask often names no project
                  message=self.p["request"])
         self.add("finished", self.at + self.p["finished_after"], "event", "event",
                  {"project": P, "action": "start", "escalate": False, "kind": "judge"},
@@ -446,6 +447,8 @@ class Day:
 
     def scenario(self, a) -> dict:
         sc = {"id": a["sid"] or a["sid_full"], "kind": a["kind"], "expected": copy.deepcopy(a["expected"])}
+        if sc["expected"].pop("score_project", True) is False:  # the project is known (simulators use it) but not scored
+            sc["expected"]["project_known"], sc["expected"]["project"] = sc["expected"]["project"], None
         if a["event"] is not None:
             sc["event"] = a["event"]
         else:

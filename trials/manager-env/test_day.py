@@ -21,7 +21,8 @@ def perfect(env, obs, skip_judge=False, queue_start_now=False):
     """The actions a manager that knows the label would take on this arrival (reads the environment's own label)."""
     d, a = env.day, env.arrival
     sc = d.scenario(a)
-    exp, P, act = sc["expected"], sc["expected"]["project"], sc["expected"]["action"]
+    exp, act = sc["expected"], sc["expected"]["action"]
+    P = exp.get("project_known", exp["project"])  # a project the scorer ignores is still where the work belongs
     out = []
     if act == "start":
         kind = exp.get("kind", "work")
