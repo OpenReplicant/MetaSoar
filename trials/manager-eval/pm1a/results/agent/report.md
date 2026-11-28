@@ -63,3 +63,12 @@ Sonnet both asked without naming a project on s14 and s26, so both would score 4
 ask that names no project were not scored on project (as an `ack` already is not). The Kaggle Inkling and LFM3 runs are
 unchanged by that rule (30/43 and 9/43). The scorer is Substrate's (`scripts/trials/manager/score.py`); the change, if
 wanted, belongs there first. Until then every number here uses it unchanged.
+
+## m1 (manager.md + prompts/owner-only.md), Haiku subagents, 2026-11-28
+
+33/43 against 38/43 for manager.md; fixed none, changed five: s32 now opens the decision (right action) but names no
+project (the scorer's project check fails it); s10 ("merge main into the manager branch", a worker's git step) became a
+decision: the rule's "merging" is too broad; s03 and s23 flipped with no relation to the rule (run-to-run noise, 2-3 of
+43); r05 is void (the subagent ran two stray commands on it). The rule also quotes s32 ("whatever it costs"), so its
+PM-1a score is in-sample. To be rewritten (narrow: approving a pull request or release into main; examples in new words)
+and measured on manager-env days, not on 43 single runs.
