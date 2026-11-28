@@ -57,7 +57,8 @@ def make_driver(a):
         return claude_driver.ClaudeCode(a.model, a.effort, a.prompt)
     if a.driver == "openai-compatible":
         return drivers.OpenAICompatible(a.url, a.model or "local", a.prompt, json.loads(a.extra or "{}"),
-                                        name=f"openai-compatible:{a.label}", prefill=a.prefill)
+                                        name=f"openai-compatible:{a.label}", prefill=a.prefill,
+                                        env=json.loads(a.env or "{}"))
     return drivers.Choice(a.url or "http://127.0.0.1:8083")
 
 
@@ -66,6 +67,7 @@ def run_all(driver, scenarios, portfolio, out_path, only=None, resume=False, log
     if resume and os.path.exists(out_path):
         done = {r["id"]: r for r in json.load(open(out_path))["runs"]}
     runs, stopped = [], None
+    info = {"driver_info": driver.info()} if callable(getattr(driver, "info", None)) else {}
     for sc in scenarios:
         if only and sc["id"] not in only:
             continue
@@ -87,13 +89,15 @@ def run_all(driver, scenarios, portfolio, out_path, only=None, resume=False, log
         sco = S.score(sc, pf, trace, res)
         runs.append({"id": sc["id"], "score": sco, "trace": trace, "final_text": res.get("final_text", ""),
                      "error": res.get("error"), "reported_model": res.get("reported_model") or res.get("model"),
-                     "offered_tools": res.get("offered_tools"), "prefill": res.get("prefill")})
+                     "offered_tools": res.get("offered_tools"), "prefill": res.get("prefill"),
+                     **({"env_intercepts": res["env_intercepts"]} if "env_intercepts" in res else {})})
         log(f"{sc['id']}: {','.join(sco['tags'])} {sco['named']} routing={'ok' if sco['routing_ok'] else 'WRONG'} "
             f"{sco['wall_s']:.1f}s {sco['tokens']['output']} out" + (f" ERROR {res['error'][:80]}" if res.get("error") else ""))
         with open(out_path, "w") as f:
-            json.dump({"driver": driver.name, "stopped": stopped, "runs": runs}, f, indent=1)
+            json.dump({"driver": driver.name, **info, "stopped": stopped, "runs": runs}, f, indent=1)
     with open(out_path, "w") as f:
-        json.dump({"driver": driver.name, "date": datetime.date.today().isoformat(), "stopped": stopped, "runs": runs}, f, indent=1)
+        json.dump({"driver": driver.name, **info, "date": datetime.date.today().isoformat(), "stopped": stopped,
+                   "runs": runs}, f, indent=1)
     return runs, stopped
 
 
@@ -226,6 +230,8 @@ def main():
     r.add_argument("--url")
     r.add_argument("--extra", help="JSON merged into each chat request (openai-compatible)")
     r.add_argument("--prefill", choices=["off", "on", "auto"], default="off", help="close Inkling's thinking by prefill (openai-compatible)")
+    r.add_argument("--env", help="JSON of environment options (openai-compatible): inline_portfolio, dedupe, search_budget, "
+                                 "final_nudge, max_turns, max_tokens")
     r.add_argument("--prompt")
     r.add_argument("--label", required=True)
     r.add_argument("--out")

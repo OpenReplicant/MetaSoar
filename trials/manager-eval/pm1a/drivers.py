@@ -10,6 +10,7 @@ RateLimited so the run can stop and report.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import subprocess
@@ -80,15 +81,45 @@ class OpenAICompatible:
     into the request (e.g. {"chat_template_kwargs": {"enable_thinking": false}}). `prefill` closes the model's thinking
     before it starts, by ending the messages with an assistant message of EMPTY_THINKING (llama.cpp continues it):
     "off", "on", or "auto" (plain first; when a turn comes back with no tool call and no text, as when the budget went
-    on thinking, switch to the prefill for the rest of the run, sticky across scenarios). `mode_log` records the switch."""
+    on thinking, switch to the prefill for the rest of the run, sticky across scenarios). `mode_log` records the switch.
+
+    `env` (default {}: nothing changes) shapes the environment around the model, for prompt/environment optimisation:
+      inline_portfolio (bool)  the first user message gets "Current portfolio (what pm_portfolio returns):\n<json>" appended
+                               (not a traced call);
+      dedupe (bool)            an exact repeat (same tool, same arguments as canonical JSON) within a run is not sent to the
+                               stub; the model gets DEDUPE_MSG;
+      search_budget (int|None) kernel_search calls after this many in a run are not sent to the stub; SEARCH_MSG instead;
+      final_nudge (bool)       before the last allowed turn, a user message FINAL_NUDGE is appended;
+      max_turns, max_tokens    override the arguments of the same name.
+    The result's "env_intercepts" counts the calls dedupe and search_budget answered themselves (present only when env is set)."""
+
+    ENV_KEYS = ("inline_portfolio", "dedupe", "search_budget", "final_nudge", "max_turns", "max_tokens")
+    DEDUPE_MSG = "(You already made this exact call; its result is above. Decide and act now.)"
+    SEARCH_MSG = ("(Search budget spent. Act on what you have; if the portfolio and kernel do not hold the answer, "
+                  "start a worker or say you do not know.)")
+    FINAL_NUDGE = "Last turn: make your decision now with one tool call, or reply in plain text."
 
     def __init__(self, url, model="local", prompt_file=None, extra=None, max_turns=10, timeout=900, name=None,
-                 prefill="off", max_tokens=2048):
+                 prefill="off", max_tokens=2048, env=None):
         self.name = name or f"openai-compatible:{model}"
+        self.env = dict(env or {})
+        bad = sorted(set(self.env) - set(self.ENV_KEYS))
+        if bad:
+            raise ValueError(f"unknown env option(s) {bad}; known: {list(self.ENV_KEYS)}")
+        max_turns = int(self.env.get("max_turns") or max_turns)
+        max_tokens = int(self.env.get("max_tokens") or max_tokens)
         self.url, self.model, self.extra, self.max_turns, self.timeout = url.rstrip("/"), model, extra or {}, max_turns, timeout
         self.prefill, self.max_tokens, self.mode_log = prefill, max_tokens, []
-        with open(prompt_file or os.path.join(HERE, "manager.md")) as f:
-            self.prompt = f.read()
+        self.prompt_file = os.path.abspath(prompt_file or os.path.join(HERE, "manager.md"))
+        with open(self.prompt_file, "rb") as f:
+            raw = f.read()
+        self.prompt = raw.decode()
+        self.prompt_sha256 = hashlib.sha256(raw).hexdigest()
+
+    def info(self):
+        return {"env": self.env, "prompt": self.prompt_file, "prompt_sha256": self.prompt_sha256, "url": self.url,
+                "model": self.model, "extra": self.extra, "prefill": self.prefill, "max_turns": self.max_turns,
+                "max_tokens": self.max_tokens}
 
     def turn(self, msgs):
         pre = self.prefill == "on"
@@ -104,9 +135,16 @@ class OpenAICompatible:
 
     def run(self, text, portfolio, trace_path):
         stub = stub_pm.Stub(portfolio, trace_path)
-        msgs = [{"role": "system", "content": self.prompt}, {"role": "user", "content": text}]
+        env = self.env
+        first = text
+        if env.get("inline_portfolio"):
+            first += "\n\nCurrent portfolio (what pm_portfolio returns):\n" + json.dumps(stub.p)
+        msgs = [{"role": "system", "content": self.prompt}, {"role": "user", "content": first}]
         tok, attempts, final, error, t0 = tokens(), [], "", None, time.time()
-        for _ in range(self.max_turns):
+        seen, searches, hits = set(), 0, {"dedupe": 0, "search_budget": 0}
+        for turn_no in range(self.max_turns):
+            if env.get("final_nudge") and self.max_turns > 1 and turn_no == self.max_turns - 1:
+                msgs.append({"role": "user", "content": self.FINAL_NUDGE})
             r = self.turn(msgs)
             u = r.get("usage") or {}
             tok = tokens(tok["input"] + u.get("prompt_tokens", 0), tok["output"] + u.get("completion_tokens", 0),
@@ -125,13 +163,28 @@ class OpenAICompatible:
                 except ValueError:
                     args = {}
                 attempts.append(fn["name"])
-                res = stub.call(fn["name"], args)[0] if fn["name"] in stub_pm.NAMES else f"no such tool: {fn['name']}"
+                key = fn["name"] + json.dumps(args, sort_keys=True, separators=(",", ":"))
+                if env.get("dedupe") and key in seen:
+                    hits["dedupe"] += 1
+                    res = self.DEDUPE_MSG
+                elif (fn["name"] == "kernel_search" and env.get("search_budget") is not None
+                      and searches >= int(env["search_budget"])):
+                    hits["search_budget"] += 1
+                    res = self.SEARCH_MSG
+                else:
+                    if fn["name"] == "kernel_search":
+                        searches += 1
+                    res = stub.call(fn["name"], args)[0] if fn["name"] in stub_pm.NAMES else f"no such tool: {fn['name']}"
+                seen.add(key)
                 msgs.append({"role": "tool", "tool_call_id": c.get("id", ""), "content": res})
         else:
             error = f"no final answer in {self.max_turns} turns"
-        return {"final_text": final, "launch_ts": t0, "wall_s": time.time() - t0, "tokens": tok,
-                "offered_tools": list(stub_pm.NAMES), "attempts": attempts, "error": error, "model": self.model,
-                "prefill": self.prefill}
+        out = {"final_text": final, "launch_ts": t0, "wall_s": time.time() - t0, "tokens": tok,
+               "offered_tools": list(stub_pm.NAMES), "attempts": attempts, "error": error, "model": self.model,
+               "prefill": self.prefill}
+        if env:
+            out["env_intercepts"] = hits
+        return out
 
 
 class Choice:
