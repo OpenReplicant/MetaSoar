@@ -1,0 +1,287 @@
+{
+ "seed": 20261127,
+ "per_label": 20,
+ "source": "MS-Eval 4c1bbd3dc0d736623bba563e56cfd8666f85daac",
+ "items": [
+  {
+   "id": "academic-literature-review",
+   "label": "need_subagent",
+   "delegate_expected": true,
+   "prompt_sha256": "ceb0f192cfa12f589dea2aceba7415e93287e1b74164d421009c0cab124b2585",
+   "prompt_chars": 4666
+  },
+  {
+   "id": "academic-presentation-builder",
+   "label": "need_subagent",
+   "delegate_expected": true,
+   "prompt_sha256": "f1d934c99b1313ebd5272b330146e0a41a313db317629bd568415d25c80a3091",
+   "prompt_chars": 4681
+  },
+  {
+   "id": "arxiv-research-pipeline-notion-excel",
+   "label": "need_subagent",
+   "delegate_expected": true,
+   "prompt_sha256": "02f9bfdd7d034a08868be3d4ba14fc8bbda02c208f506eb7d75d7a04f033d66c",
+   "prompt_chars": 2485
+  },
+  {
+   "id": "canvas-course-comparison",
+   "label": "need_subagent",
+   "delegate_expected": true,
+   "prompt_sha256": "17f47ac883fdb331117e83527db01f6c6dc95f0b940572eca7bc150a23b3973b",
+   "prompt_chars": 2098
+  },
+  {
+   "id": "canvas-course-comparison-word",
+   "label": "need_subagent",
+   "delegate_expected": true,
+   "prompt_sha256": "d9fdb27daf9b5b490422678eac0e9612a55f84a4da6d1b87fe7d731133ff6c70",
+   "prompt_chars": 2989
+  },
+  {
+   "id": "canvas-course-feedback",
+   "label": "need_subagent",
+   "delegate_expected": true,
+   "prompt_sha256": "9c13531bb595c46d0706851ea728ff7f99bf5caaf6509dc94b965c905f73bf2c",
+   "prompt_chars": 3165
+  },
+  {
+   "id": "canvas-course-notion-wiki",
+   "label": "need_subagent",
+   "delegate_expected": true,
+   "prompt_sha256": "4b630004de1977d915c7c6cec246e8f0fe1cf4207087ae1e652241e7bf041aff",
+   "prompt_chars": 2827
+  },
+  {
+   "id": "canvas-grade-distribution-gform",
+   "label": "need_subagent",
+   "delegate_expected": true,
+   "prompt_sha256": "9fb325bdbc04e659d02172bfb3ec5429b53bbb7d8e861e215615918bb7c5bec8",
+   "prompt_chars": 2802
+  },
+  {
+   "id": "canvas-late-submission-gcal",
+   "label": "need_subagent",
+   "delegate_expected": true,
+   "prompt_sha256": "b685dec0cf80960f58e00a06c5275c9c0d0979902727ceac645eb3a40e3f12a2",
+   "prompt_chars": 2985
+  },
+  {
+   "id": "canvas-quiz-item-analysis-word-gcal-email",
+   "label": "need_subagent",
+   "delegate_expected": true,
+   "prompt_sha256": "d28f6ac1e2470481691ccc8b5b5b2a23be13534c8976204b30d3e9b8c538467e",
+   "prompt_chars": 4849
+  },
+  {
+   "id": "canvas-scholarly-curriculum-review",
+   "label": "need_subagent",
+   "delegate_expected": true,
+   "prompt_sha256": "241c6c1d4c6835434a7844d93cf26d8f9d67636fd21415f3e8cc963f2a7e0da5",
+   "prompt_chars": 4275
+  },
+  {
+   "id": "canvas-ta-workload-excel-email",
+   "label": "need_subagent",
+   "delegate_expected": true,
+   "prompt_sha256": "650596de209f9aa60f2f114a726bea1ee355780a924324afd0e8c5899ca2dbda",
+   "prompt_chars": 2190
+  },
+  {
+   "id": "ecommerce-commodity-impact",
+   "label": "need_subagent",
+   "delegate_expected": true,
+   "prompt_sha256": "bc15c30081050d7eeb40e73225ae0ad8791f0aaebdcd84ce5dc29998be8f5c3d",
+   "prompt_chars": 4392
+  },
+  {
+   "id": "howtocook-workshop-materials",
+   "label": "need_subagent",
+   "delegate_expected": true,
+   "prompt_sha256": "47538e6a490abb3f5909b0c22dcaf3234a384b1775451000ac44a7c02617b125",
+   "prompt_chars": 2955
+  },
+  {
+   "id": "supplier-contract-compliance-audit",
+   "label": "need_subagent",
+   "delegate_expected": true,
+   "prompt_sha256": "9d0254f21b9f59fc57bfc9bba35b82e54c6458824119b44c12bf9d73a26ea177",
+   "prompt_chars": 5149
+  },
+  {
+   "id": "terminal-arxiv-scholarly-notion-word-excel",
+   "label": "need_subagent",
+   "delegate_expected": true,
+   "prompt_sha256": "4aecba27f835921c7b846efbe4a9bd6d55a9b4c991d803bb57bdfb3d037f46cb",
+   "prompt_chars": 4301
+  },
+  {
+   "id": "terminal-sf-wc-yf-excel-ppt",
+   "label": "need_subagent",
+   "delegate_expected": true,
+   "prompt_sha256": "2ecd867d104997001f1ae2c0c353df4ef7f210219f5fd50ee356c4a8a04de493",
+   "prompt_chars": 6122
+  },
+  {
+   "id": "terminal-yf-canvas-excel-gcal-email",
+   "label": "need_subagent",
+   "delegate_expected": true,
+   "prompt_sha256": "15175430c2d7ff983495b5def30ce6f8851c5e815b83e13e665084764516eff7",
+   "prompt_chars": 5199
+  },
+  {
+   "id": "terminal-yf-wc-excel-word-notion",
+   "label": "need_subagent",
+   "delegate_expected": true,
+   "prompt_sha256": "1bc25a1aaa677efe79860a4de77a8a2e34f775b8103516df8ad000ede15e3d8e",
+   "prompt_chars": 5714
+  },
+  {
+   "id": "yf-sector-outlook-report",
+   "label": "need_subagent",
+   "delegate_expected": true,
+   "prompt_sha256": "23d079d0e1cda05c5e117f0bf4fc803408295cf62d6e5ecc1f577f4ef5e9f8c2",
+   "prompt_chars": 5365
+  },
+  {
+   "id": "canvas-assignment-feedback-gform-word",
+   "label": "no_need_subagent",
+   "delegate_expected": false,
+   "prompt_sha256": "94634e9d8425f1f2aec2c3a4b1f05a2c7ee89f3fd6cb3ceacda9a0b29bbea39a",
+   "prompt_chars": 2884
+  },
+  {
+   "id": "canvas-enrollment-forecast-excel-gform-email",
+   "label": "no_need_subagent",
+   "delegate_expected": false,
+   "prompt_sha256": "8cf361d1c8bba14ea7ae6c729cb86018c503dec4781b3bfc4f43382cbff8c8ba",
+   "prompt_chars": 5258
+  },
+  {
+   "id": "canvas-enrollment-overview-excel-email",
+   "label": "no_need_subagent",
+   "delegate_expected": false,
+   "prompt_sha256": "15a501002b962fa8f27dd5f224649c71214669db7ee3bb9e41ca0f799b993b7b",
+   "prompt_chars": 2246
+  },
+  {
+   "id": "canvas-quiz-performance-gcal-gform",
+   "label": "no_need_subagent",
+   "delegate_expected": false,
+   "prompt_sha256": "b34240f52f896de7737fbd1dcd01d624f7b106116565da2528720bf9c8a29937",
+   "prompt_chars": 3804
+  },
+  {
+   "id": "howtocook-diet-gform-notion-excel",
+   "label": "no_need_subagent",
+   "delegate_expected": false,
+   "prompt_sha256": "44447b688bbeb3a7c19a74e5c6618050b32a36cc6663ac3ab3a3f3959e4549ed",
+   "prompt_chars": 2874
+  },
+  {
+   "id": "howtocook-ecommerce-bundle",
+   "label": "no_need_subagent",
+   "delegate_expected": false,
+   "prompt_sha256": "366ab0583e70ee8cbf4cbf2e665ae7fe8e5294ad2ec78b26ad3ae34da594d598",
+   "prompt_chars": 3381
+  },
+  {
+   "id": "playwright-sf-hr-benefits-survey-gform-excel",
+   "label": "no_need_subagent",
+   "delegate_expected": false,
+   "prompt_sha256": "ae756af8095dd80fe610db7fe0b35550b6fec88011fb4369fedf2a382150b1bb",
+   "prompt_chars": 4470
+  },
+  {
+   "id": "sf-hr-education-notion",
+   "label": "no_need_subagent",
+   "delegate_expected": false,
+   "prompt_sha256": "5234a0c2bc8d51cd6f8413a8a28eed295cba53d09c58a1bb980b93f137ba7bc1",
+   "prompt_chars": 2642
+  },
+  {
+   "id": "sf-hr-salary-benchmark-gform-excel-email",
+   "label": "no_need_subagent",
+   "delegate_expected": false,
+   "prompt_sha256": "fb4089572e55f5d864c3d442e7b013672ab072b490963573c03ed5ddd0e74e5b",
+   "prompt_chars": 2939
+  },
+  {
+   "id": "sf-sales-trend-word-pdf",
+   "label": "no_need_subagent",
+   "delegate_expected": false,
+   "prompt_sha256": "ffddecff418bd079c20fecc60068414961292cf6382db3f264550f6fb81618d5",
+   "prompt_chars": 2544
+  },
+  {
+   "id": "sf-support-priority-review",
+   "label": "no_need_subagent",
+   "delegate_expected": false,
+   "prompt_sha256": "78c78c9c02534c454b0da547354eaf69a69ccb0c249bd6befc58bdc8434bf71a",
+   "prompt_chars": 1948
+  },
+  {
+   "id": "terminal-canvas-howtocook-gsheet-notion-email",
+   "label": "no_need_subagent",
+   "delegate_expected": false,
+   "prompt_sha256": "ee15b92338e494d454ca3129ecbe27e59457c420de3252762e99286861a3e714",
+   "prompt_chars": 6616
+  },
+  {
+   "id": "terminal-sf-scholarly-excel-ppt-gcal",
+   "label": "no_need_subagent",
+   "delegate_expected": false,
+   "prompt_sha256": "3887eb20dc4be638d058178eb74d435ea2e005a1936d8d8b163a862ea9a8dc25",
+   "prompt_chars": 6107
+  },
+  {
+   "id": "wc-category-performance-ppt",
+   "label": "no_need_subagent",
+   "delegate_expected": false,
+   "prompt_sha256": "5c7b3997849f05d341eab4aa85067f4efc48fa3e2e39064b8376a1696b0283cf",
+   "prompt_chars": 2002
+  },
+  {
+   "id": "yf-financial-health-excel-notion",
+   "label": "no_need_subagent",
+   "delegate_expected": false,
+   "prompt_sha256": "40ce6fbeb71bdb32c1ecb5fee523710fb82b8d819a585c5670375d444b373ce6",
+   "prompt_chars": 2362
+  },
+  {
+   "id": "yf-portfolio-gsheet-pdf-gcal-email",
+   "label": "no_need_subagent",
+   "delegate_expected": false,
+   "prompt_sha256": "d63673183e9d780240b4f3b4c51545d0804b31f6376d753de7757113a2dd5246",
+   "prompt_chars": 2660
+  },
+  {
+   "id": "yf-portfolio-risk-excel",
+   "label": "no_need_subagent",
+   "delegate_expected": false,
+   "prompt_sha256": "7ab89afa79a880eb866eeb168d159e5860cbe6ed542de7cdcb661c41824477bc",
+   "prompt_chars": 2346
+  },
+  {
+   "id": "yf-sector-rotation-dashboard",
+   "label": "no_need_subagent",
+   "delegate_expected": false,
+   "prompt_sha256": "ee0ffa98a5edd06bb8456abe8c57fdb424e30c49306a9401474295edb83ef9ea",
+   "prompt_chars": 3358
+  },
+  {
+   "id": "yt-fireship-gform-survey-excel-gcal",
+   "label": "no_need_subagent",
+   "delegate_expected": false,
+   "prompt_sha256": "77124c85c62c4ae331856cfddd59f7b757c118fb98bd5eb8673044940ba238ac",
+   "prompt_chars": 4109
+  },
+  {
+   "id": "yt-ml-repos-github-notion-excel-email",
+   "label": "no_need_subagent",
+   "delegate_expected": false,
+   "prompt_sha256": "0201a6f4fd904e10a76dc9599a635ccaf5517ada63570cb1ac933bd5ec77c38f",
+   "prompt_chars": 4239
+  }
+ ]
+}
