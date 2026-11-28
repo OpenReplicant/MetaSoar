@@ -1,7 +1,0 @@
-{"about": "Round 1, from the failures of job pm1a (commit 75a2423): p1 = manager.md + a decision order and a search limit; p2 = a short procedural prompt for LFM3; env = portfolio in the first message, repeated calls refused, two searches, a last-turn nudge.",
- "candidates": [
-  {"id": "p1", "prompt": "prompts/p1.md", "env": {}},
-  {"id": "env", "prompt": null, "env": {"inline_portfolio": true, "dedupe": true, "search_budget": 2, "final_nudge": true}},
-  {"id": "p1env", "prompt": "prompts/p1.md", "env": {"inline_portfolio": true, "dedupe": true, "search_budget": 2, "final_nudge": true}},
-  {"id": "p2env", "prompt": "prompts/p2.md", "env": {"inline_portfolio": true, "dedupe": true, "search_budget": 2, "final_nudge": true}}
- ]}
