@@ -1,0 +1,28 @@
+{
+ "about": "Round 3 LFM3: r1o = the one-call router r1 + the owner-only rule (r1 lost s31 and lacked decisions for owner-only orders); r1 itself is unchanged and deterministic, so not re-run.",
+ "candidates": [
+  {
+   "id": "r1o",
+   "prompt": "prompts/r1o.md",
+   "env": {
+    "inline_portfolio": true,
+    "tools": [
+     "pm_worker_start",
+     "pm_worker_message",
+     "pm_worker_stop",
+     "pm_decision_open",
+     "desktop_ask",
+     "desktop_say"
+    ],
+    "noop_tool": true,
+    "stop_after_action": true,
+    "max_turns": 2
+   },
+   "extra": {
+    "chat_template_kwargs": {
+     "enable_thinking": false
+    }
+   }
+  }
+ ]
+}
