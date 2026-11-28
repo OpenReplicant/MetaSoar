@@ -98,3 +98,20 @@ is in-sample: the rule was written after reading these scenarios' failures.
 | lfm3-p3router | 9/43 | 9/43 | | |
 
 These prompts quoted scenario phrases, so the gains are an upper bound. The test that counts is E-21 on held-out days.
+
+## Kaggle round 3 (pm1a-gepa-r3, commit 6533cdb: reworded prompts, no scenario phrases; still in-sample)
+
+| Candidate | Routing | Round 2 (leaky wording) | Kaggle baseline |
+| --- | --- | --- | --- |
+| inkling-m1 (manager.md + owner-only) | 35/43 | | 30/43 |
+| inkling-p4 | 35/43 | 33/43 | 30/43 |
+| inkling-p1 | 33/43 | 35/43 | 30/43 |
+| lfm3-r1o (router + owner-only) | 12/43 | r1: 13/43 | 9/43 |
+
+- Removing the quoted phrases cost nothing measurable: p4 +2, p1 -2, both within noise.
+- Misses every Inkling prompt shares: s23 ("fix the judge", should ask) and s26. Of each prompt's 8-10 misses, 3-4 are
+  "no final answer in 10 turns" after repeated `kernel_search`: round 4 tests search_budget 2 + final_nudge.
+- s03 under p4 is a correct answer citing "PR 34" without the project id: what `manager_env.refs` would credit.
+- p1 and p4 leak chat-template tokens (`<|message_model|><|content_thinking|>`) into 23 of 43 closing texts; m1 none.
+  The scorer ignores the closing text's form, but a person would see it: a driver or prompt fix before any real use.
+- LFM3: the owner-only rule did not help the router (s31 still missed); LFM3 stays far below Inkling.
