@@ -115,3 +115,15 @@ These prompts quoted scenario phrases, so the gains are an upper bound. The test
 - p1 and p4 leak chat-template tokens (`<|message_model|><|content_thinking|>`) into 23 of 43 closing texts; m1 none.
   The scorer ignores the closing text's form, but a person would see it: a driver or prompt fix before any real use.
 - LFM3: the owner-only rule did not help the router (s31 still missed); LFM3 stays far below Inkling.
+
+## Kaggle round 4 (pm1a-gepa-r4, commit 24839a9: search_budget 2 + final_nudge; in-sample)
+
+| Candidate | Routing | Same prompt, round 3 | Prefill switched on | Thinking-only closing texts |
+| --- | --- | --- | --- | --- |
+| inkling-p4env | **40/43** (+s18 s21 s26 s33 r04 r06, -s24) | 35/43 | no | 0 |
+| inkling-m1env | 31/43 | 35/43 | yes | 37 |
+
+What decides a run is whether the driver's `prefill: auto` switches on (after one empty turn, sticky for the rest of the
+run): once it is on, Inkling reopens its thinking and ends turns without acting. p4 switched in round 3 and not in round
+4; m1 the reverse. So rounds 3 and 4 do not separate the prompts or the search options cleanly; they separate runs where
+the switch fired from runs where it did not. Round 5 (`strip_thinking`) tests the fix for the switched state.
