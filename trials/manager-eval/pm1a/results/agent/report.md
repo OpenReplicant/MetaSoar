@@ -1,0 +1,56 @@
+# PM-1a results, 2026-11-28
+
+Arms: haiku (subagent:haiku), sonnet (subagent:sonnet). Scenarios scored: 43 of 43. Runs per scenario: 1 (the design says 3). Intervals are bootstrap over scenarios (percentile, 95%).
+
+| Metric | haiku | sonnet | haiku minus sonnet, paired 95% |
+|---|---|---|---|
+| Routing accuracy (project and action) | 88.4% [79, 98]% | 88.4% [79, 98]% | +0.0 pt [+0.0, +0.0] pt |
+| Action accuracy | 93.0% [84, 100]% | 93.0% [84, 100]% | +0.0 pt [+0.0, +0.0] pt |
+| Project accuracy (where labelled) | 83.3% [69, 96]% | 86.7% [73, 97]% | -3.3 pt [-11.1, +0.0] pt |
+| Delegation recall (start/message/stop when expected) | 72.2% [50, 92]% | 72.2% [50, 92]% | +0.0 pt [+0.0, +0.0] pt |
+| Delegated when it should not have | 0.0% [0, 0]% | 0.0% [0, 0]% | +0.0 pt [+0.0, +0.0] pt |
+| Did the work itself (scenarios: outside tool or >10 lines of code) | 0 [0.0, 0.0] | 0 [0.0, 0.0] | +0.0 [+0.0, +0.0] |
+| Escalation precision | 88.9% [72, 100]% | 88.9% [72, 100]% | +0.0 pt [+0.0, +0.0] pt |
+| Escalation recall | 100.0% [100, 100]% | 100.0% [100, 100]% | +0.0 pt [+0.0, +0.0] pt |
+| Brief fields present (objective, output, boundaries, done_when) | 100.0% [100, 100]% | 100.0% [100, 100]% | +0.0 pt [+0.0, +0.0] pt |
+| Runner as labelled (where labelled) | 100.0% [100, 100]% | 100.0% [100, 100]% | +0.0 pt [+0.0, +0.0] pt |
+| Reply latency, median s (launch to first desktop_say/ask) | 5.0 [4.2, 5.5] | 5.3 [4.7, 6.0] | -0.3 [-1.3, +0.3] |
+| Session wall time, mean s | 0.0 [0.0, 0.0] | 0.0 [0.0, 0.0] | +0.0 [+0.0, +0.0] |
+| Tokens per scenario, mean (all input + output) | 0 [0.0, 0.0] | 0 [0.0, 0.0] | +0.0 [+0.0, +0.0] |
+| Tool calls per scenario, mean | 1.98 [1.7, 2.3] | 1.98 [1.7, 2.3] | +0.0 [-0.2, +0.3] |
+
+## Falsifier: "haiku is reliable enough"
+
+**Verdict: not refuted on PM-1a's tests; unsettled until test 4 (PM-1b) runs.**
+
+1. Routing-and-delegation accuracy, haiku minus sonnet: +0.0 pt, 95% interval [+0.0, +0.0] pt: not refuted (the interval excludes a 5-point gap).
+2. haiku did the work itself in 0 scenario(s) (limit: more than 1): not refuted (replay only).
+3. Must-escalate scenarios haiku missed that sonnet got: 0 (limit: more than 1): not refuted (one run, not a majority of three).
+4. Live brief quality: PM-1b, not run.
+
+## Scenarios where they differ
+
+| Scenario | Message | Expected | haiku | sonnet |
+|---|---|---|---|---|
+| s17 | Try the 2B model as the intent parser and compare it with the current  | start metasoar | WRONG: ask metasoar,substrate | WRONG: ask - |
+| s21 | Can you write me the SQL for the portfolio tables here in the chat so  | start substrate | WRONG: answer - | WRONG: answer substrate |
+
+## Every wrong routing
+
+| Arm | Scenario | Expected | Did |
+|---|---|---|---|
+| haiku | s14 | start/ask/queued metasoar | ask - |
+| haiku | s17 | start metasoar | ask metasoar,substrate |
+| haiku | s18 | start substrate | ask - |
+| haiku | s21 | start substrate | answer - |
+| haiku | s26 | message/ask metasoar | ask - |
+| sonnet | s14 | start/ask/queued metasoar | ask - |
+| sonnet | s17 | start metasoar | ask - |
+| sonnet | s18 | start substrate | ask - |
+| sonnet | s21 | start substrate | answer substrate |
+| sonnet | s26 | message/ask metasoar | ask - |
+
+## Checks
+
+- haiku: tool sets offered across runs: [['desktop_ask', 'desktop_say', 'kernel_search', 'pm_decision_open', 'pm_portfolio', 'pm_project_note', 'pm_worker_message', 'pm_worker_start', 'pm_worker_stop']]; models reported: ['haiku']; errors: 0; no desktop_say (closing text only): 16; failed tool calls: 0; scenarios over 8 tool calls: 0.
+- sonnet: tool sets offered across runs: [['desktop_ask', 'desktop_say', 'kernel_search', 'pm_decision_open', 'pm_portfolio', 'pm_project_note', 'pm_worker_message', 'pm_worker_start', 'pm_worker_stop']]; models reported: ['sonnet']; errors: 0; no desktop_say (closing text only): 5; failed tool calls: 0; scenarios over 8 tool calls: 0.
