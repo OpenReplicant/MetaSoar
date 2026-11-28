@@ -54,3 +54,12 @@ Arms: haiku (subagent:haiku), sonnet (subagent:sonnet). Scenarios scored: 43 of 
 
 - haiku: tool sets offered across runs: [['desktop_ask', 'desktop_say', 'kernel_search', 'pm_decision_open', 'pm_portfolio', 'pm_project_note', 'pm_worker_message', 'pm_worker_start', 'pm_worker_stop']]; models reported: ['haiku']; errors: 0; no desktop_say (closing text only): 16; failed tool calls: 0; scenarios over 8 tool calls: 0.
 - sonnet: tool sets offered across runs: [['desktop_ask', 'desktop_say', 'kernel_search', 'pm_decision_open', 'pm_portfolio', 'pm_project_note', 'pm_worker_message', 'pm_worker_start', 'pm_worker_stop']]; models reported: ['sonnet']; errors: 0; no desktop_say (closing text only): 5; failed tool calls: 0; scenarios over 8 tool calls: 0.
+
+## A scorer question (not changed here)
+
+`score.py` scores the project of an `ask` like any other action: an ask that names no project gets `project_ok`
+false, even where the label allows `ask` (s14 allows start, ask or queued; s26 allows message or ask). Haiku and
+Sonnet both asked without naming a project on s14 and s26, so both would score 40/43 instead of 38/43 if an allowed
+ask that names no project were not scored on project (as an `ack` already is not). The Kaggle Inkling and LFM3 runs are
+unchanged by that rule (30/43 and 9/43). The scorer is Substrate's (`scripts/trials/manager/score.py`); the change, if
+wanted, belongs there first. Until then every number here uses it unchanged.
