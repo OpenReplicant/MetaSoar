@@ -1,0 +1,28 @@
+{
+ "about": "E-21 round A, LFM3: the one-call router r1 (PM-1a 13/43 vs 9/43 base) on train days; stop_after_action also stops the runaway starts seen in the baseline.",
+ "candidates": [
+  {
+   "id": "r1",
+   "prompt": "prompts/r1.md",
+   "env": {
+    "inline_portfolio": true,
+    "tools": [
+     "pm_worker_start",
+     "pm_worker_message",
+     "pm_worker_stop",
+     "pm_decision_open",
+     "desktop_ask",
+     "desktop_say"
+    ],
+    "noop_tool": true,
+    "stop_after_action": true,
+    "max_turns": 2
+   },
+   "extra": {
+    "chat_template_kwargs": {
+     "enable_thinking": false
+    }
+   }
+  }
+ ]
+}

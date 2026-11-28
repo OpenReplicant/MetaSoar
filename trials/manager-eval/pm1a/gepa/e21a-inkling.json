@@ -1,0 +1,23 @@
+{
+ "about": "E-21 round A on train days (from the PM-1a rounds 3-4 and the train-day baseline). basethink = manager.md + strip_thinking: the baseline with only the harness fix, to size that fix apart from the prompt. p4thinkenv = p4 + strip_thinking + search_budget 2 + final_nudge.",
+ "candidates": [
+  {
+   "id": "basethink",
+   "prompt": null,
+   "env": {
+    "strip_thinking": true
+   },
+   "prefill": "auto"
+  },
+  {
+   "id": "p4thinkenv",
+   "prompt": "prompts/p4.md",
+   "env": {
+    "strip_thinking": true,
+    "search_budget": 2,
+    "final_nudge": true
+   },
+   "prefill": "auto"
+  }
+ ]
+}
