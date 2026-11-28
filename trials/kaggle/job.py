@@ -5,14 +5,17 @@
 
 The job runs `run.py` with JOB filled in, as a private notebook `mossmanpete/metasoar-NAME`, with the build notebook
 attached. The commit must be pushed: the notebook clones the public repo. Results land in trials/kaggle/runs/NAME/
-(not committed; copy what an experiment keeps into its own results folder). Needs the Kaggle CLI (~/.venvs/kaggle)
-and its token in ~/.kaggle; nothing here reads the token.
+(not committed; copy what an experiment keeps into its own results folder). Needs the Kaggle CLI: $KAGGLE_CLI, else
+~/.venvs/kaggle/bin/kaggle (the owner's PC), else `kaggle` on PATH (a cloud session: scripts/cloud-setup.sh). The CLI
+finds its own token (~/.kaggle/, or KAGGLE_API_TOKEN, or KAGGLE_USERNAME with KAGGLE_KEY); nothing here reads it.
 """
 import argparse, json, os, shutil, subprocess, sys, tempfile, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-KAGGLE = os.path.expanduser("~/.venvs/kaggle/bin/kaggle")
-USER = "mossmanpete"
+KAGGLE = (os.environ.get("KAGGLE_CLI")
+          or next((p for p in [os.path.expanduser("~/.venvs/kaggle/bin/kaggle")] if os.path.exists(p)), None)
+          or shutil.which("kaggle") or "kaggle")
+USER = os.environ.get("KAGGLE_USERNAME") or "mossmanpete"
 BUILD = f"{USER}/metasoar-build-llama-b12627"
 
 

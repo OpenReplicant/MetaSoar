@@ -28,7 +28,11 @@ build and the same files as locally keeps results comparable and the code known.
   their state files, so chunks of one experiment can run in consecutive jobs if the state goes through git.
 - Notebooks are private (TabMWP's licence is non-commercial; nothing is published).
 - Inputs come only from git at a pushed commit, so every run can be traced to one.
-- The token stays in `~/.kaggle/`; nothing in the repo reads or copies it.
+- The token stays where the CLI finds it: `~/.kaggle/` on the owner's PC, or a cloud environment's secret
+  (`KAGGLE_API_TOKEN`, or `KAGGLE_USERNAME` with `KAGGLE_KEY`). Nothing in the repo reads or copies it, and it never goes
+  into a job, a log or a commit.
+- In a Claude Code cloud session, `scripts/cloud-setup.sh` (a SessionStart hook) installs the CLI. The environment's
+  network policy must allow `www.kaggle.com` and `storage.googleapis.com` (outputs download from there).
 
 ## Use
 
