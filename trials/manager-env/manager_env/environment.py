@@ -48,6 +48,25 @@ class _MemStub(stub_pm.Stub):
         self.trace.append({"seq": self.seq, "ts": round(time.time(), 3), **rec})
 
 
+NOOP_TOOL = {"name": drivers.OpenAICompatible.NOOP_TOOL["function"]["name"],
+             "description": drivers.OpenAICompatible.NOOP_TOOL["function"]["description"],
+             "inputSchema": drivers.OpenAICompatible.NOOP_TOOL["function"]["parameters"]}
+
+
+def offered_tools(options: dict) -> list:
+    """The tool list the observations carry: stub_pm.TOOLS filtered by `tools`, plus NOOP_TOOL if `noop_tool` (as the driver
+    puts it in its requests)."""
+    want = options.get("tools")
+    out = [t for t in copy.deepcopy(stub_pm.TOOLS) if want is None or t["name"] in want]
+    if options.get("noop_tool"):
+        out.append(copy.deepcopy(NOOP_TOOL))
+    return out
+
+
+def allowed_tool(options: dict, name: str) -> bool:
+    return name in stub_pm.NAMES and (options.get("tools") is None or name in options["tools"])
+
+
 def _key(name: str, args: dict) -> str:
     return name + json.dumps(args, sort_keys=True, separators=(",", ":"))
 
@@ -58,6 +77,10 @@ class ManagerEnvironment(MCPEnvironment):
       dedupe            an exact repeat of a call (same tool, same arguments) is answered with DEDUPE_MSG, not run;
       search_budget     kernel_search calls past this many are answered with SEARCH_MSG, not run;
       final_nudge       the observation before the last allowed step carries FINAL_NUDGE in `nudge`;
+      tools             (list) only these of the stub's tools are offered; a call to another is answered "no such tool: <name>";
+      noop_tool         NOOP_TOOL (pm_nothing) is also offered; calling it ends the episode as end_turn with empty text
+                        (not run, not in attempts);
+      stop_after_action the episode ends after the first successful call of drivers.OpenAICompatible.ACTIONS;
       max_turns         the step limit (alias of max_steps; default 10);
       max_tokens        accepted and ignored here: it belongs to the model call.
     The messages are drivers.OpenAICompatible's, so the two cannot drift apart."""
@@ -136,6 +159,9 @@ class ManagerEnvironment(MCPEnvironment):
         # a tool call
         name, args = action.tool_name, action.arguments if isinstance(action.arguments, dict) else {}
         opts, stub = self.options, ep["stub"]
+        if opts.get("noop_tool") and name == NOOP_TOOL["name"]:
+            return self._finish(action)
+        stop = False
         ep["attempts"].append(name)
         key = _key(name, args)
         if opts.get("dedupe") and key in ep["seen"]:
@@ -148,8 +174,14 @@ class ManagerEnvironment(MCPEnvironment):
         else:
             if name == "kernel_search":
                 ep["searches"] += 1
-            result, err = stub.call(name, args) if name in stub_pm.NAMES else (f"no such tool: {name}", True)
+            if allowed_tool(opts, name):
+                result, err = stub.call(name, args)
+                stop = bool(opts.get("stop_after_action")) and not err and name in drivers.OpenAICompatible.ACTIONS
+            else:
+                result, err = f"no such tool: {name}", True
         ep["seen"].add(key)
+        if stop:
+            return self._finish(action, tool_result=result, tool_error=err)
         if ep["steps"] >= self.max_steps:
             ep["error"] = ep["error"] or f"no final answer in {self.max_steps} turns"
             return self._finish(action, tool_result=result, tool_error=err)
@@ -187,7 +219,7 @@ class ManagerEnvironment(MCPEnvironment):
     def _obs(self, tools=False, tool_result=None, tool_error=False, nudge=None, **kw) -> ManagerObservation:
         ep = self.episode
         return ManagerObservation(scenario_id=ep["scenario"]["id"], message=ep["message"] if ep["steps"] == 0 else "",
-                                  tools=copy.deepcopy(stub_pm.TOOLS) if tools else [], tool_result=tool_result,
+                                  tools=offered_tools(self.options) if tools else [], tool_result=tool_result,
                                   tool_error=tool_error, nudge=nudge, step=ep["steps"], max_steps=self.max_steps,
                                   done=False, reward=None, **kw)
 

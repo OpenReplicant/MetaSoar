@@ -284,6 +284,25 @@ class DayMechanics(unittest.TestCase):
         with self.assertRaises(ValueError):
             DayEnvironment({"nope": 1})
 
+    def test_tools_noop_and_stop_after_action_per_turn(self):
+        env = DayEnvironment({"tools": ["pm_portfolio", "desktop_say"], "noop_tool": True, "stop_after_action": True})
+        obs = env.reset(day_id=train_day(1))
+        self.assertEqual([t["name"] for t in obs.tools], ["pm_portfolio", "desktop_say", "pm_nothing"])
+        first = obs.arrival_index
+        o = env.step(call("pm_project_note", project="kernel", note="x"))
+        self.assertEqual((o.tool_result, o.tool_error), ("no such tool: pm_project_note", True))
+        self.assertEqual(env.stub.trace, [])
+        o = env.step(call("desktop_say", text="hello"))  # an action ends the turn: the next arrival is here
+        self.assertEqual(o.arrival_index, first + 1)
+        self.assertEqual([c["tool"] for c in o.arrival_record["trace"]], ["desktop_say"])
+        self.assertEqual([t["name"] for t in o.tools], ["pm_portfolio", "desktop_say", "pm_nothing"])
+        o = env.step(call("pm_nothing"))  # ends the turn, nothing done
+        self.assertEqual(o.arrival_index, first + 2)
+        self.assertEqual(o.arrival_record["trace"], [])
+        self.assertIsNone(o.arrival_record["error"])
+        o = env.step(call("pm_worker_stop", worker="w-nope"))  # hidden, so no stop and no run
+        self.assertEqual(o.arrival_index, first + 2)
+
     def test_max_steps_ends_the_turn(self):
         env = DayEnvironment(max_steps=2)
         env.reset(day_id=train_day(1))

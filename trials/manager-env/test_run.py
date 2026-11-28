@@ -41,6 +41,29 @@ class Fake(BaseHTTPRequestHandler):
         pass
 
 
+def scripted_handler(script):
+    """A chat endpoint that answers turn n (counted by the tool messages so far) with script[n]: (tool, args) or text."""
+    class H(Fake):
+        seen = []
+
+        def do_POST(self):
+            body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
+            H.seen.append(body)
+            step = script[min(sum(1 for m in body["messages"] if m["role"] == "tool"), len(script) - 1)]
+            if isinstance(step, str):
+                msg = {"role": "assistant", "content": step}
+            else:
+                msg = {"role": "assistant", "content": "", "tool_calls": [{"id": "c", "type": "function", "function": {
+                    "name": step[0], "arguments": json.dumps(step[1])}}]}
+            out = json.dumps({"choices": [{"message": msg}], "usage": {"prompt_tokens": 10, "completion_tokens": 5}}).encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(out)))
+            self.end_headers()
+            self.wfile.write(out)
+    return H
+
+
 class RunTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -124,6 +147,48 @@ class RunTest(unittest.TestCase):
             for k in ("tags", "named", "routing_ok", "action_ok", "project_ok", "tool_calls", "failed_calls"):
                 self.assertEqual(got[k], want[k], k)
             self.assertEqual(ours[sc["id"]]["final_text"], theirs["final_text"])
+
+    def test_router_options_same_as_the_pm1a_driver(self):
+        """tools + noop_tool + stop_after_action: one fake endpoint through drivers.OpenAICompatible.run and the tier-1 env."""
+        env_opts = {"tools": ["pm_portfolio", "desktop_say", "pm_worker_stop"], "noop_tool": True, "stop_after_action": True,
+                    "inline_portfolio": True}
+        scripts = {"stop": [("pm_portfolio", {}), ("pm_project_note", {"project": "metasoar", "note": "x"}),
+                            ("desktop_say", {"text": "E-19 in development on metasoar"}), ("desktop_say", {"text": "again"})],
+                   "noop": [("pm_portfolio", {}), ("pm_nothing", {}), ("desktop_say", {"text": "never"})]}
+        scs, pf = replay.load_world()
+        for name, script in scripts.items():
+            H = scripted_handler(script)
+            srv = HTTPServer(("127.0.0.1", 0), H)
+            threading.Thread(target=srv.serve_forever, daemon=True).start()
+            self.addCleanup(srv.server_close)
+            self.addCleanup(srv.shutdown)
+            url = f"http://127.0.0.1:{srv.server_port}"
+            drv = gepa.make_driver({"id": "x", "env": env_opts}, "fake", url, "m")
+            with tempfile.TemporaryDirectory() as d:
+                c = os.path.join(d, "c.json")
+                json.dump({"candidates": [{"id": "x", "env": env_opts}]}, open(c, "w"))
+                args = ["--arm", "fake", "--url", url, "--model", "m", "--only", "s01,s02", "--out-dir", d, "--candidates", c]
+                with contextlib.redirect_stdout(io.StringIO()):
+                    run.main(args)
+                ours = {r["id"]: r for r in json.load(open(os.path.join(d, "fake-x.json")))["runs"]}
+                n_ours = len(H.seen)
+                for sc in scs[:2]:
+                    tp = os.path.join(d, "trace.jsonl")
+                    theirs = drv.run(replay.S.message_for(sc), replay.fresh(pf, sc), tp)
+                    tr = replay.S.load_trace(tp)
+                    os.remove(tp)
+                    want = replay.S.score(sc, replay.fresh(pf, sc), tr, theirs)
+                    got = ours[sc["id"]]["score"]
+                    for k in ("tags", "named", "routing_ok", "action_ok", "project_ok", "tool_calls", "failed_calls", "error"):
+                        self.assertEqual(got[k], want[k], f"{name} {sc['id']} {k}")
+                    self.assertEqual(ours[sc["id"]]["final_text"], theirs["final_text"])
+                    self.assertEqual([c["tool"] for c in ours[sc["id"]]["trace"]], [c["tool"] for c in tr])
+                # the same requests, tool list included (the first half of the log is the env's, the second the driver's)
+                half = H.seen[:n_ours]
+                self.assertEqual([b["tools"] for b in half], [b["tools"] for b in H.seen[n_ours:]])
+                self.assertEqual([t["function"]["name"] for t in half[0]["tools"]],
+                                 ["pm_portfolio", "pm_worker_stop", "desktop_say", "pm_nothing"])
+            self.assertEqual(len(half), 2 * len(script[:3]) if name == "stop" else 2 * 2)
 
     def test_parity_on_committed_agent_traces(self):
         files = [f for f in parity.default_files() if "/agent/" in f]

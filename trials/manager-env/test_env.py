@@ -2,7 +2,9 @@ import json
 import unittest
 
 from manager_env import ManagerAction, ManagerEnvironment, _pm1a
+import drivers
 import stub_pm
+from openenv.core.env_server.mcp_types import ListToolsAction
 import score as S
 
 
@@ -117,6 +119,46 @@ class EnvTest(unittest.TestCase):
         self.assertIsNone(env.step(call("pm_portfolio")).nudge)
         o = env.step(call("kernel_search", query="x"))
         self.assertIn("Last turn", o.nudge)
+
+    def test_tools_noop_and_stop_after_action(self):
+        names = ["pm_portfolio", "desktop_say"]
+        env = ManagerEnvironment({"tools": names, "noop_tool": True, "stop_after_action": True})
+        o = env.reset(scenario_id="s01")
+        self.assertEqual([t["name"] for t in o.tools], names + ["pm_nothing"])
+        self.assertEqual(o.tools[-1], {"name": "pm_nothing", "description": drivers.OpenAICompatible.NOOP_TOOL["function"]["description"],
+                                       "inputSchema": {"type": "object", "properties": {}}})
+        self.assertEqual([t["name"] for t in env.step(ListToolsAction()).tools], names + ["pm_nothing"])
+        o = env.step(call("pm_project_note", project="metasoar", note="x"))  # hidden: no such tool, not run
+        self.assertEqual((o.tool_result, o.tool_error, o.done), ("no such tool: pm_project_note", True, False))
+        self.assertEqual(env.episode["trace"], [])
+        self.assertFalse(env.step(call("pm_portfolio")).done)
+        o = env.step(call("desktop_say", text="E-19 in development on metasoar"))  # the first action ends the episode
+        self.assertTrue(o.done)
+        self.assertIsNone(env.episode["error"])
+        self.assertEqual(env.episode["attempts"], ["pm_project_note", "pm_portfolio", "desktop_say"])
+        with self.assertRaises(RuntimeError):
+            env.step(call("pm_portfolio"))
+        # a failed action does not stop; a pm_nothing ends with nothing done, not traced, not an attempt
+        env = ManagerEnvironment({"tools": ["pm_worker_stop"], "noop_tool": True, "stop_after_action": True})
+        env.reset(scenario_id="s01")
+        o = env.step(call("pm_worker_stop", worker="w-nope"))
+        self.assertFalse(o.done)
+        o = env.step(call("pm_nothing"))
+        self.assertTrue(o.done)
+        self.assertEqual(env.episode["attempts"], ["pm_worker_stop"])
+        self.assertEqual([c["tool"] for c in env.episode["trace"]], ["pm_worker_stop"])
+        # without the options pm_nothing is just an unknown tool
+        env = ManagerEnvironment()
+        env.reset(scenario_id="s01")
+        self.assertTrue(env.step(call("pm_nothing")).tool_error)
+        self.assertEqual([t["name"] for t in env.reset(scenario_id="s01").tools], stub_pm.NAMES)
+
+    def test_stop_after_action_not_on_intercepts_and_beats_max_steps(self):
+        env = ManagerEnvironment({"stop_after_action": True, "max_turns": 1})
+        env.reset(scenario_id="s01")
+        o = env.step(call("desktop_say", text="hi"))
+        self.assertTrue(o.done)
+        self.assertIsNone(o.metadata["error"])
 
     def test_unknown_option(self):
         with self.assertRaises(ValueError):

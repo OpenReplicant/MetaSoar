@@ -6,7 +6,7 @@ reset(day_id=... | day={...} | seed=N) -> the first arrival. step(DayAction):
   end_turn   ends the turn on the current arrival: the arrival is scored (score.score on a scenario synthesised from the
              arrival, its label resolved at run time), the clock advances by seconds x speed, and the next arrival is
              delivered. done when the day's queue is empty.
-Options: tier 1's (inline_portfolio, dedupe, search_budget, final_nudge, max_turns: per turn) and `owner_first`, `speed`.
+Options: tier 1's (inline_portfolio, dedupe, search_budget, final_nudge, max_turns, tools, noop_tool, stop_after_action: per turn) and `owner_first`, `speed`.
 Reward: per-arrival routing on each end_turn observation; on the final one the mean per-arrival routing. The episode terms
 (owner wait, dropped loops, double writers, interruptions) are in `episode` of the final observation, unweighted.
 """
@@ -32,6 +32,7 @@ import stub_pm  # noqa: E402
 
 from .day import DAYS_DIR, Day, generate_day, hhmm, load_day  # noqa: E402
 from .day_models import DayAction, DayObservation, DayState  # noqa: E402
+from .environment import NOOP_TOOL, allowed_tool, offered_tools  # noqa: E402
 from .models import ManagerAction  # noqa: E402
 
 DEFAULT_MAX_STEPS = 10
@@ -135,7 +136,7 @@ class DayEnvironment(MCPEnvironment):
         d, a, t = self.day, self.arrival, self.turn
         return DayObservation(
             scenario_id=a["sid_full"] if a else "", message=message if message is not None else "",
-            tools=copy.deepcopy(stub_pm.TOOLS) if tools else [], tool_result=tool_result, tool_error=tool_error, nudge=nudge,
+            tools=offered_tools(self.options) if tools else [], tool_result=tool_result, tool_error=tool_error, nudge=nudge,
             step=t["steps"] if t else 0, max_steps=self.max_steps, done=False, reward=None, day_id=d.id,
             arrival_index=a["n"] if a else 0, source=a["source"] if a else "", kind=a["kind"] if a else "",
             clock_s=d.clock, clock=hhmm(d.clock), queue_len=len(d.pending), **kw)
@@ -194,6 +195,9 @@ class DayEnvironment(MCPEnvironment):
             return self._end_turn(action.seconds)
         name, args = action.tool_name, action.arguments if isinstance(action.arguments, dict) else {}
         opts, stub = self.options, self.stub
+        if opts.get("noop_tool") and name == NOOP_TOOL["name"]:
+            return self._end_turn(md.get("t"))
+        stop = False
         t["attempts"].append(name)
         key = _key(name, args)
         n_before = len(stub.trace)
@@ -206,10 +210,16 @@ class DayEnvironment(MCPEnvironment):
         else:
             if name == "kernel_search":
                 t["searches"] += 1
-            result, err = stub.call(name, args) if name in stub_pm.NAMES else (f"no such tool: {name}", True)
+            if allowed_tool(opts, name):
+                result, err = stub.call(name, args)
+                stop = bool(opts.get("stop_after_action")) and not err and name in drivers.OpenAICompatible.ACTIONS
+            else:
+                result, err = f"no such tool: {name}", True
         t["seen"].add(key)
         if len(stub.trace) > n_before:
             t["calls"].append((stub.trace[-1], md.get("t"), time.monotonic() - t["t0"]))
+        if stop:
+            return self._end_turn(md.get("t"))
         if t["steps"] >= self.max_steps:
             t["error"] = t["error"] or f"no final answer in {self.max_steps} turns"
             return self._end_turn(None)
